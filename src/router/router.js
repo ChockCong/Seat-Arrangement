@@ -19,6 +19,29 @@ const router = new VueRouter({
                     path: 'login',
                     name: 'login',
                     component: () => import('../view/admin/login.vue'),
+                },
+                {
+                    path: 'management',
+                    name: 'management',
+                    component: () => import('../components/admin/management.vue'),
+                    redirect: 'management/home',
+                    children: [
+                        {
+                            path: 'home',
+                            name: 'home',
+                            component: () => import('../components/admin/home.vue'),
+                        },
+                        {
+                            path: 'info',
+                            name: 'info',
+                            component: () => import('../components/admin/self/info.vue'),
+                        },
+                        {
+                            path: 'upload-member',
+                            name: 'upload-member',
+                            // component: () => import('../components/admin/management.vue')
+                        }
+                    ]
                 }
             ]
 		},
