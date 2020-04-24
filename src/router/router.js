@@ -4,7 +4,7 @@ Vue.use(VueRouter);
 // import Login from '../view/admin/login';
 
 const router = new VueRouter({
-	mode: 'history',
+	mode: 'hash',
 	routes: [
 		{
 			path: '/',

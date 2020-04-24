@@ -3,7 +3,8 @@ const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
 const PcPahe = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
 module.exports = {
-    publicPath: '/',
+	publicPath: '',
+	// assetsDir: '',
     css: {
 		loaderOptions: {
 			postcss: {
