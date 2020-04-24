@@ -2,9 +2,14 @@ const path = require('path');
 const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
 const PcPahe = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
+// console.log(process.env.NODE_ENV);
 module.exports = {
 	publicPath: '',
-	// assetsDir: '',
+	assetsDir: 'static',
+	outputDir: 'front',
+	filenameHashing: true,
+	lintOnSave: true,
+	productionSourceMap: true,
     css: {
 		loaderOptions: {
 			postcss: {
@@ -19,5 +24,7 @@ module.exports = {
 				]
 			}
 		}
-    }
+	},
+	configureWebpack: config => {},
+	chainWebpack: config => {}
 }
