@@ -2,7 +2,6 @@ const path = require('path');
 const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
 const PcPahe = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
-// console.log(process.env.NODE_ENV);
 module.exports = {
 	publicPath: '',
 	assetsDir: 'static',
@@ -26,5 +25,17 @@ module.exports = {
 		}
 	},
 	configureWebpack: config => {},
-	chainWebpack: config => {}
+	chainWebpack: config => {},
+	devServer: {
+		proxy: {
+		  "/api": {
+			target: process.env.VUE_APP_API,   // 要请求的后台地址
+			ws: true,    // 启用websockets
+			changeOrigin: true,    // 是否跨域
+			pathRewrite: {   
+			  "^/api": "/"          // 这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替
+			}
+		  }
+		}
+	  }
 }

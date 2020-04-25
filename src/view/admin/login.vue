@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { adminLogin } from '../../api/api';
 export default {
     name: 'login',
     data() {
@@ -60,9 +61,19 @@ export default {
         },
         forgetPwd() {
         },
-        submit() {
+        async submit() {
             if (this.account && this.pwd) {
-                this.$router.push({ path: 'management' })
+                let params = {
+                    name: this.account,
+                    password:this.pwd,
+                    company: {
+                        address: 'asdhfjkhdskalg',
+                        phoneNo: 123123213123
+                    }
+                };
+                const res = await adminLogin(params);
+                console.log(res);
+                // this.$router.push({ path: 'management' })
             }
             //     this.isShowLoading = true
             //     // 登陆成功 设置用户信息
