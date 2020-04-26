@@ -23,23 +23,23 @@ const router = new VueRouter({
                 {
                     path: 'management',
                     name: 'management',
-                    component: () => import('../components/admin/management.vue'),
+                    component: () => import('../components/admin/Management.vue'),
                     redirect: 'management/home',
                     children: [
                         {
                             path: 'home',
                             name: 'home',
-                            component: () => import('../components/admin/home.vue'),
+                            component: () => import('../components/admin/Home.vue'),
                         },
                         {
                             path: 'info',
                             name: 'info',
-                            component: () => import('../components/admin/self/info.vue'),
+                            component: () => import('../components/admin/self/Info.vue'),
                         },
                         {
-                            path: 'upload-member',
-                            name: 'upload-member',
-                            // component: () => import('../components/admin/management.vue')
+                            path: 'fun-setting',
+                            name: 'fun-setting',
+                            component: () => import('../components/admin/self/FunctionSetting.vue'),
                         }
                     ]
                 }

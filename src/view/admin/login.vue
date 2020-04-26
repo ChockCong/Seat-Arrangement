@@ -1,17 +1,19 @@
 <template>
     <div class="login-vue" :style="bg">
         <div class="container">
-            <p class="title">WELCOME</p>
-            <div class="input-c">
-                <Input prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-blur="verifyAccount"/>
-                <p class="error">{{accountError}}</p>
+            <div class="flex-container">
+                <p class="title">WELCOME</p>
+                <div class="input-c">
+                    <Input size="large" prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-blur="verifyAccount"/>
+                    <p class="error">{{accountError}}</p>
+                </div>
+                <div class="input-c">
+                    <Input size="large" type="password" v-model="pwd" prefix="md-lock" placeholder="密码" clearable @on-blur="verifyPwd"/>
+                    <p class="error">{{pwdError}}</p>
+                </div>
+                <Button size="large" :loading="isShowLoading" class="submit" type="primary" @click="submit">登陆</Button>
+                <p class="account"><span @click="register">注册账号</span> | <span @click="forgetPwd">忘记密码</span></p>
             </div>
-            <div class="input-c">
-                <Input type="password" v-model="pwd" prefix="md-lock" placeholder="密码" clearable @on-blur="verifyPwd"/>
-                <p class="error">{{pwdError}}</p>
-            </div>
-            <Button :loading="isShowLoading" class="submit" type="primary" @click="submit">登陆</Button>
-            <p class="account"><span @click="register">注册账号</span> | <span @click="forgetPwd">忘记密码</span></p>
         </div>
     </div>
 </template>
@@ -71,8 +73,22 @@ export default {
                         phoneNo: 123123213123
                     }
                 };
-                const res = await adminLogin(params);
-                console.log(res);
+                // const res = await adminLogin(params);
+                // console.log(res);
+                let data = {
+                    admin_token: 'ghfkjahksgsd54234234sdfgsdfsfsdgsdg',
+                    username: '叻叻猪呢你都',
+                    email: '123@123.com',
+                    phoneNo: '12023698547',
+                    company: {
+                        address: 'sdgfjkhsdkfksdb三大框架还疯狂水底纳瓜',
+                        phoneNo: ''
+                    }
+                };
+                this.$store.commit('SET_ADMIN_INFO', data);
+                if (this.$store.getters.getAdminToken) {
+                    this.$router.push({ path: 'management' });
+                }
                 // this.$router.push({ path: 'management' })
             }
             //     this.isShowLoading = true
@@ -105,10 +121,16 @@ export default {
     background-size: cover;
     & .container {
         background: rgba(255, 255, 255, .5);
-        width: 400px;
-        text-align: center;
+        width: 600px;
+        height: 450px;
+        // text-align: center;
         border-radius: 10px;
         padding: 30px;
+        display: flex;
+        align-items: center;
+        & .flex-container {
+            width: 100%;
+        }
     }
     & .ivu-input {
         background-color: transparent;
@@ -129,8 +151,8 @@ export default {
         color: rgba(255, 255, 255, .8);
     }
     & .title {
-        font-size: 16px;
-        margin-bottom: 20px;
+        font-size: 34px;
+        margin-bottom: 35px;
     }
     & .input-c {
         margin: auto;
@@ -145,13 +167,15 @@ export default {
         height: 20px;
     }
     & .submit {
-        width: 200px;
+        width: 250px;
+        font-size: 16px;
     }
     & .account {
         margin-top: 30px;
     }
     & .account span {
         cursor: pointer;
+        font-size: 16px;
     }
     & .ivu-icon {
         color: #eee;
