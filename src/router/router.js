@@ -37,9 +37,19 @@ const router = new VueRouter({
                             component: () => import('../components/admin/self/Info.vue'),
                         },
                         {
-                            path: 'fun-setting',
-                            name: 'fun-setting',
+                            path: 'function-setting',
+                            name: 'function-setting',
                             component: () => import('../components/admin/self/FunctionSetting.vue'),
+                        },
+                        {
+                            path: 'upload-data',
+                            name: 'upload-data',
+                            component: () => import('../components/admin/main/Upload.vue'),
+                        },
+                        {
+                            path: 'seat-setting',
+                            name: 'seat-setting',
+                            component: () => import('../components/admin/main/Setting'),
                         }
                     ]
                 }

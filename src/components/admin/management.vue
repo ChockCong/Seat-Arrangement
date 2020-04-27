@@ -676,7 +676,7 @@ a {
 .view-c {
     position: relative;
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
 }
 .pointer {
     cursor: pointer;

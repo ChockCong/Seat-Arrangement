@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { Menu, Submenu, MenuItem, Button, Input, Form, Dropdown, DropdownMenu, DropdownItem, Spin, Modal, Icon } from 'iview';
+import { Menu, Submenu, MenuItem, Button, Input, Form, Dropdown, DropdownMenu, DropdownItem, Spin, Modal, Alert, Icon } from 'iview';
 Vue.component('Menu', Menu);
 Vue.component('Button', Button);
 Vue.component('Input', Input);
@@ -11,5 +11,6 @@ Vue.component('DropdownMenu', DropdownMenu);
 Vue.component('DropdownItem', DropdownItem);
 Vue.component('Spin', Spin);
 Vue.component('Modal', Modal);
+Vue.component('Alert', Alert);
 
 Vue.component('Icon', Icon);

@@ -6,7 +6,7 @@
 </template>
 <script>
 export default {
-    name: 'FunctionSetting'
+    name: 'Upload'
 }
 </script>
 <style lang="scss" scoped></style>
