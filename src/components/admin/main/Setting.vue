@@ -23,7 +23,7 @@
             <h1>会场阵列图</h1>
             <h3 v-if="step">{{`第${step}步：${stepName}`}}</h3>
             <div class="show-area">
-                <div class="seat-area">
+                <div class="seat-area" ref="imageDom">
                     <div class="seat-area-row" v-for="(itemi, indexI) in seatList" :key="indexI">
                         <template v-for="(itemj, indexJ) in seatList[indexI]">
                              <!-- :style="fullColor(itemj.value)" full-->
@@ -49,12 +49,21 @@
                     <Button type="primary" @click="selecLeave(0)">取消全选剩余位置</Button>
                 </section>
                 <section>
-                    <Button size="default" type="primary" @click="clearSeatpreview">重置布置</Button>
+                    <Button size="default" type="primary" @click="clearSeat">重置布置</Button>
                     <Button v-if="[1,2].includes(step)" size="default" type="primary" @click="nextStep">下一步</Button>
-                    <Button v-else size="default" type="primary" @click="preview">确定预览</Button>
+                    <Button v-else size="default" type="primary" @click="preview">
+                        {{previewTag ? '取消预览' : '确定预览'}}
+                    </Button>
+                    <Button v-if="previewTag" size="default" type="primary" @click="buildImage">确定生成</Button>
                 </section>
             </div>
         </div>
+            <!-- @on-ok="ok" @on-cancel="cancel" -->
+        <Modal v-model="modal" title="最终会场展示">
+            <div class="modal-form">
+                <img :src="imgUrl" />
+            </div>
+        </Modal>
     </div>
 </template>
 <script>
@@ -68,7 +77,15 @@ export default {
             colNum: 0,
             seatList: [],
             step: 0,
-            previewTag: false
+            previewTag: false,
+            modal: false,
+            imgUrl: null,
+            opts: {
+                logging: true, // 启用日志记录以进行调试 (发现加上对去白边有帮助)
+                allowTaint: true, // 否允许跨源图像污染画布
+                backgroundColor: 'white', // 解决生成的图片有白边
+                useCORS: true // 如果截图的内容里有图片,解决文件跨域问题
+            },
         }
     },
     computed: {
@@ -91,7 +108,7 @@ export default {
         },
         fullColor(value) {
             switch(value) {
-                case 1 : return 'background-color: blue;';
+                case 1 : return 'background-color: skyblue;';
                 case 2 : return 'background-color: violet;';
                 case 3 : return 'background-color: orange;';
                 default: return '';
@@ -124,6 +141,14 @@ export default {
             console.log(e);
         },
         selectItem(i, j) {
+            if (this.previewTag) return;
+            if (this.step === 2) {
+                const rowBol = i === 0 || j === 0;
+                const colBol = i === this.seatList.length - 1 || j === this.seatList[0].length - 1;
+                if (!rowBol && !colBol) {
+                    return this.$Message.warning({content: '入口不能设置在这里', closable: true});
+                }
+            }
             this.seatList[i][j].value = this.seatList[i][j].value ? 0 : this.step;
             this.$forceUpdate();
         },
@@ -137,6 +162,20 @@ export default {
         },
         preview() {
             this.previewTag = !this.previewTag;
+        },
+        buildImage() {
+            this.$Loading.start();
+            this.html2canvas(this.$refs.imageDom, this.opts).then(canvas => {
+                console.log(canvas)
+                // 转成图片，生成图片地址
+                this.imgUrl = canvas.toDataURL("image/png");
+                if (this.imgUrl) {
+                    this.$Loading.finish();
+                    this.modal = true;
+                } else {
+                    this.$Loading.error();
+                }
+            });
         }
     },
     beforeMount() {
@@ -249,10 +288,10 @@ export default {
                                 color: orange;
                             }
                             &.active-stage {
-                                color: blue;
+                                color: skyblue;
                             }
                             &.active-door {
-                                color: violet;
+                                color: red;
                             }
                         }
                     }
@@ -267,11 +306,21 @@ export default {
                 justify-content: space-between;
             }
             & button {
-                &:first-child {
-                    margin-right: 10px;
+                margin-right: 10px;
+                &:last-child {
+                    margin-right: 0px;
                 }
             }
         }
+    }
+}
+.modal-form {
+    display: flex;
+    padding: 50px 0;
+    & img {
+        margin: 0 auto;
+        height: 100%;
+        width: 100%;
     }
 }
 </style>
