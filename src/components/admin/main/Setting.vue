@@ -2,7 +2,7 @@
     <div class="index-vue-seatsetting">
         <div class="left-side">
             <div class="input-area">
-                <p>输入你所需要的最大行列数</p>
+                <p>{{'输入你所需要的最大行列数'}}</p>
                 <div class="input-area-item">
                     <section class="item">
                         <label>行数: </label>
@@ -21,7 +21,10 @@
         </div>
         <div class="right-side">
             <h1>会场阵列图</h1>
-            <h3 v-if="step">{{`第${step}步：${stepName}`}}</h3>
+            <h3 :class="bling ? 'red' : ''" v-if="step">
+                <span>{{`第${step}步：${stepName}`}}</span>
+                <span v-if="step === 1">{{ '(可多选)' }}</span>
+            </h3>
             <div class="show-area">
                 <div class="seat-area" ref="imageDom">
                     <div class="seat-area-row" v-for="(itemi, indexI) in seatList" :key="indexI">
@@ -30,6 +33,7 @@
                             <div :key="indexJ" v-if="itemj.value && itemj.value !== step" class="seat-area-row-item">
                                 <Icon v-if="itemj.value === 1" :class="differentColor(itemj.value)" type="ios-bowtie" />
                                 <Icon v-if="itemj.value === 2" :class="differentColor(itemj.value)" type="ios-star" />
+                                <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" />
                             </div>
                             <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
                                 <template v-if="!previewTag">
@@ -45,11 +49,12 @@
             </div>
             <div class="button-area" :class="step === 3 ? 'step_3' : ''">
                 <section v-if="step === 3">
-                    <Button type="primary" @click="selecLeave(3)">全选剩余位置</Button>
-                    <Button type="primary" @click="selecLeave(0)">取消全选剩余位置</Button>
+                    <Button v-if="!previewTag" type="primary" @click="selectLeave(3)">全选剩余位置</Button>
+                    <Button v-if="!previewTag" type="primary" @click="selectLeave(0)">取消全选剩余位置</Button>
                 </section>
                 <section>
                     <Button size="default" type="primary" @click="clearSeat">重置布置</Button>
+                    <Button v-if="[2,3].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">上一步</Button>
                     <Button v-if="[1,2].includes(step)" size="default" type="primary" @click="nextStep">下一步</Button>
                     <Button v-else size="default" type="primary" @click="preview">
                         {{previewTag ? '取消预览' : '确定预览'}}
@@ -59,7 +64,7 @@
             </div>
         </div>
             <!-- @on-ok="ok" @on-cancel="cancel" -->
-        <Modal v-model="modal" title="最终会场展示">
+        <Modal v-model="modal" width="70%" title="最终会场展示">
             <div class="modal-form">
                 <img :src="imgUrl" />
             </div>
@@ -68,6 +73,7 @@
 </template>
 <script>
 import AlertPopup from '../../frame/AlertPopup'
+import { setInterval, setTimeout } from 'timers';
 export default {
     name: 'Setting',
     components: {AlertPopup},
@@ -86,6 +92,8 @@ export default {
                 backgroundColor: 'white', // 解决生成的图片有白边
                 useCORS: true // 如果截图的内容里有图片,解决文件跨域问题
             },
+            bling: false,
+            timer: null
         }
     },
     computed: {
@@ -95,6 +103,19 @@ export default {
                 case 2 : return '确定入口位置';
                 case 3 : return '确定舞所有座位';
             }
+        }
+    },
+    watch: {
+        step(value) {
+            if (this.timer) return;
+            this.timer = window.setInterval(() => {
+                this.bling = !this.bling;
+            }, 500);
+            setTimeout(() => {
+                window.clearInterval(this.timer);
+                this.bling = false;
+                this.timer = null;
+            }, 3000);
         }
     },
     methods: {
@@ -115,6 +136,9 @@ export default {
             }
         },
         settingStart() {
+            if (this.previewTag) {
+                return this.$Message.warning({content: '请取消预览再进行操作', closable: true});
+            }
             if (Number(this.rowNum) < 0 || Number(this.colNum) < 0) {
                 this.$Message.warning({content: '输入数字不能少于0', closable: true});
                 return;
@@ -137,8 +161,16 @@ export default {
         nextStep() {
             this.step = this.step === 1 ? 2 : 3;
         },
-        drag(e) {
-            console.log(e);
+        previewStep() {
+            // if (this.step === 3) {
+            //    this.seatList.forEach(item => {
+            //        item.forEach(val => {
+            //         val.value = val.value === 3 ? 0 : val.value;
+            //        })
+            //     });
+            // }
+            this.step -= 1;
+            this.$forceUpdate();
         },
         selectItem(i, j) {
             if (this.previewTag) return;
@@ -152,10 +184,11 @@ export default {
             this.seatList[i][j].value = this.seatList[i][j].value ? 0 : this.step;
             this.$forceUpdate();
         },
-        selecLeave(type) {
+        selectLeave(type) {
+            if (this.previewTag) return;
             this.seatList.forEach((item, i) => {
                 item.forEach((val, j) => {
-                    if (![1,2].includes(val.value)) val.value = type;
+                    if (![1,2].includes(val.value) && ![0, this.seatList.length - 1].includes(i) && ![0, item.length - 1].includes(j)) val.value = type;
                 })
             });
             this.$forceUpdate();
@@ -251,6 +284,9 @@ export default {
         & h3 {
             font-size: 16px;
             text-align: left;
+            &.red {
+                color:tomato;
+            }
         }
         & .show-area {
             border: 1px solid black;
@@ -319,8 +355,8 @@ export default {
     padding: 50px 0;
     & img {
         margin: 0 auto;
-        height: 100%;
-        width: 100%;
+        // height: 100%;
+        // width: 100%;
     }
 }
 </style>
