@@ -34,6 +34,7 @@
                                 <Icon v-if="itemj.value === 1" :class="differentColor(itemj.value)" type="ios-bowtie" />
                                 <Icon v-if="itemj.value === 2" :class="differentColor(itemj.value)" type="ios-star" />
                                 <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" />
+                                <div class="number-cycle" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No !== -1 ? itemj.No : ''}}</div>
                             </div>
                             <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
                                 <template v-if="!previewTag">
@@ -47,16 +48,21 @@
                     </div>
                 </div>
             </div>
-            <div class="button-area" :class="step === 3 ? 'step_3' : ''">
+            <div class="button-area" :class="[3,4].includes(step) ? 'step_3' : ''">
                 <section v-if="step === 3">
                     <Button v-if="!previewTag" type="primary" @click="selectLeave(3)">全选剩余位置</Button>
                     <Button v-if="!previewTag" type="primary" @click="selectLeave(0)">取消全选剩余位置</Button>
                 </section>
+                <section v-if="step === 4">
+                    <Button type="primary" @click="mutipliTag = !mutipliTag">
+                        {{mutipliTag ? '多个编号' : '单个编号'}}
+                    </Button>
+                </section>
                 <section>
                     <Button size="default" type="primary" @click="clearSeat">重置布置</Button>
-                    <Button v-if="[2,3].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">上一步</Button>
-                    <Button v-if="[1,2].includes(step)" size="default" type="primary" @click="nextStep">下一步</Button>
-                    <Button v-else size="default" type="primary" @click="preview">
+                    <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">上一步</Button>
+                    <Button v-if="[1,2,3].includes(step)" size="default" type="primary" @click="nextStep">下一步</Button>
+                    <Button v-if="step === 4" size="default" type="primary" @click="preview">
                         {{previewTag ? '取消预览' : '确定预览'}}
                     </Button>
                     <Button v-if="previewTag" size="default" type="primary" @click="buildImage">确定生成</Button>
@@ -84,6 +90,7 @@ export default {
             seatList: [],
             step: 0,
             previewTag: false,
+            mutipliTag: false,
             modal: false,
             imgUrl: null,
             opts: {
@@ -93,7 +100,8 @@ export default {
                 useCORS: true // 如果截图的内容里有图片,解决文件跨域问题
             },
             bling: false,
-            timer: null
+            timer: null,
+            seatsNumber: 0,
         }
     },
     computed: {
@@ -101,7 +109,8 @@ export default {
             switch(this.step) {
                 case 1 : return '确定舞台位置';
                 case 2 : return '确定入口位置';
-                case 3 : return '确定舞所有座位';
+                case 3 : return '确定座位位置';
+                case 4 : return '确定座位编号';
             }
         }
     },
@@ -151,6 +160,7 @@ export default {
                 }
             }
             this.step = 1;
+            this.seatsNumber = Number(this.rowNum) * Number(this.colNum);
         },
         clearSeat() {
             this.seatList = [];
@@ -159,7 +169,7 @@ export default {
             this.step = 0;
         },
         nextStep() {
-            this.step = this.step === 1 ? 2 : 3;
+            this.step += 1;
         },
         previewStep() {
             // if (this.step === 3) {
@@ -173,25 +183,52 @@ export default {
             this.$forceUpdate();
         },
         selectItem(i, j) {
-            if (this.previewTag) return;
+            if (this.previewTag || this.step === 4) return;
             if (this.step === 2) {
                 const rowBol = i === 0 || j === 0;
                 const colBol = i === this.seatList.length - 1 || j === this.seatList[0].length - 1;
                 if (!rowBol && !colBol) {
                     return this.$Message.warning({content: '入口不能设置在这里', closable: true});
                 }
+            } else if (this.step === 3) {
+                const rowBol = i === 0 || j === 0;
+                const colBol = i === this.seatList.length - 1 || j === this.seatList[0].length - 1;
+                console.log(rowBol,colBol)
+                if (rowBol || colBol) {
+                    return this.$Message.warning({content: '座位不能设置在这里', closable: true});
+                }
             }
             this.seatList[i][j].value = this.seatList[i][j].value ? 0 : this.step;
             this.$forceUpdate();
         },
         selectLeave(type) {
-            if (this.previewTag) return;
+            if (this.previewTag || this.step === 4) return;
             this.seatList.forEach((item, i) => {
                 item.forEach((val, j) => {
                     if (![1,2].includes(val.value) && ![0, this.seatList.length - 1].includes(i) && ![0, item.length - 1].includes(j)) val.value = type;
                 })
             });
             this.$forceUpdate();
+        },
+        setNumber(i, j) {
+            let startNum = Number(this.seatsNumber) - Number(this.seatedNumber().length);
+            if (!this.mutipliTag) {
+                this.seatList[i][j].No = startNum;
+            } else {
+                this.seatList.forEach((item,indexi) => {
+                    
+                })
+            }
+            this.$forceUpdate();
+        },
+        seatedNumber() {
+            let arr = []
+            this.seatList.forEach(item => {
+                item.forEach(val => {
+                    if (val.value === 3 && val.No === -1) arr.push(val);
+                })
+            });
+            return arr;
         },
         preview() {
             this.previewTag = !this.previewTag;
@@ -311,6 +348,7 @@ export default {
                     &-item {
                         margin-right: 20px;
                         margin-bottom: 20px;
+                        position: relative;
                         &:last-child {
                             margin-right: 0;
                         }
@@ -318,8 +356,21 @@ export default {
                             height: 25px;
                             width: 25px;
                         }
+                        & .number-cycle {
+                            position: absolute;
+                            width: 15px;
+                            height: 15px;
+                            border: 1px solid black;
+                            line-height: 15px;
+                            background-color: white;
+                            border-radius: 50%;
+                            top: 25%;
+                            left: 25%;
+                            font-weight: bold;
+                            cursor: pointer;
+                        }
                         & i {
-                            font-size: 25px;
+                            font-size: 28px;
                             &.active-table {
                                 color: orange;
                             }
