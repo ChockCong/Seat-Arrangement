@@ -6,11 +6,11 @@
                 <div class="input-area-item">
                     <section class="item">
                         <label>行数: </label>
-                        <Input type="number" style="width: 70%" v-model="rowNum" size="large" placeholder="输入数字"  />
+                        <Input type="number" :disabled="!editTag" style="width: 70%" v-model="rowNum" size="large" placeholder="输入数字"  />
                     </section>
                     <section class="item">
                         <label>列数: </label>
-                        <Input type="number" style="width: 70%" v-model="colNum" size="large" placeholder="输入数字" />
+                        <Input type="number" :disabled="!editTag" style="width: 70%" v-model="colNum" size="large" placeholder="输入数字" />
                     </section>
                 </div>
                 <div class="input-area-button">
@@ -25,7 +25,7 @@
                     <Button v-if="!previewTag" type="primary" @click="selectLeave(0)">取消全选剩余位置</Button>
                 </section>
                 <section  class="button-area-item" v-if="step === 4">
-                    <Button type="primary">
+                    <Button :type="isRecover ? 'primary' : 'default'" :disable="!isRecover" @click="recoverNumber">
                         {{'恢复上一步'}}
                     </Button>
                 </section>
@@ -106,7 +106,9 @@ export default {
             timer: null,
             seatsNumber: 0,
             originReplace: [],
-            replace: []
+            replace: [],
+            timeReplace: [], //用于恢复时消失背景色
+            editTag: true
         }
     },
     computed: {
@@ -117,6 +119,9 @@ export default {
                 case 3 : return '确定座位位置';
                 case 4 : return '确定座位编号';
             }
+        },
+        isRecover() {
+            return this.originReplace.length;
         }
     },
     watch: {
@@ -152,6 +157,8 @@ export default {
         settingStart() {
             if (this.previewTag) {
                 return this.$Message.warning({content: '请取消预览再进行操作', closable: true});
+            } else if (!this.editTag) {
+                return this.$Message.warning({content: '请重置布局再进行操作', closable: true});
             }
             if (Number(this.rowNum) < 0 || Number(this.colNum) < 0) {
                 this.$Message.warning({content: '输入数字不能少于0', closable: true});
@@ -166,12 +173,16 @@ export default {
             }
             this.step = 1;
             this.seatsNumber = Number(this.rowNum) * Number(this.colNum);
+            this.editTag = false;
         },
         clearSeat() {
             this.seatList = [];
             this.rowNum = 0;
             this.colNum = 0;
             this.step = 0;
+            this.originReplace = [];
+            this.replace = [];
+            this.editTag = true;
         },
         nextStep() {
             this.step += 1;
@@ -235,24 +246,60 @@ export default {
                     
             //     })
             // }
-            this.seatList[i][j].active = true;
             this.replace.push({i,j});
             if(this.replace.length > 2) {
                 delete this.seatList[this.replace[0].i][this.replace[0].j].active;
                 delete this.seatList[this.replace[1].i][this.replace[1].j].active;
                 this.replace.splice(0,2);
-                this.originReplace = [];
             }
+            this.seatList[i][j].active = true;
             if (this.replace.length === 2) {
+                if (this.replace[0].i === this.replace[1].i && this.replace[0].j === this.replace[1].j) {
+                    delete this.seatList[this.replace[1].i][this.replace[1].j].active
+                    this.replace = [];
+                    this.$forceUpdate();
+                    return;
+                }
                 let replaceItem = this.seatList[this.replace[0].i][this.replace[0].j];
-                this.originReplace = JSON.parse(JSON.stringify(this.replace));
+                this.originReplace = this.originReplace.concat(JSON.parse(JSON.stringify(this.replace)));
                 this.seatList[this.replace[0].i][this.replace[0].j] = JSON.parse(JSON.stringify(this.seatList[this.replace[1].i][this.replace[1].j]));
-                this.seatList[this.replace[1].i][this.replace[1].j] = JSON.parse(JSON.stringify(replaceItem)); 
+                this.seatList[this.replace[1].i][this.replace[1].j] = JSON.parse(JSON.stringify(replaceItem));
             }
             this.$forceUpdate();
         },
+        recoverNumber() {
+            if (this.timeReplace.length) {
+                delete this.seatList[this.timeReplace[0].i][this.timeReplace[0].j].active;
+                delete this.seatList[this.timeReplace[1].i][this.timeReplace[1].j].active;
+                this.timeReplace = [];
+            }
+            if (this.replace.length === 1) {
+                delete this.seatList[this.replace[0].i][this.replace[0].j].active;
+                this.replace = [];
+            }
+            this.$forceUpdate();
+            if (!this.originReplace.length) return this.$Message.warning({content: '这是原始数据', closable: true});
+            let first = this.originReplace[this.originReplace.length - 1];
+            let second = this.originReplace[this.originReplace.length - 2];
+            let replaceItem = this.seatList[first.i][first.j];
+            this.seatList[first.i][first.j] = JSON.parse(JSON.stringify(this.seatList[second.i][second.j]));
+            this.seatList[second.i][second.j] = JSON.parse(JSON.stringify(replaceItem));
+            this.seatList[first.i][first.j].active = true;
+            this.seatList[second.i][second.j].active = true;
+            this.timeReplace = [
+                first,second
+            ];
+            this.originReplace.pop();
+            this.originReplace.pop();
+            this.replace = [
+                {i: first.i,j: first.j},
+                {i: second.i,j: second.j},
+            ];
+            this.$forceUpdate();
+            // this.originReplace.splice(this.originReplace.length - 3,this.originReplace.length);
+        },
         seatedNumber() {
-            let arr = []
+            let arr = [];
             this.seatList.forEach(item => {
                 item.forEach(val => {
                     if (val.value === 3 && val.No === -1) arr.push(val);
@@ -352,6 +399,9 @@ export default {
                 // margin-top: 20px;
                 & button {
                     margin-top: 20px;
+                }
+                & .gary {
+                    background-color: gray;
                 }
             }
         }
