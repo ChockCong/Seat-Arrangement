@@ -18,6 +18,18 @@
                     <Button size="default" type="primary" @click="settingStart">确定生成</Button>
                 </div>
             </div>
+            <div class="button-area" v-if="[3,4].includes(step)">
+                <p>{{'快捷方式'}}</p>
+                <section  class="button-area-item" v-if="step === 3">
+                    <Button v-if="!previewTag" type="primary" @click="selectLeave(3)">全选剩余位置</Button>
+                    <Button v-if="!previewTag" type="primary" @click="selectLeave(0)">取消全选剩余位置</Button>
+                </section>
+                <section  class="button-area-item" v-if="step === 4">
+                    <Button type="primary">
+                        {{'恢复上一步'}}
+                    </Button>
+                </section>
+            </div>
         </div>
         <div class="right-side">
             <h1>会场阵列图</h1>
@@ -34,7 +46,7 @@
                                 <Icon v-if="itemj.value === 1" :class="differentColor(itemj.value)" type="ios-bowtie" />
                                 <Icon v-if="itemj.value === 2" :class="differentColor(itemj.value)" type="ios-star" />
                                 <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" />
-                                <div class="number-cycle" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No !== -1 ? itemj.No : ''}}</div>
+                                <div class="number-cycle" :class="itemj.active ? 'active' : ''" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No !== -1 ? itemj.No : ''}}</div>
                             </div>
                             <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
                                 <template v-if="!previewTag">
@@ -48,16 +60,7 @@
                     </div>
                 </div>
             </div>
-            <div class="button-area" :class="[3,4].includes(step) ? 'step_3' : ''">
-                <section v-if="step === 3">
-                    <Button v-if="!previewTag" type="primary" @click="selectLeave(3)">全选剩余位置</Button>
-                    <Button v-if="!previewTag" type="primary" @click="selectLeave(0)">取消全选剩余位置</Button>
-                </section>
-                <section v-if="step === 4">
-                    <Button type="primary" @click="mutipliTag = !mutipliTag">
-                        {{mutipliTag ? '多个编号' : '单个编号'}}
-                    </Button>
-                </section>
+            <div class="button-area">
                 <section>
                     <Button size="default" type="primary" @click="clearSeat">重置布置</Button>
                     <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">上一步</Button>
@@ -102,6 +105,8 @@ export default {
             bling: false,
             timer: null,
             seatsNumber: 0,
+            originReplace: [],
+            replace: []
         }
     },
     computed: {
@@ -170,6 +175,17 @@ export default {
         },
         nextStep() {
             this.step += 1;
+            if (this.step === 4) {
+                let idx = 1;
+                this.seatList.forEach(item => {
+                    item.forEach(val => {
+                        if (val.value === 3) {
+                            val.No = idx;
+                            idx++;
+                        }
+                    })
+                });
+            }
         },
         previewStep() {
             // if (this.step === 3) {
@@ -211,13 +227,27 @@ export default {
             this.$forceUpdate();
         },
         setNumber(i, j) {
-            let startNum = Number(this.seatsNumber) - Number(this.seatedNumber().length);
-            if (!this.mutipliTag) {
-                this.seatList[i][j].No = startNum;
-            } else {
-                this.seatList.forEach((item,indexi) => {
+            // let startNum = Number(this.seatsNumber) - Number(this.seatedNumber().length);
+            // if (!this.mutipliTag) {
+            //     this.seatList[i][j].No = startNum;
+            // } else {
+            //     this.seatList.forEach((item,indexi) => {
                     
-                })
+            //     })
+            // }
+            this.seatList[i][j].active = true;
+            this.replace.push({i,j});
+            if(this.replace.length > 2) {
+                delete this.seatList[this.replace[0].i][this.replace[0].j].active;
+                delete this.seatList[this.replace[1].i][this.replace[1].j].active;
+                this.replace.splice(0,2);
+                this.originReplace = [];
+            }
+            if (this.replace.length === 2) {
+                let replaceItem = this.seatList[this.replace[0].i][this.replace[0].j];
+                this.originReplace = JSON.parse(JSON.stringify(this.replace));
+                this.seatList[this.replace[0].i][this.replace[0].j] = JSON.parse(JSON.stringify(this.seatList[this.replace[1].i][this.replace[1].j]));
+                this.seatList[this.replace[1].i][this.replace[1].j] = JSON.parse(JSON.stringify(replaceItem)); 
             }
             this.$forceUpdate();
         },
@@ -308,6 +338,23 @@ export default {
                 color: black;
             }
         }
+        & .button-area {
+            padding: 0 50px;
+            & p {
+                font-weight: bold;
+                font-size: 14px;
+                color: black;
+                margin-top: 10px;
+            }
+            &-item {
+                display: flex;
+                flex-direction: column;
+                // margin-top: 20px;
+                & button {
+                    margin-top: 20px;
+                }
+            }
+        }
     }
     & .right-side {
         flex: 1;
@@ -358,16 +405,22 @@ export default {
                         }
                         & .number-cycle {
                             position: absolute;
-                            width: 15px;
-                            height: 15px;
+                            width: 20px;
+                            height: 20px;
                             border: 1px solid black;
-                            line-height: 15px;
+                            color: black;
+                            line-height: 20px;
+                            text-align: center;
                             background-color: white;
                             border-radius: 50%;
-                            top: 25%;
-                            left: 25%;
+                            top: 15%;
+                            left: 15%;
                             font-weight: bold;
                             cursor: pointer;
+                            &.active {
+                                background-color: black;
+                                color: white;
+                            }
                         }
                         & i {
                             font-size: 28px;
