@@ -82,7 +82,7 @@
 </template>
 <script>
 import AlertPopup from '../../frame/AlertPopup'
-import { setInterval, setTimeout } from 'timers';
+import { setInterval, setTimeout, clearInterval } from 'timers';
 export default {
     name: 'Setting',
     components: {AlertPopup},
@@ -113,28 +113,31 @@ export default {
     },
     computed: {
         stepName() {
+            let val = ''
             switch(this.step) {
-                case 1 : return '确定舞台位置';
-                case 2 : return '确定入口位置';
-                case 3 : return '确定座位位置';
-                case 4 : return '确定座位编号';
+                case 1 : val = '确定舞台位置'; break;
+                case 2 : val =  '确定入口位置'; break;
+                case 3 : val =  '确定座位位置'; break;
+                case 4 : val =  '确定座位编号'; break;
             }
+            return val;
         },
         isRecover() {
             return this.originReplace.length;
         }
     },
     watch: {
-        step(value) {
+        step() {
             if (this.timer) return;
-            this.timer = window.setInterval(() => {
+            this.timer = setInterval(() => {
                 this.bling = !this.bling;
             }, 500);
-            setTimeout(() => {
-                window.clearInterval(this.timer);
+            let timeout = setTimeout(() => {
+                clearInterval(this.timer);
                 this.bling = false;
                 this.timer = null;
             }, 3000);
+            clearTimeout(timeout);
         }
     },
     methods: {
@@ -261,7 +264,7 @@ export default {
                     return;
                 }
                 let replaceItem = this.seatList[this.replace[0].i][this.replace[0].j];
-                this.originReplace = this.originReplace.concat(JSON.parse(JSON.stringify(this.replace)));
+                this.originReplace = this.originReplace.concat(this.replace);
                 this.seatList[this.replace[0].i][this.replace[0].j] = JSON.parse(JSON.stringify(this.seatList[this.replace[1].i][this.replace[1].j]));
                 this.seatList[this.replace[1].i][this.replace[1].j] = JSON.parse(JSON.stringify(replaceItem));
             }
