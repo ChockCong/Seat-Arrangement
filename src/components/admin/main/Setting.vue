@@ -26,7 +26,10 @@
                 </section>
                 <section  class="button-area-item" v-if="step === 4">
                     <Button :type="isRecover ? 'primary' : 'default'" :disable="!isRecover" @click="recoverNumber">
-                        {{'恢复上一步'}}
+                        {{'撤销上一步排号'}}
+                    </Button>
+                    <Button :class="mutipliTag ? 'mutiply' : ''" :type="mutipliTag ? 'default' : 'primary'" @click="mutipliControl">
+                        {{ mutipliTag ? '调位排号' : '多选排号' }}
                     </Button>
                 </section>
             </div>
@@ -107,6 +110,9 @@ export default {
             seatsNumber: 0,
             originReplace: [],
             replace: [],
+            originMutipliSelec: [],
+            mutipliSelect: [], //多选记录数组
+            mutipliRecord: 1,
             timeReplace: [], //用于恢复时消失背景色
             editTag: true
         }
@@ -249,6 +255,10 @@ export default {
                     
             //     })
             // }
+            if (this.mutipliTag) {
+                this.selectMutipli(i, j);
+                return;
+            }
             this.replace.push({i,j});
             if(this.replace.length > 2) {
                 delete this.seatList[this.replace[0].i][this.replace[0].j].active;
@@ -309,6 +319,70 @@ export default {
                 })
             });
             return arr;
+        },
+        mutipliControl() {
+            this.mutipliTag = !this.mutipliTag;
+            if (!this.mutipliTag) {
+                this.mutipliRecord = 1;
+                this.mutipliSelect = [];
+                let idx = 1;
+                this.seatList.forEach(item => {
+                    item.forEach(val => {
+                        if (val.value === 3) {
+                            delete val.active;
+                            val.No = idx;
+                            idx++;
+                        }
+                    })
+                });
+            } else {
+                this.seatList.forEach(item => {
+                    item.forEach(val => {
+                        if (val.value === 3) {
+                            delete val.active;
+                            val.No = 0;
+                        }
+                    })
+                });
+            }
+        },
+        selectMutipli(i, j) {
+            if (this.seatList[i][j].No) return;
+            this.mutipliSelect.push({i, j});
+            this.originMutipliSelec.push({i, j});
+            this.seatList[i][j].active = true;
+            if (this.mutipliSelect.length > 2) {
+                let firstRow = this.mutipliSelect[0].i > this.mutipliSelect[1].i ? 1 : 0;
+                let firstCol = this.mutipliSelect[0].j > this.mutipliSelect[1].j ? 1 : 0;
+                let secondRow = firstRow === 1 ? 0 : 1;
+                let secondCol = firstCol === 1 ? 0 : 1;
+                for (let first = this.mutipliSelect[firstRow].i; first <= this.mutipliSelect[secondRow].i; first++) {
+                    for (let second = this.mutipliSelect[firstCol].j; second <= this.mutipliSelect[secondCol].j; second++) {
+                        if (this.seatList[first][second].active && this.seatList[first][second].No > 0) {
+                            delete this.seatList[first][second].active;
+                        }
+                    }
+                }
+                this.mutipliSelect.splice(0,2);
+            }
+            if (this.mutipliSelect.length === 2) {
+                let firstRow = this.mutipliSelect[0].i > this.mutipliSelect[1].i ? 1 : 0;
+                let firstCol = this.mutipliSelect[0].j > this.mutipliSelect[1].j ? 1 : 0;
+                let secondRow = firstRow === 1 ? 0 : 1;
+                let secondCol = firstCol === 1 ? 0 : 1;
+                for (let first = this.mutipliSelect[firstRow].i; first <= this.mutipliSelect[secondRow].i; first++) {
+                    for (let second = this.mutipliSelect[firstCol].j; second <= this.mutipliSelect[secondCol].j; second++) {
+                        this.seatList[first][second].active = true;
+                        if (this.seatList[first][second].No > 0) continue;
+                        else {
+                            this.seatList[first][second].No = this.mutipliRecord;
+                            this.seatList[i][j].active = true;
+                            this.mutipliRecord += 1;
+                        }
+                    }
+                }
+            }
+            this.$forceUpdate();
         },
         preview() {
             this.previewTag = !this.previewTag;
@@ -405,6 +479,10 @@ export default {
                 }
                 & .gary {
                     background-color: gray;
+                }
+                & .mutiply {
+                    background-color: orangered !important;
+                    color: white !important;
                 }
             }
         }
