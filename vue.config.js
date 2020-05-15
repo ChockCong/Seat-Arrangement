@@ -1,6 +1,7 @@
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
+const webpack = require('webpack');
 const PcPage = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
 module.exports = {
 	publicPath: '',
@@ -24,8 +25,30 @@ module.exports = {
 			}
 		}
 	},
-	configureWebpack: config => {},
-	chainWebpack: config => {},
+	configureWebpack: {
+		plugins: [
+			new webpack.ProvidePlugin({
+				_: 'lodash'
+			})
+		],
+		performance: false,
+		output: {
+			filename: '[name].[contenthash].js',
+			chunkFilename: '[name].[contenthash].js'
+		}
+	},
+	chainWebpack: config => {
+		config.optimization.splitChunks({
+			chunks: 'all',
+			cacheGroups: {
+				vendors: {
+					test: /[\\/]node_modules[\\/]/,
+					priority: -10,
+					name: 'vendors'
+				}
+			}
+		});
+	},
 	devServer: {
 		proxy: {
 		  "/api": {
