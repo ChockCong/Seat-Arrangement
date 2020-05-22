@@ -24,8 +24,11 @@
                     <Button v-if="!previewTag" type="primary" @click="selectLeave(3)">全选剩余位置</Button>
                     <Button v-if="!previewTag" type="primary" @click="selectLeave(0)">取消全选剩余位置</Button>
                 </section>
-                <section  class="button-area-item" v-if="step === 4">
-                    <Button :type="isRecover ? 'primary' : 'default'" :disable="!isRecover" @click="recoverNumber">
+                <section  class="button-area-item" v-if="step === 4 && !previewTag">
+                    <Button v-if="!mutipliTag" :type="isRecover ? 'primary' : 'default'" :disable="!isRecover" @click="recoverNumber">
+                        {{'撤销上一步排号'}}
+                    </Button>
+                    <Button v-else :type="isMutipiliRecover ? 'primary' : 'default'" :disable="!isMutipiliRecover" @click="recoverNumber">
                         {{'撤销上一步排号'}}
                     </Button>
                     <Button :class="mutipliTag ? 'mutiply' : ''" :type="mutipliTag ? 'default' : 'primary'" @click="mutipliControl">
@@ -130,6 +133,9 @@ export default {
         },
         isRecover() {
             return this.originReplace.length;
+        },
+        isMutipiliRecover() {
+            return this.originMutipliSelec.length;
         }
     },
     watch: {
@@ -191,6 +197,9 @@ export default {
             this.step = 0;
             this.originReplace = [];
             this.replace = [];
+            this.originMutipliSelec = [];
+            this.mutipliSelect = [];
+            this.mutipliRecord = 1;
             this.editTag = true;
         },
         nextStep() {
@@ -281,17 +290,21 @@ export default {
             this.$forceUpdate();
         },
         recoverNumber() {
+            if (this.mutipliTag) {
+                this.recoverMutipliNumber();
+                return;
+            }
             if (this.timeReplace.length) {
                 delete this.seatList[this.timeReplace[0].i][this.timeReplace[0].j].active;
                 delete this.seatList[this.timeReplace[1].i][this.timeReplace[1].j].active;
                 this.timeReplace = [];
             }
+            if (!this.originReplace.length) return this.$Message.warning({content: '这是原始数据', closable: true});
             if (this.replace.length === 1) {
                 delete this.seatList[this.replace[0].i][this.replace[0].j].active;
                 this.replace = [];
             }
             this.$forceUpdate();
-            if (!this.originReplace.length) return this.$Message.warning({content: '这是原始数据', closable: true});
             let first = this.originReplace[this.originReplace.length - 1];
             let second = this.originReplace[this.originReplace.length - 2];
             let replaceItem = this.seatList[first.i][first.j];
@@ -311,6 +324,53 @@ export default {
             this.$forceUpdate();
             // this.originReplace.splice(this.originReplace.length - 3,this.originReplace.length);
         },
+        recoverMutipliNumber() {
+            if (!this.originMutipliSelec.length) return this.$Message.warning({content: '这是原始数据', closable: true});
+            if (this.originMutipliSelec.length === 1) {
+                delete this.seatList[this.originMutipliSelec[0].i][this.originMutipliSelec[0].j].active;
+                this.originMutipliSelec = [];
+                this.mutipliSelect = [];
+            } else {
+                let firstv = {};
+                let secondv = {};
+                let rowTag = false;
+                let colTag = false;
+                firstv = this.originMutipliSelec[this.originMutipliSelec.length - 1];
+                secondv = this.originMutipliSelec[this.originMutipliSelec.length - 2];
+                rowTag = firstv.i > secondv.i ? true : false;
+                colTag = firstv.i > secondv.i ? true : false;
+                //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
+                for (let first = firstv.i; rowTag ? first >= secondv.i : first <= secondv.i; rowTag ? first-- : first++) {
+                    for (let second = firstv.j; colTag ? second >= secondv.j : second <= secondv.j; colTag ? second-- : second++) {
+                        if (this.seatList[first][second].No > 0) {
+                            this.seatList[first][second].No = 0;
+                            delete this.seatList[first][second].active;
+                            this.mutipliRecord--;
+                        }
+                    }
+                }
+                
+                this.originMutipliSelec.pop();
+                this.originMutipliSelec.pop();
+                // if (this.originMutipliSelec.length) {
+                //     firstv = this.originMutipliSelec[this.originMutipliSelec.length - 1];
+                //     secondv = this.originMutipliSelec[this.originMutipliSelec.length - 2];
+                //     rowTag = firstv.i > secondv.i ? true : false;
+                //     colTag = firstv.j > secondv.j ? true : false;
+                //     //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
+                //     for (let first = firstv.i; rowTag ? first >= secondv.i : first <= secondv.i; rowTag ? first-- : first++) {
+                //         for (let second = firstv.j; colTag ? second >= secondv.j : second <= secondv.j; colTag ? second-- : second++) {
+                //             if (this.seatList[first][second].No > 0) {
+                //                 this.seatList[first][second].active = true;
+                //             }
+                //         }
+                //     }
+                // }
+                this.$forceUpdate();
+            }
+            
+
+        },
         seatedNumber() {
             let arr = [];
             this.seatList.forEach(item => {
@@ -322,7 +382,9 @@ export default {
         },
         mutipliControl() {
             this.mutipliTag = !this.mutipliTag;
+            this.timeReplace = [];
             if (!this.mutipliTag) {
+                this.originMutipliSelec = [];
                 this.mutipliRecord = 1;
                 this.mutipliSelect = [];
                 let idx = 1;
@@ -336,6 +398,7 @@ export default {
                     })
                 });
             } else {
+                this.originReplace = [];
                 this.seatList.forEach(item => {
                     item.forEach(val => {
                         if (val.value === 3) {
@@ -351,13 +414,14 @@ export default {
             this.mutipliSelect.push({i, j});
             this.originMutipliSelec.push({i, j});
             this.seatList[i][j].active = true;
+            let rowTag = false;
+            let colTag = false;
             if (this.mutipliSelect.length > 2) {
-                let firstRow = this.mutipliSelect[0].i > this.mutipliSelect[1].i ? 1 : 0;
-                let firstCol = this.mutipliSelect[0].j > this.mutipliSelect[1].j ? 1 : 0;
-                let secondRow = firstRow === 1 ? 0 : 1;
-                let secondCol = firstCol === 1 ? 0 : 1;
-                for (let first = this.mutipliSelect[firstRow].i; first <= this.mutipliSelect[secondRow].i; first++) {
-                    for (let second = this.mutipliSelect[firstCol].j; second <= this.mutipliSelect[secondCol].j; second++) {
+                rowTag = this.mutipliSelect[0].i > this.mutipliSelect[1].i ? true : false;
+                colTag = this.mutipliSelect[0].j > this.mutipliSelect[1].j ? true : false;
+                //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
+                for (let first = this.mutipliSelect[0].i; rowTag ? first >= this.mutipliSelect[1].i : first <= this.mutipliSelect[1].i; rowTag ? first-- : first++) {
+                    for (let second = this.mutipliSelect[0].j; colTag ? second >= this.mutipliSelect[1].j : second <= this.mutipliSelect[1].j; colTag ? second-- : second++) {
                         if (this.seatList[first][second].active && this.seatList[first][second].No > 0) {
                             delete this.seatList[first][second].active;
                         }
@@ -366,12 +430,11 @@ export default {
                 this.mutipliSelect.splice(0,2);
             }
             if (this.mutipliSelect.length === 2) {
-                let firstRow = this.mutipliSelect[0].i > this.mutipliSelect[1].i ? 1 : 0;
-                let firstCol = this.mutipliSelect[0].j > this.mutipliSelect[1].j ? 1 : 0;
-                let secondRow = firstRow === 1 ? 0 : 1;
-                let secondCol = firstCol === 1 ? 0 : 1;
-                for (let first = this.mutipliSelect[firstRow].i; first <= this.mutipliSelect[secondRow].i; first++) {
-                    for (let second = this.mutipliSelect[firstCol].j; second <= this.mutipliSelect[secondCol].j; second++) {
+                rowTag = this.mutipliSelect[0].i > this.mutipliSelect[1].i ? true : false;
+                colTag = this.mutipliSelect[0].j > this.mutipliSelect[1].j ? true : false;
+                //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
+                for (let first = this.mutipliSelect[0].i; rowTag ? first >= this.mutipliSelect[1].i : first <= this.mutipliSelect[1].i; rowTag ? first-- : first++) {
+                    for (let second = this.mutipliSelect[0].j; colTag ? second >= this.mutipliSelect[1].j : second <= this.mutipliSelect[1].j; colTag ? second-- : second++) {
                         this.seatList[first][second].active = true;
                         if (this.seatList[first][second].No > 0) continue;
                         else {
@@ -386,6 +449,11 @@ export default {
         },
         preview() {
             this.previewTag = !this.previewTag;
+            this.seatList.forEach(item => {
+                item.forEach(val => {
+                    if (val.active) delete val.active;
+                });
+            });
         },
         buildImage() {
             this.$Loading.start();
@@ -544,8 +612,8 @@ export default {
                             text-align: center;
                             background-color: white;
                             border-radius: 50%;
-                            top: 15%;
-                            left: 15%;
+                            top: 17%;
+                            left: 17%;
                             font-weight: bold;
                             cursor: pointer;
                             &.active {
@@ -554,7 +622,7 @@ export default {
                             }
                         }
                         & i {
-                            font-size: 28px;
+                            font-size: 30px;
                             &.active-table {
                                 color: orange;
                             }
@@ -590,6 +658,8 @@ export default {
     padding: 50px 0;
     & img {
         margin: 0 auto;
+        border: gray 1px solid;
+        border-radius: 10px;
         // height: 100%;
         // width: 100%;
     }

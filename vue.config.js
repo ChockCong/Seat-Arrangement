@@ -33,11 +33,14 @@ module.exports = {
 		],
 		performance: false,
 		output: {
-			filename: '[name].[contenthash].js',
-			chunkFilename: '[name].[contenthash].js'
+			filename: '[name].[hash].js',
+			chunkFilename: '[name].[hash].js'
 		}
 	},
 	chainWebpack: config => {
+		config.optimization.runtimeChunk({
+			name: 'runtime'
+		}),
 		config.optimization.splitChunks({
 			chunks: 'all',
 			cacheGroups: {
