@@ -624,8 +624,9 @@ export default {
                             margin-right: 0;
                         }
                         &.full {
-                            height: 25px;
-                            width: 25px;
+                            //位置偏移调整
+                            height: 30px;
+                            width: 30px;
                         }
                         & .number-cycle {
                             position: absolute;
