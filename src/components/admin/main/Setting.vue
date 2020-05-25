@@ -18,21 +18,30 @@
                     <Button size="default" type="primary" @click="settingStart">确定生成</Button>
                 </div>
             </div>
-            <div class="button-area" v-if="[3,4].includes(step)">
+            <div class="button-area" v-if="!editTag && !previewTag">
                 <p>{{'快捷方式'}}</p>
-                <section  class="button-area-item" v-if="step === 3">
-                    <Button v-if="!previewTag" type="primary" @click="selectLeave(3)">全选剩余位置</Button>
-                    <Button v-if="!previewTag" type="primary" @click="selectLeave(0)">取消全选剩余位置</Button>
+                <section  class="button-area-item">
+                    <Button v-if="step < 4" :class="!posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
+                        {{'单选位置'}}
+                    </Button>
+                    <Button v-if="step < 4" :class="posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
+                        {{ '多选位置' }}
+                    </Button>
+                    <Button type="primary" @click="selectLeave(step)">{{ '全选剩余位置' }}</Button>
+                    <Button type="primary" @click="selectLeave(0)">{{ '取消全选剩余位置' }}</Button>
                 </section>
                 <section  class="button-area-item" v-if="step === 4 && !previewTag">
-                    <Button v-if="!mutipliTag" type="default" :class="isRecover ? 'gary' : ''" :disable="!isRecover" @click="recoverNumber">
+                    <Button :class="!mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
+                        {{'调位排号'}}
+                    </Button>
+                    <Button :class="mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
+                        {{ '多选排号' }}
+                    </Button>
+                    <Button v-if="!mutipliTag" type="primary" :class="isRecover ? '' : 'gary'" :disable="!isRecover" @click="recoverNumber">
                         {{'撤销上一步排号'}}
                     </Button>
-                    <Button v-else type="default" :class="isMutipiliRecover ? 'gary' : ''" :disable="!isMutipiliRecover" @click="recoverNumber">
+                    <Button v-else type="primary" :class="isMutipiliRecover ? '' : 'gary'" :disable="!isMutipiliRecover" @click="recoverNumber">
                         {{'撤销上一步排号'}}
-                    </Button>
-                    <Button :class="mutipliTag ? '' : 'mutiply'" :type="mutipliTag ? 'primary' : 'default'" @click="mutipliControl">
-                        {{ mutipliTag ? '调位排号' : '多选排号' }}
                     </Button>
                 </section>
             </div>
@@ -68,13 +77,13 @@
             </div>
             <div class="button-area">
                 <section>
-                    <Button v-if="!editTag" size="default" type="primary" @click="clearSeat">重置布置</Button>
-                    <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">上一步</Button>
-                    <Button v-if="[1,2,3].includes(step)" size="default" type="primary" @click="nextStep">下一步</Button>
+                    <Button class="reset" v-if="!editTag && !previewTag" size="default" type="primary" @click="clearSeat">{{'重置布置'}}</Button>
+                    <Button v-if="previewTag" size="default" type="primary" @click="buildImage">{{'确定生成'}}</Button>
                     <Button v-if="step === 4" size="default" type="primary" @click="preview">
                         {{previewTag ? '取消预览' : '确定预览'}}
                     </Button>
-                    <Button v-if="previewTag" size="default" type="primary" @click="buildImage">确定生成</Button>
+                    <Button v-if="[1,2,3].includes(step)" size="default" type="primary" @click="nextStep">{{'下一步'}}</Button>
+                    <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">{{'上一步'}}</Button>
                 </section>
             </div>
         </div>
@@ -98,9 +107,11 @@ export default {
             colNum: 0,
             seatList: [],
             step: 0,
-            previewTag: false,
-            mutipliTag: false,
-            modal: false,
+            editTag: true,
+            previewTag: false, //预览标志
+            mutipliTag: false, //排号多选标志
+            posMutipliTag: false,
+            modal: false, //弹窗控制
             imgUrl: null,
             opts: {
                 logging: true, // 启用日志记录以进行调试 (发现加上对去白边有帮助)
@@ -108,16 +119,17 @@ export default {
                 backgroundColor: 'white', // 解决生成的图片有白边
                 useCORS: true // 如果截图的内容里有图片,解决文件跨域问题
             },
-            bling: false,
-            timer: null,
-            seatsNumber: 0,
+            bling: false, //提示名字闪烁控制
+            timer: null, //闪烁计时器
+            // seatsNumber: 0, //排号，或许没用
             originReplace: [],
             replace: [],
             originMutipliSelec: [],
             mutipliSelect: [], //多选记录数组
-            mutipliRecord: 1,
+            mutipliRecord: 1, //多选的起始number
             timeReplace: [], //用于恢复时消失背景色
-            editTag: true
+            posMutipliSelect: [],
+            originPosMutipliSelect: []
         }
     },
     computed: {
@@ -187,7 +199,7 @@ export default {
                 }
             }
             this.step = 1;
-            this.seatsNumber = Number(this.rowNum) * Number(this.colNum);
+            // this.seatsNumber = Number(this.rowNum) * Number(this.colNum);
             this.editTag = false;
         },
         clearSeat() {
@@ -195,6 +207,7 @@ export default {
             this.rowNum = 0;
             this.colNum = 0;
             this.step = 0;
+            this.posMutipliSelect = [];
             this.originReplace = [];
             this.replace = [];
             this.originMutipliSelec = [];
@@ -204,6 +217,8 @@ export default {
             this.editTag = true;
         },
         nextStep() {
+            this.posMutipliTag = false;
+            this.posMutipliSelect = [];
             if (this.step === 3) {
                 let row = 0;
                 this.seatList.forEach(item => {
@@ -241,8 +256,14 @@ export default {
                     });
                 });
             }
+            this.posMutipliTag = false;
+            this.posMutipliSelect = [];
             this.step -= 1;
             this.$forceUpdate();
+        },
+        posSelectControl() {
+            this.posMutipliTag = !this.posMutipliTag;
+            if (!this.posMutipliTag) this.posMutipliSelect = [];
         },
         selectItem(i, j) {
             if (this.previewTag || this.step === 4) return;
@@ -259,14 +280,54 @@ export default {
                     return this.$Message.warning({content: '座位不能设置在这里', closable: true});
                 }
             }
-            this.seatList[i][j].value = this.seatList[i][j].value ? 0 : this.step;
+            if (this.posMutipliTag) {
+                this.mutipliPos(i, j);
+            } else {
+                this.seatList[i][j].value = this.seatList[i][j].value ? 0 : this.step;
+            }
             this.$forceUpdate();
+        },
+        mutipliPos(i, j) {
+            if (this.posMutipliSelect.length && i === this.posMutipliSelect[0].i && j === this.posMutipliSelect[0].j) return;
+            this.seatList[i][j].value = this.step;
+            this.posMutipliSelect.push({i, j});
+            if (this.posMutipliSelect.length === 2) {
+                let firstRow = this.posMutipliSelect[0].i > this.posMutipliSelect[1].i ? 1 : 0;
+                let secondRow = firstRow === 1 ? 0 : 1;
+                let firstCol = this.posMutipliSelect[0].j > this.posMutipliSelect[1].j ? 1 : 0;
+                let secondCol = firstCol === 1 ? 0 : 1;
+                console.log(firstRow, secondRow)
+                //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
+                for (let first = this.posMutipliSelect[firstRow].i; first <= this.posMutipliSelect[secondRow].i; first++) {
+                    for (let second = this.posMutipliSelect[firstCol].j; second <= this.posMutipliSelect[secondCol].j; second++) {
+                        let bol = !this.seatList[first][second].value || this.seatList[first][second].value === this.step;
+                        if (this.step === 2) {
+                            if (bol && (first === 0  || second === 0 || first === this.seatList.length - 1 || second === this.seatList[0].length - 1)) {
+                                this.seatList[first][second].value = this.step;
+                            }
+                        } else if (this.step === 3) {
+                            if (bol && (first !== 0  || second !== 0 || first !== this.seatList.length - 1 || second !== this.seatList[0].length - 1)) {
+                                this.seatList[first][second].value = this.step;
+                            }
+                        } else {
+                            if (bol) {
+                                this.seatList[first][second].value = this.step;
+                            }
+                        }
+                    }
+                }
+            }
+            if (this.posMutipliSelect.length > 2) {
+                this.posMutipliSelect.splice(0,2);
+            }
         },
         selectLeave(type) {
             if (this.previewTag || this.step === 4) return;
             this.seatList.forEach((item, i) => {
                 item.forEach((val, j) => {
-                    if (![1,2].includes(val.value) && ![0, this.seatList.length - 1].includes(i) && ![0, item.length - 1].includes(j)) val.value = type;
+                    if (![1,2].includes(val.value) && ![0, this.seatList.length - 1].includes(i) && ![0, item.length - 1].includes(j) && this.step === 3) val.value = type;
+                    else if (![1,3].includes(val.value) && (i === 0  || j === 0 || i === this.seatList.length - 1 || j === this.seatList[0].length - 1) && this.step === 2) val.value = type;
+                    else if (![2,3].includes(val.value) && this.step === 1) val.value = type;
                 })
             });
             this.$forceUpdate();
@@ -665,15 +726,16 @@ export default {
         }
         & .button-area {
             padding: 10px 0;
-            display: flex;
-            justify-content: flex-end;
+            // display: flex;
+            // justify-content: flex-end;
             &.step_3 {
                 justify-content: space-between;
             }
             & button {
                 margin-right: 10px;
-                &:last-child {
-                    margin-right: 0px;
+                float: right;
+                &.reset {
+                    float: left;
                 }
             }
         }

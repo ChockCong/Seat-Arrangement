@@ -57,26 +57,6 @@ const state = {
             ]
         },
         {
-            text: '会场管理',
-            type: 'md-bowtie',
-            size: 18, // icon大小
-            category: 'all',
-            children: [
-                {
-                    type: 'ios-people',
-                    size: 18, // icon大小
-                    name: 'upload-data',
-                    text: '宾客数据上传',
-                },
-                {
-                    type: 'md-wine',
-                    size: 18, // icon大小
-                    name: 'seat-setting',
-                    text: '会场设置',
-                }
-            ]
-        },
-        {
             text: '功能管理',
             type: 'md-folder',
             size: 18, // icon大小
@@ -87,6 +67,26 @@ const state = {
                     size: 18, // icon大小
                     name: 'function-setting',
                     text: '功能设置',
+                }
+            ]
+        },
+        {
+            text: '会场管理',
+            type: 'md-bowtie',
+            size: 18, // icon大小
+            category: 'all',
+            children: [
+                {
+                    type: 'ios-people',
+                    size: 18, // icon大小
+                    name: 'upload-data',
+                    text: '会场选择',
+                },
+                {
+                    type: 'md-wine',
+                    size: 18, // icon大小
+                    name: 'seat-setting',
+                    text: '会场设置',
                 }
             ]
         }
