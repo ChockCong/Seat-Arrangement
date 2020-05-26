@@ -20,29 +20,30 @@
             </div>
             <div class="button-area" v-if="!editTag && !previewTag">
                 <p>{{'快捷方式'}}</p>
-                <section  class="button-area-item">
-                    <Button v-if="step < 4" :class="!posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
+                <section  class="button-area-item" v-if="step < 4">
+                    <Button :class="!posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
                         {{'单选位置'}}
                     </Button>
-                    <Button v-if="step < 4" :class="posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
+                    <Button :class="posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
                         {{ '多选位置' }}
                     </Button>
                     <Button type="primary" @click="selectLeave(step)">{{ '全选剩余位置' }}</Button>
                     <Button type="primary" @click="selectLeave(0)">{{ '取消全选剩余位置' }}</Button>
                 </section>
                 <section  class="button-area-item" v-if="step === 4 && !previewTag">
-                    <Button :class="!mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
-                        {{'调位排号'}}
-                    </Button>
-                    <Button :class="mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
+                    <!-- <Button :class="mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
                         {{ '多选排号' }}
                     </Button>
+                    <Button :class="!mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
+                        {{'调位排号'}}
+                    </Button> -->
                     <Button v-if="!mutipliTag" type="primary" :class="isRecover ? '' : 'gary'" :disable="!isRecover" @click="recoverNumber">
-                        {{'撤销上一步排号'}}
+                        {{'上一步排号'}}
                     </Button>
                     <Button v-else type="primary" :class="isMutipiliRecover ? '' : 'gary'" :disable="!isMutipiliRecover" @click="recoverNumber">
-                        {{'撤销上一步排号'}}
+                        {{'上一步排号'}}
                     </Button>
+                    <Button class="reset" size="default" type="primary" @click="numberModal = true">{{'重置排号'}}</Button>
                 </section>
             </div>
         </div>
@@ -77,7 +78,7 @@
             </div>
             <div class="button-area">
                 <section>
-                    <Button class="reset" v-if="!editTag && !previewTag" size="default" type="primary" @click="clearSeat">{{'重置布置'}}</Button>
+                    <Button class="reset" v-if="!editTag && !previewTag" size="default" type="primary" @click="clearSeat">{{'重置会场'}}</Button>
                     <Button v-if="previewTag" size="default" type="primary" @click="buildImage">{{'确定生成'}}</Button>
                     <Button v-if="step === 4" size="default" type="primary" @click="preview">
                         {{previewTag ? '取消预览' : '确定预览'}}
@@ -87,7 +88,21 @@
                 </section>
             </div>
         </div>
-            <!-- @on-ok="ok" @on-cancel="cancel" -->
+        <Modal v-model="numberModal">
+            <p slot="header" style="color:#f60;text-align:center">
+                <Icon type="md-analytics" />
+                <span>{{ '排号模式' }}</span>
+            </p>
+            <div style="text-align:left">
+                <p>排号模式说明：</p>
+                <p>1.多选排号模式您可以自由排列控制位置号码，然后再通过调换排号模式微调。</p>
+                <p>2.调位排号模式系统将为你自动排列所有位置，然后再通过调换排号模式微调。</p>
+            </div>
+            <div slot="footer" style="display: flex;">
+                <Button type="error" style="flex: 1;" size="large" @click="sureNumberModal(true)">{{'多选模式'}}</Button>
+                <Button type="error" style="flex: 1;" size="large" @click="sureNumberModal(false)">{{'调位模式'}}</Button>
+            </div>
+        </Modal>
         <Modal v-model="modal" width="70%" title="最终会场展示">
             <div class="modal-form">
                 <img :src="imgUrl" />
@@ -109,9 +124,10 @@ export default {
             step: 0,
             editTag: true,
             previewTag: false, //预览标志
-            mutipliTag: false, //排号多选标志
+            mutipliTag: true, //排号多选标志
             posMutipliTag: false,
             modal: false, //弹窗控制
+            numberModal: false,
             imgUrl: null,
             opts: {
                 logging: true, // 启用日志记录以进行调试 (发现加上对去白边有帮助)
@@ -213,7 +229,7 @@ export default {
             this.originMutipliSelec = [];
             this.mutipliSelect = [];
             this.mutipliRecord = 1;
-            this.mutipliTag = false;
+            this.mutipliTag = true;
             this.editTag = true;
         },
         nextStep() {
@@ -231,30 +247,51 @@ export default {
                 return this.$Message.warning({content: '请选择座位再进行下一步', closable: true});
             }
             this.step += 1;
+            if (this.step === 4) this.numberModal = true;
+        },
+        sureNumberModal(type) {
+            this.mutipliTag = type;
+            this.defaultNumber();
+            this.numberModal = false;
+        },
+        defaultNumber() {
             if (this.step === 4) {
-                let idx = 1;
-                this.seatList.forEach(item => {
-                    item.forEach(val => {
-                        if (val.value === 3) {
-                            val.No = idx;
-                            idx++;
-                        }
-                    })
-                });
+                if (!this.mutipliTag) {
+                    let idx = 1;
+                    this.seatList.forEach(item => {
+                        item.forEach(val => {
+                            if (val.value === 3) {
+                                val.No = idx;
+                                idx++;
+                            }
+                        })
+                    });
+                } else {
+                   this.seatList.forEach(item => {
+                        item.forEach(val => {
+                            if (val.value === 3) {
+                                val.No = 0;
+                            }
+                        })
+                    });
+                }
+                this.clearActive(false);
+                this.$forceUpdate();
             }
         },
         previewStep() {
             if (this.step === 4) {
-                this.mutipliTag = false;
+                this.mutipliTag = true;
                 this.originReplace = [];
                 this.originMutipliSelec = [];
                 this.replace = [];
                 this.mutipliSelect = [];
-                this.seatList.forEach(item => {
-                    item.forEach(val => {
-                        if (val.active) delete val.active;
-                    });
-                });
+                this.clearActive(false);
+                // this.seatList.forEach(item => {
+                //     item.forEach(val => {
+                //         if (val.active) delete val.active;
+                //     });
+                // });
             }
             this.posMutipliTag = false;
             this.posMutipliSelect = [];
@@ -288,7 +325,7 @@ export default {
             this.$forceUpdate();
         },
         mutipliPos(i, j) {
-            if (this.posMutipliSelect.length && i === this.posMutipliSelect[0].i && j === this.posMutipliSelect[0].j) return;
+            if (this.posMutipliSelect.length === 1 && i === this.posMutipliSelect[0].i && j === this.posMutipliSelect[0].j) return;
             this.seatList[i][j].value = this.step;
             this.posMutipliSelect.push({i, j});
             if (this.posMutipliSelect.length === 2) {
@@ -334,7 +371,7 @@ export default {
         },
         setNumber(i, j) {
             if (this.mutipliTag) {
-                this.selectMutipli(i, j);
+                this.selectMutipliNumber(i, j);
                 return;
             }
             this.replace.push({i,j});
@@ -358,7 +395,7 @@ export default {
             }
             this.$forceUpdate();
         },
-        selectMutipli(i, j) {
+        selectMutipliNumber(i, j) {
             if (this.seatList[i][j].No) return;
             this.mutipliSelect.push({i, j});
             if(this.mutipliSelect.length === 2) {
@@ -492,15 +529,15 @@ export default {
                 this.$forceUpdate();
             }
         },
-        seatedNumber() {
-            let arr = [];
-            this.seatList.forEach(item => {
-                item.forEach(val => {
-                    if (val.value === 3 && val.No === -1) arr.push(val);
-                })
-            });
-            return arr;
-        },
+        // seatedNumber() {
+        //     let arr = [];
+        //     this.seatList.forEach(item => {
+        //         item.forEach(val => {
+        //             if (val.value === 3 && val.No === -1) arr.push(val);
+        //         })
+        //     });
+        //     return arr;
+        // },
         mutipliControl() {
             this.mutipliTag = !this.mutipliTag;
             this.timeReplace = [];
@@ -533,11 +570,20 @@ export default {
         },
         preview() {
             this.previewTag = !this.previewTag;
+            this.clearActive();
+            // this.seatList.forEach(item => {
+            //     item.forEach(val => {
+            //         if (val.active) delete val.active;
+            //     });
+            // });
+        },
+        clearActive(isLoad = true) {
             this.seatList.forEach(item => {
                 item.forEach(val => {
                     if (val.active) delete val.active;
                 });
             });
+            if (isLoad) this.$forceUpdate();
         },
         buildImage() {
             console.log(this.seatList);
@@ -580,10 +626,11 @@ export default {
     & .left-side {
         min-width: 300px;
         max-width: 400px;
-        border-right: 1px solid gray;
+        border-right: 1px solid lightgray;
+        box-shadow: 1px 1px 5px lightgray;
         & .input-area {
             padding: 20px;
-            border-bottom: 1px solid gray;
+            border-bottom: 1px solid lightgray;
             &-item {
                 & .item {
                     display: flex;
@@ -658,7 +705,9 @@ export default {
             }
         }
         & .show-area {
-            border: 1px solid black;
+            border: 1px solid lightgray;
+            border-radius: 10px;
+            // box-shadow: 1px 1px 5px gray;
             background: white;
             display: flex;
             align-items: center;
