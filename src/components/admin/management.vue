@@ -200,7 +200,6 @@ export default {
         })
         // 根据路由打开对应的菜单栏
         this.openMenus = this.getMenus(name);
-        console.log(this.openMenus);
         this.$nextTick(() => {
             this.$refs.asideMenu.updateOpened()
         })
@@ -211,6 +210,9 @@ export default {
 
         this.main = document.querySelector('.sec-right')
         this.asideArrowIcons = document.querySelectorAll('aside .ivu-icon-ios-arrow-down')
+
+        //面包屑
+        this.getCrumbs(this.$route);
 
         // 监听窗口大小 自动收缩侧边栏
         this.monitorWindowSize()
@@ -231,7 +233,6 @@ export default {
                 }
                 this.tagsArry.push({ name, text: this.nameToTitle[name] })
             }
-
             setTimeout(() => {
                 this.crumbs = this.paths[name]
             }, 0)
@@ -259,10 +260,30 @@ export default {
         },
     },
     methods: {
+        getCrumbs(to) {
+            const name = to.name
+            this.currentPage = name
+            if (name == 'error') {
+                this.crumbs = '404'
+                return
+            }
+
+            if (!this.keepAliveData.includes(name)) {
+                // 如果标签超过8个 则将第一个标签删除
+                if (this.tagsArry.length == 8) {
+                    this.tagsArry.shift()
+                }
+                this.tagsArry.push({ name, text: this.nameToTitle[name] })
+            }
+            console.log(this.crumbs)
+            console.log(this.paths[name])
+            setTimeout(() => {
+                this.crumbs = this.paths[name]
+            }, 0)
+        },
         getMenus(name) {
             let menus
             const tagTitle = this.nameToTitle[name]
-            console.log(tagTitle);
             for (let i = 0, l = this.menuItems.length; i < l; i++) {
                 const item = this.menuItems[i]
                 menus = []
