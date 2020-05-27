@@ -143,11 +143,6 @@ export default {
             seatList: [],
             copySeatList: [],
             step: 0,
-            editTag: true,
-            previewTag: false, //预览标志
-            mutipliTag: true, //排号多选标志
-            posMutipliTag: false,
-            isStartNumberMode: false, //判断是第一次进入排位还是需要重置排位
             modal: false, //弹窗控制
             numberModal: false,
             passModal: false,
@@ -161,6 +156,11 @@ export default {
             bling: false, //提示名字闪烁控制
             timer: null, //闪烁计时器
             // seatsNumber: 0, //排号，或许没用
+            editTag: true,
+            previewTag: false, //预览标志
+            mutipliTag: true, //排号多选标志
+            posMutipliTag: false,
+            isStartNumberMode: false, //判断是第一次进入排位还是需要重置排位
             originReplace: [],
             replace: [],
             originMutipliSelec: [],
@@ -253,6 +253,9 @@ export default {
             this.mutipliSelect = [];
             this.mutipliRecord = 1;
             this.mutipliTag = true;
+            this.isStartNumberMode = false;
+            this.imgUrl = null;
+            this.copySeatList = [];
             this.editTag = true;
         },
         nextStep() {
@@ -280,6 +283,7 @@ export default {
                 this.originMutipliSelec = [];
                 this.replace = [];
                 this.mutipliSelect = [];
+                this.copySeatList = [];
                 this.isStartNumberMode = false;
                 this.clearActive(false);
                 this.clearNumber(false);
