@@ -7,6 +7,8 @@ import router from './router/router';
 import './plugins/iview'
 import 'iview/dist/styles/iview.css';
 import html2canvas from 'html2canvas';
+import _ from './utils/lodash';
+window._ = _;
 
 Vue.config.productionTip = false;
 

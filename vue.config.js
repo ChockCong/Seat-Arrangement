@@ -27,9 +27,9 @@ module.exports = {
 	},
 	configureWebpack: {
 		plugins: [
-			new webpack.ProvidePlugin({
-				_: 'lodash'
-			})
+			// new webpack.ProvidePlugin({
+			// 	_: 'lodash'
+			// })
 		],
 		performance: false,
 		output: {

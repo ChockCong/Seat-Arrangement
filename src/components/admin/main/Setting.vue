@@ -21,10 +21,10 @@
             <div class="button-area" v-if="!editTag && !previewTag">
                 <p>{{'快捷方式'}}</p>
                 <section  class="button-area-item" v-if="step < 4">
-                    <Button :class="!posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
+                    <Button :class="!posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl(false)">
                         {{'单选位置'}}
                     </Button>
-                    <Button :class="posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl">
+                    <Button :class="posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl(true)">
                         {{ '多选位置' }}
                     </Button>
                     <Button type="primary" @click="selectLeave(step)">{{ '全选剩余位置' }}</Button>
@@ -43,7 +43,8 @@
                     <Button v-else type="primary" :class="isMutipiliRecover ? '' : 'gary'" :disable="!isMutipiliRecover" @click="recoverNumber">
                         {{'上一步排号'}}
                     </Button>
-                    <Button class="reset" size="default" type="primary" @click="numberModal = true">{{'重置排号'}}</Button>
+                    <Button class="reset" size="default" type="primary" @click="defaultNumber">{{'重置排号'}}</Button>
+                    <Button class="reset" size="default" type="primary" @click="numberModal = true">{{'重置模式'}}</Button>
                 </section>
             </div>
         </div>
@@ -52,6 +53,7 @@
             <h3 :class="bling ? 'red' : ''" v-if="step">
                 <span>{{`第${step}步：${stepName}`}}</span>
                 <span v-if="step === 1">{{ '(可多选)' }}</span>
+                <span v-if="step === 4" style="color:#f60;">{{ mutipliTag ? '(多选模式)':'(调位模式)' }}</span>
             </h3>
             <div class="show-area">
                 <div class="seat-area" ref="imageDom">
@@ -80,18 +82,21 @@
                 <section>
                     <Button class="reset" v-if="!editTag && !previewTag" size="default" type="primary" @click="clearSeat">{{'重置会场'}}</Button>
                     <Button v-if="previewTag" size="default" type="primary" @click="buildImage">{{'确定生成'}}</Button>
-                    <Button v-if="step === 4" size="default" type="primary" @click="preview">
+                    <Button v-if="step === 4 && !mutipliTag" size="default" type="primary" @click="preview">
                         {{previewTag ? '取消预览' : '确定预览'}}
+                    </Button>
+                    <Button v-if="step === 4 && mutipliTag" size="default" type="primary" @click="toNotMutiply">
+                        {{'下一步'}}
                     </Button>
                     <Button v-if="[1,2,3].includes(step)" size="default" type="primary" @click="nextStep">{{'下一步'}}</Button>
                     <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">{{'上一步'}}</Button>
                 </section>
             </div>
         </div>
-        <Modal v-model="numberModal">
-            <p slot="header" style="color:#f60;text-align:center">
+        <Modal v-model="numberModal" :closable="isStartNumberMode ? true : false" :mask-closable="isStartNumberMode ? true : false">
+            <p slot="header" style="color:#f60; text-align:center">
                 <Icon type="md-analytics" />
-                <span>{{ '排号模式' }}</span>
+                <span style="margin-left:10px;" >{{ '排号模式' }}</span>
             </p>
             <div style="text-align:left">
                 <p>排号模式说明：</p>
@@ -103,9 +108,24 @@
                 <Button type="error" style="flex: 1;" size="large" @click="sureNumberModal(false)">{{'调位模式'}}</Button>
             </div>
         </Modal>
+        <Modal v-model="passModal" width="20%" title="" :closable="false">
+            <p slot="header" style="color:#f60; text-align:center">
+                <span style="margin-left:10px;" >{{ '提示' }}</span>
+            </p>
+            <div style="">
+                <p>接下来将进入调位模式，该步骤内你也可以选择直接生成预览</p>
+            </div>
+            <div slot="footer" style="display: flex;">
+                <Button type="error" style="flex: 1;" size="large" @click="passModal = false">{{'确定'}}</Button>
+            </div>
+        </Modal>
         <Modal v-model="modal" width="70%" title="最终会场展示">
             <div class="modal-form">
                 <img :src="imgUrl" />
+            </div>
+            <div slot="footer" style="text-align: right">
+                <Button type="default" size="large" @click="modal = false">{{'取消'}}</Button>
+                <Button type="primary" size="large" @click="modal = false">{{'确定'}}</Button>
             </div>
         </Modal>
     </div>
@@ -121,13 +141,16 @@ export default {
             rowNum: 0,
             colNum: 0,
             seatList: [],
+            copySeatList: [],
             step: 0,
             editTag: true,
             previewTag: false, //预览标志
             mutipliTag: true, //排号多选标志
             posMutipliTag: false,
+            isStartNumberMode: false, //判断是第一次进入排位还是需要重置排位
             modal: false, //弹窗控制
             numberModal: false,
+            passModal: false,
             imgUrl: null,
             opts: {
                 logging: true, // 启用日志记录以进行调试 (发现加上对去白边有帮助)
@@ -233,9 +256,8 @@ export default {
             this.editTag = true;
         },
         nextStep() {
-            this.posMutipliTag = false;
-            this.posMutipliSelect = [];
-            if (this.step === 3) {
+            this.step += 1;
+            if (this.step === 4) {
                 let row = 0;
                 this.seatList.forEach(item => {
                     let hasValue = item.filter(val => {
@@ -243,41 +265,13 @@ export default {
                     });
                     if (!hasValue.length) row += 1;
                 });
-                if (row === this.seatList.length)
-                return this.$Message.warning({content: '请选择座位再进行下一步', closable: true});
+                if (row === this.seatList.length) {
+                    this.step = 3;
+                    return this.$Message.warning({content: '请选择座位再进行下一步', closable: true});
+                } else this.numberModal = true;
             }
-            this.step += 1;
-            if (this.step === 4) this.numberModal = true;
-        },
-        sureNumberModal(type) {
-            this.mutipliTag = type;
-            this.defaultNumber();
-            this.numberModal = false;
-        },
-        defaultNumber() {
-            if (this.step === 4) {
-                if (!this.mutipliTag) {
-                    let idx = 1;
-                    this.seatList.forEach(item => {
-                        item.forEach(val => {
-                            if (val.value === 3) {
-                                val.No = idx;
-                                idx++;
-                            }
-                        })
-                    });
-                } else {
-                   this.seatList.forEach(item => {
-                        item.forEach(val => {
-                            if (val.value === 3) {
-                                val.No = 0;
-                            }
-                        })
-                    });
-                }
-                this.clearActive(false);
-                this.$forceUpdate();
-            }
+            this.posMutipliTag = false;
+            this.posMutipliSelect = [];
         },
         previewStep() {
             if (this.step === 4) {
@@ -286,20 +280,65 @@ export default {
                 this.originMutipliSelec = [];
                 this.replace = [];
                 this.mutipliSelect = [];
+                this.isStartNumberMode = false;
                 this.clearActive(false);
-                // this.seatList.forEach(item => {
-                //     item.forEach(val => {
-                //         if (val.active) delete val.active;
-                //     });
-                // });
+                this.clearNumber(false);
             }
             this.posMutipliTag = false;
             this.posMutipliSelect = [];
             this.step -= 1;
             this.$forceUpdate();
         },
-        posSelectControl() {
-            this.posMutipliTag = !this.posMutipliTag;
+        sureNumberModal(type) {
+            this.copySeatList = [];
+            this.originMutipliSelec = [];
+            this.mutipliRecord = 1;
+            this.mutipliSelect = [];
+            this.originReplace = [];
+            this.timeReplace = [];
+            this.replace = [];
+            this.isStartNumberMode = true;
+            this.mutipliTag = type;
+            this.defaultNumber();
+            this.numberModal = false;
+        },
+        defaultNumber() {
+            if (this.step === 4) {
+                if (!this.mutipliTag) {
+                    let idx = 1;
+                    if (!this.copySeatList.length) {
+                        this.seatList.forEach(item => {
+                            item.forEach(val => {
+                                if (val.value === 3) {
+                                    val.No = idx;
+                                    idx++;
+                                }
+                            })
+                        });
+                    } else {
+                        this.seatList = _.cloneDeep(this.copySeatList);
+                    }
+                    this.originReplace = [];
+                    this.timeReplace = [];
+                    this.replace = [];
+                } else {
+                   this.seatList.forEach(item => {
+                        item.forEach(val => {
+                            if (val.value === 3) {
+                                val.No = 0;
+                            }
+                        })
+                    });
+                    this.originMutipliSelec = [];
+                    this.mutipliRecord = 1;
+                    this.mutipliSelect = [];
+                }
+                this.clearActive(false);
+                this.$forceUpdate();
+            }
+        },
+        posSelectControl(type) {
+            this.posMutipliTag = type;
             if (!this.posMutipliTag) this.posMutipliSelect = [];
         },
         selectItem(i, j) {
@@ -368,6 +407,24 @@ export default {
                 })
             });
             this.$forceUpdate();
+        },
+        toNotMutiply() {
+            let zeroLen = 0;
+            this.seatList.forEach(item => {
+                let rowZero = item.filter(val => { return val.value === 3 && !val.No; });
+                zeroLen += rowZero.length; 
+            });
+            if (zeroLen) return this.$Message.warning({content: '请把全部号码设置完毕', closable: true});
+            else {
+                this.passModal = true;
+                this.copySeatList = _.cloneDeep(this.seatList);
+                this.originMutipliSelec = [];
+                this.mutipliRecord = 1;
+                this.mutipliSelect = [];
+                this.mutipliTag = false;
+                this.clearActive();
+                
+            }
         },
         setNumber(i, j) {
             if (this.mutipliTag) {
@@ -445,7 +502,10 @@ export default {
                 delete this.seatList[this.timeReplace[1].i][this.timeReplace[1].j].active;
                 this.timeReplace = [];
             }
-            if (!this.originReplace.length) return this.$Message.warning({content: '这是原始数据', closable: true});
+            if (!this.originReplace.length) {
+                this.$Message.warning({content: '这是原始数据', closable: true});
+                return this.clearActive();
+            }
             if (this.replace.length === 1) {
                 delete this.seatList[this.replace[0].i][this.replace[0].j].active;
                 this.replace = [];
@@ -471,13 +531,6 @@ export default {
             // this.originReplace.splice(this.originReplace.length - 3,this.originReplace.length);
         },
         recoverMutipliNumber() {
-            // if (this.mutipliSelect.length % 2) {
-            //     let index = this.mutipliSelect[this.mutipliSelect.length - 1];
-            //     delete this.seatList[index.i][index.j].active;
-            //     this.mutipliSelect.pop();
-            //     this.$forceUpdate();
-            //     return;
-            // }
             if (!this.originMutipliSelec.length) return this.$Message.warning({content: '这是原始数据', closable: true});
             if (this.originMutipliSelec.length) {
                 let firstv = {};
@@ -529,15 +582,6 @@ export default {
                 this.$forceUpdate();
             }
         },
-        // seatedNumber() {
-        //     let arr = [];
-        //     this.seatList.forEach(item => {
-        //         item.forEach(val => {
-        //             if (val.value === 3 && val.No === -1) arr.push(val);
-        //         })
-        //     });
-        //     return arr;
-        // },
         mutipliControl() {
             this.mutipliTag = !this.mutipliTag;
             this.timeReplace = [];
@@ -581,6 +625,14 @@ export default {
             this.seatList.forEach(item => {
                 item.forEach(val => {
                     if (val.active) delete val.active;
+                });
+            });
+            if (isLoad) this.$forceUpdate();
+        },
+        clearNumber(isLoad = true) {
+            this.seatList.forEach(item => {
+                item.forEach(val => {
+                    if (val.value === 3) val.No = -1;
                 });
             });
             if (isLoad) this.$forceUpdate();
