@@ -12,6 +12,9 @@ module.exports = {
 	productionSourceMap: false,
     css: {
 		loaderOptions: {
+			css: {
+				
+			},
 			postcss: {
 				plugins: [
 					autoprefixer(),
@@ -22,7 +25,7 @@ module.exports = {
 						minPixelValue: 2 // 1px的转换在安卓有问题，所以小于2px不转换
 					})
 				]
-			}
+			},
 		}
 	},
 	configureWebpack: {
@@ -38,6 +41,14 @@ module.exports = {
 		}
 	},
 	chainWebpack: config => {
+		// config.module
+		// 	.rule(/\.(ttf|eot|woff|woff2|svg)$/)
+		// 	.use('file-loader')
+		// 		.loader('file-loader')
+		// 		.tap(options => {
+		// 			// 修改它的选项...
+		// 			// return options
+		// 		}),
 		config.optimization.runtimeChunk({
 			name: 'runtime'
 		}),

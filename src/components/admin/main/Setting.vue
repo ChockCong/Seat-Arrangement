@@ -61,17 +61,21 @@
                         <template v-for="(itemj, indexJ) in seatList[indexI]">
                              <!-- :style="fullColor(itemj.value)" full-->
                             <div :key="indexJ" v-if="itemj.value && itemj.value !== step" class="seat-area-row-item">
-                                <Icon v-if="itemj.value === 1" :class="differentColor(itemj.value)" type="ios-bowtie" />
+                                <!-- <Icon v-if="itemj.value === 1" :class="differentColor(itemj.value)" type="ios-bowtie" />
                                 <Icon v-if="itemj.value === 2" :class="differentColor(itemj.value)" type="ios-star" />
-                                <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" />
+                                <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" /> -->
+                                <i v-if="itemj.value === 1"  class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
+                                <i v-if="itemj.value === 2"  class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
+                                <i v-if="itemj.value === 3"  class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
                                 <div class="number-cycle" :class="itemj.active ? 'active' : ''" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No !== -1 ? itemj.No : ''}}</div>
                             </div>
                             <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
                                 <template v-if="!previewTag">
-                                    <Icon :class="differentColor(itemj.value)" type="md-cube" />
+                                    <i class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
+                                    <!-- <Icon :class="differentColor(itemj.value)" type="md-cube" /> -->
                                 </template>
                                 <template v-else>
-                                    <Icon v-if="itemj.value" :class="differentColor(itemj.value)" type="md-cube" />
+                                    <i v-if="itemj.value" class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
                                 </template>
                             </div>
                         </template>
@@ -819,10 +823,10 @@ export default {
                                 color: orange;
                             }
                             &.active-stage {
-                                color: skyblue;
+                                background-color: #e3b78c;
                             }
                             &.active-door {
-                                color: red;
+                                color: #4caf50;
                             }
                         }
                     }

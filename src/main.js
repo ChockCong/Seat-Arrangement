@@ -6,6 +6,8 @@ import store from './store/index';
 import router from './router/router';
 import './plugins/iview'
 import 'iview/dist/styles/iview.css';
+import './assets/iconfont/iconfont.css';
+// import './assets/iconfont/iconfont.js';
 import html2canvas from 'html2canvas';
 import _ from './utils/lodash';
 window._ = _;
