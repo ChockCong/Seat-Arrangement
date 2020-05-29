@@ -64,14 +64,15 @@
                                 <!-- <Icon v-if="itemj.value === 1" :class="differentColor(itemj.value)" type="ios-bowtie" />
                                 <Icon v-if="itemj.value === 2" :class="differentColor(itemj.value)" type="ios-star" />
                                 <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" /> -->
-                                <i v-if="itemj.value === 1"  class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
+                                <i v-if="itemj.value === 1"  class="iconfont icon-diban big" :class="differentColor(itemj.value)"></i>
                                 <i v-if="itemj.value === 2"  class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
                                 <i v-if="itemj.value === 3"  class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
                                 <div class="number-cycle" :class="itemj.active ? 'active' : ''" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No !== -1 ? itemj.No : ''}}</div>
                             </div>
                             <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
                                 <template v-if="!previewTag">
-                                    <i class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
+                                    <i v-if="step>1 && itemj.value !== 1 && (indexJ === 0 || indexI === 0 || indexI === seatList.length - 1 || indexJ === seatList[indexI].length - 1)" class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
+                                    <i v-else class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
                                     <!-- <Icon :class="differentColor(itemj.value)" type="md-cube" /> -->
                                 </template>
                                 <template v-else>
@@ -780,23 +781,28 @@ export default {
             .seat-area {
                 width: fit-content;
                 margin: auto;
-                padding: 0 10px;
+                // padding: 0 10px;
                 &-row {
                     display: flex;
-                    // justify-content: space-between;
+                    line-height: 1;
                     flex-direction: row;
+                    // line-height: normal;
                     // padding: 10px 0;
                     &-item {
-                        margin-right: 20px;
-                        margin-bottom: 20px;
+                        // margin-right: 20px;
+                        // margin-bottom: 20px;
                         position: relative;
-                        &:last-child {
-                            margin-right: 0;
-                        }
+                        // &:nth-last-child(2) {
+                        //     margin-right: 0;
+                        // }
+                        // &:last-child {
+                        //     margin-right: 0;
+                        //     margin-left: 20px;
+                        // }
                         &.full {
                             //位置偏移调整
-                            height: 30px;
-                            width: 30px;
+                            height: 50px;
+                            width: 50px;
                         }
                         & .number-cycle {
                             position: absolute;
@@ -808,8 +814,8 @@ export default {
                             text-align: center;
                             background-color: white;
                             border-radius: 50%;
-                            top: 17%;
-                            left: 17%;
+                            top: 12%;
+                            left: 31%;
                             font-weight: bold;
                             cursor: pointer;
                             &.active {
@@ -818,7 +824,16 @@ export default {
                             }
                         }
                         & i {
+                            display: block;
                             font-size: 30px;
+                            margin: 10px;
+                            &.icon-efbdddbe {
+                                font-size: 27px;
+                            }
+                            &.big {
+                                margin: 0;
+                                font-size: 50px;
+                            }
                             &.active-table {
                                 color: orange;
                             }
