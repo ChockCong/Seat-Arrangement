@@ -54,11 +54,17 @@ module.exports = {
 		}),
 		config.optimization.splitChunks({
 			chunks: 'all',
+			maxInitialRequests: 3,
 			cacheGroups: {
 				vendors: {
 					test: /[\\/]node_modules[\\/]/,
-					priority: -10,
+					priority: 10,
 					name: 'vendors'
+				},
+				iview: {
+					test: /[\\/]node_modules[\\/]_?iview(.*)/,
+					name: 'chunk-iview',
+					priority: 20,
 				}
 			}
 		});
