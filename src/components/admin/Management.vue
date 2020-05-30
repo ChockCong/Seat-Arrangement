@@ -632,7 +632,7 @@ header .ivu-icon {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 4px 0;
+    margin: 4px 0 0 0;
 }
 .div-icons {
     display: flex;

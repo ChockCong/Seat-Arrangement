@@ -1,34 +1,32 @@
 <template>
     <div class="index-vue-seatsetting">
-        <transition name="draw">
-        <div class="left-side" :style="!startModal ? 'width:0;height:55px' : ''">
-            <div class="input-area" v-show="startModal">
-                <p>设置自定义会场</p>
-                <p>{{'输入你所需要的最大行列数'}}</p>
-                <div class="input-area-item">
-                    <section class="item">
-                        <label>行数: </label>
-                        <Input type="number" :disabled="!editTag" style="width: 70%" v-model="rowNum" size="large" placeholder="输入数字"  />
-                    </section>
-                    <section class="item">
-                        <label>列数: </label>
-                        <Input type="number" :disabled="!editTag" style="width: 70%" v-model="colNum" size="large" placeholder="输入数字" />
-                    </section>
+        <div class="transition-area" style="position: relative;">
+            <transition name="draw">
+                <div class="left-side"  v-show="startModal" :style="!startModal ? 'min-width: 0' : 'min-width: 300px;'">
+                    <div class="input-area" v-if="startModal">
+                        <p>{{'输入你所需要的最大行列数'}}</p>
+                        <div class="input-area-item">
+                            <section class="item">
+                                <label>行数: </label>
+                                <Input type="number" :disabled="!editTag" style="width: 70%" v-model="rowNum" size="large" placeholder="输入数字"  />
+                            </section>
+                            <section class="item">
+                                <label>列数: </label>
+                                <Input type="number" :disabled="!editTag" style="width: 70%" v-model="colNum" size="large" placeholder="输入数字" />
+                            </section>
+                        </div>
+                        <div class="input-area-button">
+                            <b>查看图例</b>
+                            <Button size="default" type="primary" @click="settingStart">确定生成</Button>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-area-button">
-                    <b>查看图例</b>
-                    <Button size="default" type="primary" @click="settingStart">确定生成</Button>
-                </div>
+            </transition>
+            <div class="hide-start" @click="showStart()">
+                <Icon :type="!startModal ? 'ios-arrow-forward' : 'ios-arrow-back'"></Icon>
+                <!-- {{!startModal ? '展开' : '收起'}} -->
             </div>
-            <div class="hide-start" @click="hideStart">
-                    <Icon :type="!startModal ? 'ios-arrow-forward' : 'ios-arrow-back'"></Icon>
-                    {{!startModal ? '展开' : '收起'}}
-                </div>
-            <!-- <div class="button-area" v-if="!editTag && !previewTag">
-                <p>{{'快捷方式'}}</p>
-            </div> -->
         </div>
-        </transition>
         <div class="right-side">
             <div class="title-area" v-if="step">
                 <!-- <h3 :class="bling ? 'red' : ''" v-if="step">
@@ -226,8 +224,23 @@ export default {
         }
     },
     methods: {
-        hideStart() {
-            this.startModal = !this.startModal
+        showStart(type = null) {
+            if (type == null) this.startModal = !this.startModal;
+            else this.startModal = type;
+        },
+        monitorWindowSize() {
+            let w = document.documentElement.clientWidth || document.body.clientWidth
+            if (w < 800) {
+                this.showStart(false)
+            }
+            window.onresize = () => {
+                // 可视窗口宽度太小 自动收缩侧边栏
+                console.log(w);
+                if (w < 800 && w > (document.documentElement.clientWidth || document.body.clientWidth)) {
+                    this.showStart(false)
+                }
+                w = document.documentElement.clientWidth || document.body.clientWidth
+            }
         },
         differentColor(value) {
             switch(value) {
@@ -265,7 +278,7 @@ export default {
             this.step = 1;
             // this.seatsNumber = Number(this.rowNum) * Number(this.colNum);
             this.editTag = false;
-            this.hideStart();
+            this.showStart();
         },
         clearSeat() {
             this.seatList = [];
@@ -283,7 +296,7 @@ export default {
             this.imgUrl = null;
             this.copySeatList = [];
             this.editTag = true;
-            this.hideStart();
+            this.showStart(true);
         },
         nextStep() {
             this.step += 1;
@@ -684,8 +697,8 @@ export default {
             });
         }
     },
-    beforeMount() {
-        
+    mounted() {
+        this.monitorWindowSize();
     }
 }
 </script>
@@ -705,18 +718,21 @@ export default {
     min-width: 1000px;
     height: 100%;
     display: flex;
-    // overflow: hidden;
+    .draw-enter-active, .draw-leave-active {
+        transition: all .5s ease;
+    }
+    .draw-enter, .draw-leave-to /* .fade-leave-active below version 2.1.8 */ {
+        min-width: 0
+    }
     & .left-side {
-        // min-width: 300px;
-        // max-width: 400px;
-        position: absolute;
-        z-index: 1;
+        height: 100%;
+        position: relative;
         background-color: #f3f7fd;
         border-right: 1px solid lightgray;
-        box-shadow: 1px 1px 5px lightgray;
+        // box-shadow: 1px 1px 5px lightgray;
         & .input-area {
             padding: 20px;
-            border-bottom: 1px solid lightgray;
+            // border-bottom: 1px solid lightgray;
             &-item {
                 & .item {
                     display: flex;
@@ -748,32 +764,30 @@ export default {
                 color: black;
             }
         }
-        & .hide-start {
-            cursor: pointer;
-            position: absolute;
-            background-color: #f3f7fd;
-            border: 1px solid lightgray;
-            border-left: 0;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-            box-shadow: 1px 1px 5px lightgray;
-            bottom: 0;
-            right: -20px;
-            display: flex;
-            flex-direction: column;
-            width: 20px;
-            font-weight: bold;
-            font-size: 13px;
-            & i {
-                font-size: 14px;
-            }
-        }
-        .draw-enter-active, .draw-leave-active {
-            transition: all 1s ease;
-        }
-        .draw-enter, .draw-leave-to /* .fade-leave-active below version 2.1.8 */ {
-            width: 0px;
-            height: 51px;
+    }
+    & .hide-start {
+        cursor: pointer;
+        position: absolute;
+        background-color: #409eff;
+        color: white;
+        border: 1px solid lightgray;
+        padding: 2px 0;
+        border-left: 0;
+        border-top: 0;
+        // border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        box-shadow: 1px 1px 5px lightgray;
+        top: 0;
+        right: -21px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 20px;
+        height: 50px;
+        font-weight: bold;
+        font-size: 14px;
+        & i {
+            font-size: 14px;
         }
     }
     & .right-side {
@@ -781,7 +795,7 @@ export default {
         padding: 10px 30px;
         display: flex;
         flex-direction: column;
-        min-width: 1000px;
+        // min-width: 1000px;
         & h1 {
             font-size: 32px;
         }
