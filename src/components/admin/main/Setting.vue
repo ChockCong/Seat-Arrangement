@@ -1,7 +1,9 @@
 <template>
     <div class="index-vue-seatsetting">
-        <div class="left-side">
-            <div class="input-area">
+        <transition name="draw">
+        <div class="left-side" :style="!startModal ? 'width:0;height:55px' : ''">
+            <div class="input-area" v-show="startModal">
+                <p>设置自定义会场</p>
                 <p>{{'输入你所需要的最大行列数'}}</p>
                 <div class="input-area-item">
                     <section class="item">
@@ -18,17 +20,37 @@
                     <Button size="default" type="primary" @click="settingStart">确定生成</Button>
                 </div>
             </div>
-            <div class="button-area" v-if="!editTag && !previewTag">
+            <div class="hide-start" @click="hideStart">
+                    <Icon :type="!startModal ? 'ios-arrow-forward' : 'ios-arrow-back'"></Icon>
+                    {{!startModal ? '展开' : '收起'}}
+                </div>
+            <!-- <div class="button-area" v-if="!editTag && !previewTag">
                 <p>{{'快捷方式'}}</p>
+            </div> -->
+        </div>
+        </transition>
+        <div class="right-side">
+            <div class="title-area" v-if="step">
+                <!-- <h3 :class="bling ? 'red' : ''" v-if="step">
+                    <span>{{`第${step}步：${stepName}`}}</span>
+                    <span v-if="step === 1">{{ '(可多选)' }}</span>
+                    <span v-if="step === 4" style="color:#f60;">{{ mutipliTag ? '(多选模式)':'(调位模式)' }}</span>
+                </h3> -->
+                <Steps :current="step - 1" size="small" class="step-bar">
+                    <Step :title="`第1步：确定舞台位置`" content=""></Step>
+                    <Step :title="`第2步：确定入口位置`" content=""></Step>
+                    <Step :title="`第3步：确定座位位置`" content=""></Step>
+                    <Step :title="`第4步：确定座位编号`" :content="step === 4 ? (mutipliTag ? '(多选模式)':'(调位模式)') : ''"></Step>
+                </Steps>
                 <section  class="button-area-item" v-if="step < 4">
-                    <Button :class="!posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl(false)">
+                    <Button :class="!posMutipliTag ? '' : 'gary'" :type="'primary'" size="small" shape="circle" @click="posSelectControl(false)">
                         {{'单选位置'}}
                     </Button>
-                    <Button :class="posMutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="posSelectControl(true)">
+                    <Button :class="posMutipliTag ? '' : 'gary'" :type="'primary'" size="small" shape="circle" @click="posSelectControl(true)">
                         {{ '多选位置' }}
                     </Button>
-                    <Button type="primary" @click="selectLeave(step)">{{ '全选剩余位置' }}</Button>
-                    <Button type="primary" @click="selectLeave(0)">{{ '取消全选剩余位置' }}</Button>
+                    <Button size="small" shape="circle" @click="selectLeave(step)">{{ '全选位置' }}</Button>
+                    <Button size="small" shape="circle" @click="selectLeave(0)">{{ '取消全选' }}</Button>
                 </section>
                 <section  class="button-area-item" v-if="step === 4 && !previewTag">
                     <!-- <Button :class="mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
@@ -37,24 +59,16 @@
                     <Button :class="!mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
                         {{'调位排号'}}
                     </Button> -->
-                    <Button v-if="!mutipliTag" type="primary" :class="isRecover ? '' : 'gary'" :disable="!isRecover" @click="recoverNumber">
+                    <Button v-if="!mutipliTag" type="primary" size="small" shape="circle" :class="isRecover ? '' : 'gary'" :disable="!isRecover" @click="recoverNumber">
                         {{'上一步排号'}}
                     </Button>
-                    <Button v-else type="primary" :class="isMutipiliRecover ? '' : 'gary'" :disable="!isMutipiliRecover" @click="recoverNumber">
+                    <Button v-else type="primary" shape="circle" size="small" :class="isMutipiliRecover ? '' : 'gary'" :disable="!isMutipiliRecover" @click="recoverNumber">
                         {{'上一步排号'}}
                     </Button>
-                    <Button class="reset" size="default" type="primary" @click="defaultNumber">{{'重置排号'}}</Button>
-                    <Button class="reset" size="default" type="primary" @click="numberModal = true">{{'重置模式'}}</Button>
+                    <Button class="reset" size="small" shape="circle" @click="defaultNumber">{{'重置排号'}}</Button>
+                    <Button class="reset" size="small" shape="circle" @click="numberModal = true">{{'重置模式'}}</Button>
                 </section>
             </div>
-        </div>
-        <div class="right-side">
-            <h1>会场阵列图</h1>
-            <h3 :class="bling ? 'red' : ''" v-if="step">
-                <span>{{`第${step}步：${stepName}`}}</span>
-                <span v-if="step === 1">{{ '(可多选)' }}</span>
-                <span v-if="step === 4" style="color:#f60;">{{ mutipliTag ? '(多选模式)':'(调位模式)' }}</span>
-            </h3>
             <div class="show-area">
                 <div class="seat-area" ref="imageDom">
                     <div class="seat-area-row" v-for="(itemi, indexI) in seatList" :key="indexI">
@@ -72,6 +86,7 @@
                             <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
                                 <template v-if="!previewTag">
                                     <i v-if="step>1 && itemj.value !== 1 && (indexJ === 0 || indexI === 0 || indexI === seatList.length - 1 || indexJ === seatList[indexI].length - 1)" class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
+                                    <i v-else-if="step>1 && itemj.value !== 1 && ((indexI > 0 && indexI < seatList.length - 1) || (indexJ > 0 &&indexJ < seatList[indexI].length - 1))" class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
                                     <i v-else class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
                                     <!-- <Icon :class="differentColor(itemj.value)" type="md-cube" /> -->
                                 </template>
@@ -105,8 +120,9 @@
             </p>
             <div style="text-align:left">
                 <p>排号模式说明：</p>
-                <p>1.多选排号模式您可以自由排列控制位置号码，然后再通过调换排号模式微调。</p>
-                <p>2.调位排号模式系统将为你自动排列所有位置，然后再通过调换排号模式微调。</p>
+                <p>1.多选排号模式您可以自由排列位置，然后再通过调换排号模式微调。</p>
+                <br />
+                <p>2.调位排号模式系统将为你自动排列所有位置</p>
             </div>
             <div slot="footer" style="display: flex;">
                 <Button type="error" style="flex: 1;" size="large" @click="sureNumberModal(true)">{{'多选模式'}}</Button>
@@ -124,7 +140,7 @@
                 <Button type="error" style="flex: 1;" size="large" @click="passModal = false">{{'确定'}}</Button>
             </div>
         </Modal>
-        <Modal v-model="modal" width="70%" title="最终会场展示">
+        <Modal v-model="modal" width="70%" :scrollable="true" title="最终会场展示">
             <div class="modal-form">
                 <img :src="imgUrl" />
             </div>
@@ -148,6 +164,7 @@ export default {
             seatList: [],
             copySeatList: [],
             step: 0,
+            startModal: true,
             modal: false, //弹窗控制
             numberModal: false,
             passModal: false,
@@ -209,6 +226,9 @@ export default {
         }
     },
     methods: {
+        hideStart() {
+            this.startModal = !this.startModal
+        },
         differentColor(value) {
             switch(value) {
                 case 1 : return 'active-stage';
@@ -245,6 +265,7 @@ export default {
             this.step = 1;
             // this.seatsNumber = Number(this.rowNum) * Number(this.colNum);
             this.editTag = false;
+            this.hideStart();
         },
         clearSeat() {
             this.seatList = [];
@@ -262,6 +283,7 @@ export default {
             this.imgUrl = null;
             this.copySeatList = [];
             this.editTag = true;
+            this.hideStart();
         },
         nextStep() {
             this.step += 1;
@@ -680,13 +702,16 @@ export default {
     }
 }
 .index-vue-seatsetting {
-    min-width: 1300px;
+    min-width: 1000px;
     height: 100%;
     display: flex;
     // overflow: hidden;
     & .left-side {
-        min-width: 300px;
-        max-width: 400px;
+        // min-width: 300px;
+        // max-width: 400px;
+        position: absolute;
+        z-index: 1;
+        background-color: #f3f7fd;
         border-right: 1px solid lightgray;
         box-shadow: 1px 1px 5px lightgray;
         & .input-area {
@@ -723,30 +748,32 @@ export default {
                 color: black;
             }
         }
-        & .button-area {
-            padding: 0 50px;
-            & p {
-                font-weight: bold;
+        & .hide-start {
+            cursor: pointer;
+            position: absolute;
+            background-color: #f3f7fd;
+            border: 1px solid lightgray;
+            border-left: 0;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 1px 1px 5px lightgray;
+            bottom: 0;
+            right: -20px;
+            display: flex;
+            flex-direction: column;
+            width: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            & i {
                 font-size: 14px;
-                color: black;
-                margin-top: 10px;
             }
-            &-item {
-                display: flex;
-                flex-direction: column;
-                // margin-top: 20px;
-                & button {
-                    margin-top: 20px;
-                }
-                & .gary {
-                    background-color: gray;
-                    color: white !important;
-                }
-                & .mutiply {
-                    background-color: orangered !important;
-                    color: white !important;
-                }
-            }
+        }
+        .draw-enter-active, .draw-leave-active {
+            transition: all 1s ease;
+        }
+        .draw-enter, .draw-leave-to /* .fade-leave-active below version 2.1.8 */ {
+            width: 0px;
+            height: 51px;
         }
     }
     & .right-side {
@@ -763,6 +790,44 @@ export default {
             text-align: left;
             &.red {
                 color:tomato;
+            }
+        }
+        & .title-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            & .step-bar {
+                width: 60%;
+            }
+            & .button-area {
+                // padding: 0 50px;
+                // & p {
+                //     font-weight: bold;
+                //     font-size: 14px;
+                //     color: black;
+                //     margin-top: 10px;
+                // }
+                &-item {
+                    display: flex;
+                    // flex-direction: column;
+                    // margin-top: 20px;
+                    & button {
+                        margin-right: 10px;
+                        &:last-child {
+                            margin-right: 0;
+                        }
+                    }
+                    & .gary {
+                        background-color: lightgray;
+                        color: white !important;
+                        border-color: lightgray
+                    }
+                    & .mutiply {
+                        background-color: orangered !important;
+                        color: white !important;
+                    }
+                }
             }
         }
         & .show-area {
@@ -817,6 +882,7 @@ export default {
                             top: 12%;
                             left: 31%;
                             font-weight: bold;
+                            font-size: 12px;
                             cursor: pointer;
                             &.active {
                                 background-color: black;
@@ -827,6 +893,7 @@ export default {
                             display: block;
                             font-size: 30px;
                             margin: 10px;
+                            color: lightgray;
                             &.icon-efbdddbe {
                                 font-size: 27px;
                             }
@@ -868,6 +935,7 @@ export default {
 .modal-form {
     display: flex;
     padding: 50px 0;
+    overflow: auto;
     & img {
         margin: 0 auto;
         border: gray 1px solid;
