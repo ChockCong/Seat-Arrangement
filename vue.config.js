@@ -30,22 +30,8 @@ module.exports = {
 			},
 		}
 	},
-	configureWebpack: {
-		plugins: [
-			new BundleAnalyzerPlugin(
-				{
-				   analyzerMode: 'server',
-				   analyzerHost: '127.0.0.1',
-				   analyzerPort: 8889,
-				   reportFilename: 'report.html',
-				   defaultSizes: 'parsed',
-				   openAnalyzer: true,
-				   generateStatsFile: false,
-				   statsFilename: 'stats.json',
-				   statsOptions: null,
-				   logLevel: 'info'
-				}
-			),
+	configureWebpack: config => {
+		let plugins = [
 			new ComPressionPlugin({
 				test: /\.js$|\.html$|\.css/,
 				threshold: 10240,
@@ -54,11 +40,32 @@ module.exports = {
 			// new webpack.ProvidePlugin({
 			// 	_: 'lodash'
 			// })
-		],
-		performance: false,
-		output: {
-			filename: '[name].[hash].js',
-			chunkFilename: '[name].[hash].js'
+		];
+		if (process.env.NODE_ENV === 'development') {
+			plugins.push(
+			new BundleAnalyzerPlugin(
+				// {
+				//    analyzerMode: 'server',
+				//    analyzerHost: '127.0.0.1',
+				//    analyzerPort: 8889,
+				//    reportFilename: 'report.html',
+				//    defaultSizes: 'parsed',
+				//    openAnalyzer: true,
+				//    generateStatsFile: false,
+				//    statsFilename: 'stats.json',
+				//    statsOptions: null,
+				//    logLevel: 'info'
+				// }
+			)
+			)
+		}
+		return {
+			plugins: plugins,
+			performance: false,
+			output: {
+				filename: '[name].[hash].js',
+				chunkFilename: '[name].[hash].js'
+			}
 		}
 	},
 	chainWebpack: config => {
