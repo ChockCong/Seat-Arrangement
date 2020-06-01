@@ -2,6 +2,8 @@ const path = require('path');
 const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
 const webpack = require('webpack');
+const ComPressionPlugin = require('compression-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const PcPage = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
 module.exports = {
 	publicPath: '',
@@ -30,6 +32,25 @@ module.exports = {
 	},
 	configureWebpack: {
 		plugins: [
+			new BundleAnalyzerPlugin(
+				{
+				   analyzerMode: 'server',
+				   analyzerHost: '127.0.0.1',
+				   analyzerPort: 8889,
+				   reportFilename: 'report.html',
+				   defaultSizes: 'parsed',
+				   openAnalyzer: true,
+				   generateStatsFile: false,
+				   statsFilename: 'stats.json',
+				   statsOptions: null,
+				   logLevel: 'info'
+				}
+			),
+			new ComPressionPlugin({
+				test: /\.js$|\.html$|\.css/,
+				threshold: 10240,
+				deleteOriginalAssets: false
+			})
 			// new webpack.ProvidePlugin({
 			// 	_: 'lodash'
 			// })
