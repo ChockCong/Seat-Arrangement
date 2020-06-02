@@ -1,10 +1,10 @@
 const path = require('path');
+const webpack = require('webpack');
 const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
-const webpack = require('webpack');
 const ComPressionPlugin = require('compression-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const PcPage = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
+const PcPages = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
 module.exports = {
 	publicPath: '',
 	assetsDir: 'static',
@@ -12,18 +12,16 @@ module.exports = {
 	filenameHashing: true,
 	lintOnSave: true,
 	productionSourceMap: false,
-    css: {
+	css: {
+		extract: true,
 		loaderOptions: {
-			css: {
-				
-			},
 			postcss: {
 				plugins: [
 					autoprefixer(),
 					pxtorem({
 						rootValue: 28,
                         propList: ['*'],
-                        selectorBlackList: PcPage,
+                        selectorBlackList: PcPages,
 						minPixelValue: 2 // 1px的转换在安卓有问题，所以小于2px不转换
 					})
 				]
@@ -43,20 +41,20 @@ module.exports = {
 		];
 		if (process.env.NODE_ENV === 'development') {
 			plugins.push(
-			new BundleAnalyzerPlugin(
-				// {
-				//    analyzerMode: 'server',
-				//    analyzerHost: '127.0.0.1',
-				//    analyzerPort: 8889,
-				//    reportFilename: 'report.html',
-				//    defaultSizes: 'parsed',
-				//    openAnalyzer: true,
-				//    generateStatsFile: false,
-				//    statsFilename: 'stats.json',
-				//    statsOptions: null,
-				//    logLevel: 'info'
-				// }
-			)
+				new BundleAnalyzerPlugin(
+					{
+						analyzerMode: 'server',
+						analyzerHost: '127.0.0.1',
+						analyzerPort: 8889,
+						reportFilename: 'report.html',
+						defaultSizes: 'parsed',
+						openAnalyzer: true,
+						generateStatsFile: false,
+						statsFilename: 'stats.json',
+						statsOptions: null,
+						logLevel: 'info'
+					}
+				)
 			)
 		}
 		return {

@@ -76,7 +76,7 @@
                                 <!-- <Icon v-if="itemj.value === 1" :class="differentColor(itemj.value)" type="ios-bowtie" />
                                 <Icon v-if="itemj.value === 2" :class="differentColor(itemj.value)" type="ios-star" />
                                 <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" /> -->
-                                <i v-if="itemj.value === 1"  class="iconfont icon-diban big" :class="differentColor(itemj.value)"></i>
+                                <i v-if="itemj.value === 1"  class="iconfont icon-diban big selected" :class="differentColor(itemj.value)"></i>
                                 <i v-if="itemj.value === 2"  class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
                                 <i v-if="itemj.value === 3"  class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
                                 <div class="number-cycle" :class="itemj.active ? 'active' : ''" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No !== -1 ? itemj.No : ''}}</div>
@@ -183,9 +183,9 @@ export default {
             isStartNumberMode: false, //判断是第一次进入排位还是需要重置排位
             originReplace: [],
             replace: [],
-            originMutipliSelec: [],
             mutipliSelect: [], //多选记录数组
             mutipliRecord: 1, //多选的起始number
+            mutipliStep: 0, //多选的整体步骤，记录在seatList内
             timeReplace: [], //用于恢复时消失背景色
             posMutipliSelect: [],
             originPosMutipliSelect: []
@@ -206,7 +206,7 @@ export default {
             return this.originReplace.length;
         },
         isMutipiliRecover() {
-            return this.originMutipliSelec.length;
+            return this.mutipliStep;
         }
     },
     watch: {
@@ -288,9 +288,9 @@ export default {
             this.posMutipliSelect = [];
             this.originReplace = [];
             this.replace = [];
-            this.originMutipliSelec = [];
             this.mutipliSelect = [];
             this.mutipliRecord = 1;
+            this.mutipliStep = 0;
             this.mutipliTag = true;
             this.isStartNumberMode = false;
             this.imgUrl = null;
@@ -320,9 +320,9 @@ export default {
             if (this.step === 4) {
                 this.mutipliTag = true;
                 this.originReplace = [];
-                this.originMutipliSelec = [];
                 this.replace = [];
                 this.mutipliSelect = [];
+                this.mutipliStep = 0;
                 this.copySeatList = [];
                 this.isStartNumberMode = false;
                 this.clearActive(false);
@@ -335,8 +335,8 @@ export default {
         },
         sureNumberModal(type) {
             this.copySeatList = [];
-            this.originMutipliSelec = [];
             this.mutipliRecord = 1;
+            this.mutipliStep = 0;
             this.mutipliSelect = [];
             this.originReplace = [];
             this.timeReplace = [];
@@ -373,8 +373,8 @@ export default {
                             }
                         })
                     });
-                    this.originMutipliSelec = [];
                     this.mutipliRecord = 1;
+                    this.mutipliStep = 0;
                     this.mutipliSelect = [];
                 }
                 this.clearActive(false);
@@ -462,8 +462,8 @@ export default {
             else {
                 this.passModal = true;
                 this.copySeatList = _.cloneDeep(this.seatList);
-                this.originMutipliSelec = [];
                 this.mutipliRecord = 1;
+                this.mutipliStep = 0;
                 this.mutipliSelect = [];
                 this.mutipliTag = false;
                 this.clearActive();
@@ -499,9 +499,6 @@ export default {
         selectMutipliNumber(i, j) {
             if (this.seatList[i][j].No) return;
             this.mutipliSelect.push({i, j});
-            if(this.mutipliSelect.length === 2) {
-                this.originMutipliSelec = this.originMutipliSelec.concat(this.mutipliSelect);
-            } 
             this.seatList[i][j].active = true;
             let rowTag = false;
             let colTag = false;
@@ -521,15 +518,17 @@ export default {
             if (this.mutipliSelect.length === 2) {
                 rowTag = this.mutipliSelect[0].i > this.mutipliSelect[1].i ? true : false;
                 colTag = this.mutipliSelect[0].j > this.mutipliSelect[1].j ? true : false;
+                this.mutipliStep += 1; //步骤+1，用于撤销
                 //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
                 for (let first = this.mutipliSelect[0].i; rowTag ? first >= this.mutipliSelect[1].i : first <= this.mutipliSelect[1].i; rowTag ? first-- : first++) {
                     for (let second = this.mutipliSelect[0].j; colTag ? second >= this.mutipliSelect[1].j : second <= this.mutipliSelect[1].j; colTag ? second-- : second++) {
                         this.seatList[first][second].active = true;
-                        if (this.seatList[first][second].No > 0) continue;
+                        if (this.seatList[first][second].value !== 3 || this.seatList[first][second].No > 0) continue;
                         else {
                             this.seatList[first][second].No = this.mutipliRecord;
-                            this.seatList[i][j].active = true;
+                            this.seatList[first][second].active = true;
                             this.mutipliRecord += 1;
+                            this.seatList[first][second].step = this.mutipliStep;
                         }
                     }
                 }
@@ -575,87 +574,79 @@ export default {
             // this.originReplace.splice(this.originReplace.length - 3,this.originReplace.length);
         },
         recoverMutipliNumber() {
-            if (!this.originMutipliSelec.length) return this.$Message.warning({content: '这是原始数据', closable: true});
-            if (this.originMutipliSelec.length) {
-                let firstv = {};
-                let secondv = {};
-                let rowTag = false;
-                let colTag = false;
-                if (this.mutipliSelect.length % 2 || this.mutipliSelect.length === 0) {
-                    let index = this.mutipliSelect[this.mutipliSelect.length - 1];
-                    delete this.seatList[index.i][index.j].active;
-                    this.mutipliSelect.pop();
-                } else {
-                    console.log(this.mutipliSelect.length)
-                    firstv = this.originMutipliSelec[this.originMutipliSelec.length - 1];
-                    secondv = this.originMutipliSelec[this.originMutipliSelec.length - 2];
-                    rowTag = firstv.i > secondv.i ? true : false;
-                    colTag = firstv.j > secondv.j ? true : false;
-                    //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
-                    for (let first = firstv.i; rowTag ? first >= secondv.i : first <= secondv.i; rowTag ? first-- : first++) {
-                        for (let second = firstv.j; colTag ? second >= secondv.j : second <= secondv.j; colTag ? second-- : second++) {
-                            if (this.seatList[first][second].No > 0) {
-                                this.seatList[first][second].No = 0;
-                                delete this.seatList[first][second].active;
-                                this.mutipliRecord--;
-                            }
-                        }
-                    }
-                    this.originMutipliSelec.pop();
-                    this.originMutipliSelec.pop();
-                }
-                this.$forceUpdate();
-
-                if (this.originMutipliSelec.length) {
-                    firstv = this.originMutipliSelec[this.originMutipliSelec.length - 1];
-                    secondv = this.originMutipliSelec[this.originMutipliSelec.length - 2];
-                    this.mutipliSelect = [
-                        firstv, secondv
-                    ]
-                    rowTag = firstv.i > secondv.i ? true : false;
-                    colTag = firstv.j > secondv.j ? true : false;
-                    //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
-                    for (let first = firstv.i; rowTag ? first >= secondv.i : first <= secondv.i; rowTag ? first-- : first++) {
-                        for (let second = firstv.j; colTag ? second >= secondv.j : second <= secondv.j; colTag ? second-- : second++) {
-                            if (this.seatList[first][second].No > 0) {
-                                this.seatList[first][second].active = true;
-                            }
-                        }
-                    }
-                }
-                this.$forceUpdate();
-            }
-        },
-        mutipliControl() {
-            this.mutipliTag = !this.mutipliTag;
-            this.timeReplace = [];
-            if (!this.mutipliTag) {
-                this.originMutipliSelec = [];
-                this.mutipliRecord = 1;
-                this.mutipliSelect = [];
-                let idx = 1;
-                this.seatList.forEach(item => {
-                    item.forEach(val => {
-                        if (val.value === 3) {
-                            delete val.active;
-                            val.No = idx;
-                            idx++;
+            if (!this.mutipliStep) return this.$Message.warning({content: '这是原始数据', closable: true});
+            let rowPreItemsIndex = [];
+            let colPreItemsIndex = [];
+            if (this.mutipliSelect.length === 1) {
+                delete this.seatList[this.mutipliSelect[0].i][this.mutipliSelect[0].j].active;
+                // this.mutipliSelect = [];
+                this.seatList.forEach((item, i) => {
+                    item.forEach((val, j) => {
+                        if (val.hasOwnProperty('step') && val.step === this.mutipliStep) {
+                            val.active = true;
+                            rowPreItemsIndex.push(i)
+                            colPreItemsIndex.push(j);
                         }
                     })
                 });
             } else {
-                this.originReplace = [];
-                this.replace = [];
-                this.seatList.forEach(item => {
-                    item.forEach(val => {
-                        if (val.value === 3) {
+                let vituralPreStep = this.mutipliStep - 1;
+                this.seatList.forEach((item, i) => {
+                    item.forEach((val, j) => {
+                        if (val.hasOwnProperty('step')) {
                             delete val.active;
-                            val.No = 0;
+                            if (val.step === this.mutipliStep) {
+                                val.No = 0;
+                                delete val.step;
+                                this.mutipliRecord--;
+                            }
+                            if (val.step === vituralPreStep) {
+                                val.active = true;
+                                rowPreItemsIndex.push(i)
+                                colPreItemsIndex.push(j);
+                            }
                         }
                     })
                 });
+                this.mutipliStep -= 1;
             }
+            rowPreItemsIndex = rowPreItemsIndex.sort((a, b) => {return a - b;});
+            colPreItemsIndex = colPreItemsIndex.sort((a, b) => {return a - b;});
+            this.mutipliSelect = [
+                {i: rowPreItemsIndex[0], j: colPreItemsIndex[0]},
+                {i: rowPreItemsIndex[rowPreItemsIndex.length - 1], j: colPreItemsIndex[colPreItemsIndex.length - 1]}
+            ]
+            this.$forceUpdate();
         },
+        // mutipliControl() {
+        //     this.mutipliTag = !this.mutipliTag;
+        //     this.timeReplace = [];
+        //     if (!this.mutipliTag) {
+        //         this.mutipliRecord = 1;
+        //         this.mutipliSelect = [];
+        //         let idx = 1;
+        //         this.seatList.forEach(item => {
+        //             item.forEach(val => {
+        //                 if (val.value === 3) {
+        //                     delete val.active;
+        //                     val.No = idx;
+        //                     idx++;
+        //                 }
+        //             })
+        //         });
+        //     } else {
+        //         this.originReplace = [];
+        //         this.replace = [];
+        //         this.seatList.forEach(item => {
+        //             item.forEach(val => {
+        //                 if (val.value === 3) {
+        //                     delete val.active;
+        //                     val.No = 0;
+        //                 }
+        //             })
+        //         });
+        //     }
+        // },
         preview() {
             this.previewTag = !this.previewTag;
             this.clearActive();
@@ -768,7 +759,7 @@ export default {
     & .hide-start {
         cursor: pointer;
         position: absolute;
-        background-color: #409eff;
+        background-color: #2d8cf0;
         color: white;
         border: 1px solid lightgray;
         padding: 2px 0;
@@ -887,7 +878,7 @@ export default {
                             position: absolute;
                             width: 20px;
                             height: 20px;
-                            border: 1px solid black;
+                            border: 1px solid gray;
                             color: black;
                             line-height: 20px;
                             text-align: center;
@@ -899,8 +890,8 @@ export default {
                             font-size: 12px;
                             cursor: pointer;
                             &.active {
-                                background-color: black;
-                                color: white;
+                                border-color: #409eff;
+                                box-shadow: 0 0 5px rgba(0,113,241,1);
                             }
                         }
                         & i {
@@ -908,13 +899,6 @@ export default {
                             font-size: 30px;
                             margin: 10px;
                             color: lightgray;
-                            &.icon-efbdddbe {
-                                font-size: 27px;
-                            }
-                            &.big {
-                                margin: 0;
-                                font-size: 50px;
-                            }
                             &.active-table {
                                 color: orange;
                             }
@@ -924,6 +908,17 @@ export default {
                             &.active-door {
                                 color: #4caf50;
                             }
+                            &.icon-efbdddbe {
+                                font-size: 27px;
+                            }
+                            &.big {
+                                margin: 0;
+                                font-size: 50px;
+                            }
+                            &.selected {
+                                color: black;
+                                border-radius: 5px;
+                            }
                         }
                     }
                 }
@@ -931,8 +926,6 @@ export default {
         }
         & .button-area {
             padding: 10px 0;
-            // display: flex;
-            // justify-content: flex-end;
             &.step_3 {
                 justify-content: space-between;
             }
