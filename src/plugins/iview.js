@@ -1,5 +1,7 @@
 import Vue from 'vue';
-import { Menu, Submenu, MenuItem, Button, Input, Form, Dropdown, DropdownMenu, DropdownItem, Spin, Modal, Alert, Message, LoadingBar, Icon, Steps, Step } from 'iview';
+import { Menu, Submenu, MenuItem, Button, Input, Form, Dropdown, DropdownMenu, DropdownItem, Spin, Modal, Alert, Message, LoadingBar, Icon, Steps, Step, Switch, Row, Col } from 'iview';
+Vue.component('Row', Row);
+Vue.component('ICol', Col);
 Vue.component('Menu', Menu);
 Vue.component('Button', Button);
 Vue.component('Input', Input);
@@ -14,6 +16,8 @@ Vue.component('Modal', Modal);
 Vue.component('Alert', Alert);
 Vue.component('Steps', Steps);
 Vue.component('Step', Step);
+Vue.component('SwitchTab', Switch);
+
 
 Vue.component('Icon', Icon);
 Vue.prototype.$Message = Message;

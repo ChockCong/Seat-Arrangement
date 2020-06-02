@@ -1,19 +1,67 @@
 <template>
     <div class="login-vue" :style="bg">
         <div class="container">
-            <div class="flex-container">
-                <p class="title">WELCOME</p>
-                <div class="input-c">
-                    <Input size="large" prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-blur="verifyAccount"/>
-                    <p class="error">{{accountError}}</p>
+            <SwitchTab size="large" class="tab-item" v-model="tab">
+                <span slot="open">{{'登录'}}</span>
+                <span slot="close">{{'注册'}}</span>
+            </SwitchTab>
+            <transition name="login">
+                <div v-if="tab" class="flex-container">
+                    <p class="title">WELCOME</p>
+                    <div class="input-c">
+                        <Input size="large" prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-change="verifyAccount"/>
+                        <p class="error">{{accountError}}</p>
+                    </div>
+                    <div class="input-c">
+                        <Input size="large" type="password" v-model="pwd" prefix="md-lock" placeholder="密码" clearable @on-change="verifyPwd"/>
+                        <p class="error">{{pwdError}}</p>
+                    </div>
+                    <Button size="large" :loading="isShowLoading" class="submit" type="primary" @click="submit">登陆</Button>
+                    <p class="account"><span @click="forgetPwd">忘记密码</span></p>
                 </div>
-                <div class="input-c">
-                    <Input size="large" type="password" v-model="pwd" prefix="md-lock" placeholder="密码" clearable @on-blur="verifyPwd"/>
-                    <p class="error">{{pwdError}}</p>
+            </transition>
+            <transition name="regist">
+                <div v-if="!tab"  class="flex-container">
+                    <p class="title regist">REGIST</p>
+                    <Row class="row" type="flex" justify="space-between">
+                        <ICol span="11">
+                            <label>登录名</label>
+                            <Input size="large" prefix="ios-contact" v-model="registForm.stLoginName" placeholder="登录名" clearable @on-blur="verifyAccount" />
+                            <p class="error">{{stNameError}}</p>
+                        </ICol>
+                        <ICol span="11">
+                            <label>用户名</label>
+                            <Input size="large" prefix="ios-contact" v-model="registForm.stName" placeholder="用户名" clearable @on-blur="verifyAccount" />
+                            <p class="error">{{stLoginNameError}}</p>
+                        </ICol>
+                    </Row>
+                    <Row class="row" type="flex" justify="space-between">
+                        <ICol span="11">
+                            <label>预留手机</label>
+                            <Input size="large" prefix="ios-contact" v-model="registForm.stPhoneNum" placeholder="预留手机" clearable @on-blur="verifyAccount" />
+                            <p class="error">{{stPhoneNumError}}</p>
+                        </ICol>
+                        <ICol span="11">
+                            <label>预留邮箱</label>
+                            <Input size="large" prefix="ios-contact" v-model="registForm.stEmail" placeholder="预留邮箱" clearable @on-blur="verifyAccount" />
+                            <p class="error">{{stEmailError}}</p>
+                        </ICol>
+                    </Row>
+                    <Row class="row" type="flex" justify="space-between">
+                        <ICol span="11">
+                            <label>登录密码</label>
+                            <Input size="large" prefix="ios-contact" v-model="registForm.stPassword" placeholder="登录密码" clearable @on-blur="verifyAccount" />
+                            <p class="error">{{stPasswordError}}</p>
+                        </ICol>
+                        <ICol span="11">
+                            <label>确认密码</label>
+                            <Input size="large" prefix="ios-contact" v-model="registForm.comfirmPassword" placeholder="确认密码" clearable @on-blur="verifyAccount" />
+                            <p class="error">{{comfirmPwddError}}</p>
+                        </ICol>
+                    </Row>
+                    <Button size="large" :loading="isShowLoading" class="submit" type="primary" @click="submit">注册</Button>
                 </div>
-                <Button size="large" :loading="isShowLoading" class="submit" type="primary" @click="submit">登陆</Button>
-                <p class="account"><span @click="register">注册账号</span> | <span @click="forgetPwd">忘记密码</span></p>
-            </div>
+            </transition>
         </div>
     </div>
 </template>
@@ -21,15 +69,24 @@
 <script>
 import { adminLogin } from '../../api/api';
 export default {
-    name: 'login',
+    name: 'loginPage',
     data() {
         return {
+            tab: false,
             account: '',
             pwd: '',
             accountError: '',
             pwdError: '',
             isShowLoading: false,
             bg: {},
+            registForm: {
+                stName: '',
+                stLoginName: '',
+                stPassword: '',
+                stPhoneNum: '',
+                stEmail: '',
+            },
+            comfirmPassword: ''
         }
     },
     created() {
@@ -43,6 +100,26 @@ export default {
             },
             immediate: true,
         },
+    },
+    computed: {
+        stNameError () {
+            return '';
+        },
+        stLoginNameError () {
+            return '';
+        },
+        stPasswordError () {
+            return '';
+        },
+        stPhoneNumError () {
+            return '';
+        },
+        stEmailError () {
+            return '';
+        },
+        comfirmPwddError () {
+            return '';
+        }
     },
     methods: {
         verifyAccount() {
@@ -112,6 +189,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.login-enter-active {
+    transition: all .5s ease;
+}
+.login-leave-active {
+    transition: all .1s ease;
+}
+.login-enter, .login-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    transform: translateX(-50px);
+    opacity: 0;
+}
+.regist-enter-active {
+    transition: all .5s ease;
+}
+.regist-leave-active {
+    transition: all .1s ease;
+}
+.regist-enter, .regist-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    transform: translateX(50px);
+    opacity: 0;
+}
 .login-vue {
     height: 100vh;
     display: flex;
@@ -128,8 +225,17 @@ export default {
         padding: 30px;
         display: flex;
         align-items: center;
+        position: relative;
         & .flex-container {
             width: 100%;
+        }
+        & .tab-item {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-weight: bold;
+            border-color: #2d8cf0;
+            background-color: #2d8cf0;
         }
     }
     & .ivu-input {
@@ -153,18 +259,30 @@ export default {
     & .title {
         font-size: 34px;
         margin-bottom: 35px;
+        &.regist {
+            margin-bottom: 10px;
+        }
     }
     & .input-c {
         margin: auto;
         width: 80%;
+        height: 60px;
+    }
+    & .row {
+        // padding-bottom: 5px;
+        height: 80px;
+        & .ivu-col {
+            text-align: left;
+            & label {
+                font-size: 13px;
+            }
+        }
     }
     & .error {
         color: red;
         text-align: left;
-        margin: 5px auto;
+        margin: 3px auto;
         font-size: 12px;
-        padding-left: 30px;
-        height: 20px;
     }
     & .submit {
         width: 250px;
