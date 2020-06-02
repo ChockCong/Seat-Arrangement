@@ -522,7 +522,7 @@ export default {
                 //这里要计算所选两个数据之间的行列先选的是否比后选的大，就需要倒序循环
                 for (let first = this.mutipliSelect[0].i; rowTag ? first >= this.mutipliSelect[1].i : first <= this.mutipliSelect[1].i; rowTag ? first-- : first++) {
                     for (let second = this.mutipliSelect[0].j; colTag ? second >= this.mutipliSelect[1].j : second <= this.mutipliSelect[1].j; colTag ? second-- : second++) {
-                        this.seatList[first][second].active = true;
+                        // this.seatList[first][second].active = true;
                         if (this.seatList[first][second].value !== 3 || this.seatList[first][second].No > 0) continue;
                         else {
                             this.seatList[first][second].No = this.mutipliRecord;
