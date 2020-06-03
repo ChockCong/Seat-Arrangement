@@ -28,6 +28,13 @@ module.exports = {
 			},
 		}
 	},
+	// pages: {
+	// 	index: {
+	// 		// entry: 'src/main.js',
+	// 		filename: 'index.html',
+	// 		title: 'Hotel Assist System'
+	// 	}
+	// },
 	configureWebpack: config => {
 		let plugins = [
 			new ComPressionPlugin({
@@ -75,6 +82,12 @@ module.exports = {
 		// 			// 修改它的选项...
 		// 			// return options
 		// 		}),
+		config
+			.plugin('html')
+			.tap(args => {
+				args[0].title = 'Hotel Assist System';
+				return args;
+			})
 		config.optimization.runtimeChunk({
 			name: 'runtime'
 		}),

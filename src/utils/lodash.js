@@ -4,9 +4,9 @@ import isEmpty from 'lodash/isEmpty';
 // import pick from 'lodash/pick';
 // import isArray from 'lodash/isArray';
 // import omit from 'lodash/omit';
-// import mapKeys from 'lodash/mapKeys';
+import mapKeys from 'lodash/mapKeys';
 import cloneDeep from 'lodash/cloneDeep';
-// import mapValues from 'lodash/mapValues';
+import mapValues from 'lodash/mapValues';
 // import filter from 'lodash/filter';
 // import forEach from 'lodash/forEach';
 // import isEqual from 'lodash/isEqual';
@@ -17,7 +17,7 @@ import cloneDeep from 'lodash/cloneDeep';
 // import isNull from 'lodash/isNull';
 // import remove from 'lodash/remove';
 // import flattenDeep from 'lodash/flattenDeep';
-// import has from 'lodash/has';
+import has from 'lodash/has';
 // import find from 'lodash/find';
 // import differenceBy from 'lodash/differenceBy';
 // import concat from 'lodash/concat';
@@ -34,9 +34,9 @@ export default {
 	// pick,
 	// isArray,
 	// omit,
-	// mapKeys,
+	mapKeys,
 	cloneDeep,
-	// mapValues,
+	mapValues,
 	// filter,
 	// forEach,
 	// isEqual,
@@ -47,7 +47,7 @@ export default {
 	// isNull,
 	// remove,
 	// flattenDeep,
-	// has,
+	has,
 	// find,
 	// differenceBy,
 	// concat,
