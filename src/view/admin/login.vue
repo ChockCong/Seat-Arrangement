@@ -72,7 +72,7 @@ export default {
     name: 'loginPage',
     data() {
         return {
-            tab: false,
+            tab: true,
             account: '',
             pwd: '',
             accountError: '',
@@ -190,23 +190,23 @@ export default {
 
 <style lang="scss" scoped>
 .login-enter-active {
-    transition: all .5s ease;
+    transition: all .8s ease;
 }
 .login-leave-active {
     transition: all .1s ease;
 }
 .login-enter, .login-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    transform: translateX(-50px);
+    transform: translateX(-60px);
     opacity: 0;
 }
 .regist-enter-active {
-    transition: all .5s ease;
+    transition: all .8s ease;
 }
 .regist-leave-active {
     transition: all .1s ease;
 }
 .regist-enter, .regist-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    transform: translateX(50px);
+    transform: translateX(60px);
     opacity: 0;
 }
 .login-vue {

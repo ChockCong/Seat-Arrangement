@@ -77,15 +77,16 @@
                                 <Icon v-if="itemj.value === 2" :class="differentColor(itemj.value)" type="ios-star" />
                                 <Icon v-if="itemj.value === 3" :class="differentColor(itemj.value)" type="md-cube" /> -->
                                 <i v-if="itemj.value === 1"  class="iconfont icon-diban big selected" :class="differentColor(itemj.value)"></i>
-                                <i v-if="itemj.value === 2"  class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
-                                <i v-if="itemj.value === 3"  class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
-                                <div class="number-cycle" :class="itemj.active ? 'active' : ''" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No !== -1 ? itemj.No : ''}}</div>
+                                <i v-else-if="itemj.value === 2"  class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
+                                <i v-else-if="itemj.value === 3"  class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
+                                <div class="number-cycle" :class="itemj.active ? 'active' : ''" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No > 0 ? itemj.No : ''}}</div>
                             </div>
                             <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
                                 <template v-if="!previewTag">
-                                    <i v-if="step>1 && itemj.value !== 1 && (indexJ === 0 || indexI === 0 || indexI === seatList.length - 1 || indexJ === seatList[indexI].length - 1)" class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
-                                    <i v-else-if="step>1 && itemj.value !== 1 && ((indexI > 0 && indexI < seatList.length - 1) || (indexJ > 0 &&indexJ < seatList[indexI].length - 1))" class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
-                                    <i v-else class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
+                                    <i v-if="step === 2 && itemj.value !== 1 && (indexJ === 0 || indexI === 0 || indexI === seatList.length - 1 || indexJ === seatList[indexI].length - 1)" class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
+                                    <i v-else-if="step === 3 && itemj.value !== 1 && ((indexI > 0 && indexI < seatList.length - 1) && (indexJ > 0 &&indexJ < seatList[indexI].length - 1))" class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
+                                    <i v-else-if="step === 1" class="iconfont icon-diban big" :class="differentColor(itemj.value)"></i>
+                                    <div v-else class="full-icon"></div>
                                     <!-- <Icon :class="differentColor(itemj.value)" type="md-cube" /> -->
                                 </template>
                                 <template v-else>
@@ -230,13 +231,13 @@ export default {
         },
         monitorWindowSize() {
             let w = document.documentElement.clientWidth || document.body.clientWidth
-            if (w < 800) {
+            if (w < 1300) {
                 this.showStart(false)
             }
             window.onresize = () => {
                 // 可视窗口宽度太小 自动收缩侧边栏
-                console.log(w);
-                if (w < 800 && w > (document.documentElement.clientWidth || document.body.clientWidth)) {
+                // console.log(w);
+                if (w < 1300 && w > (document.documentElement.clientWidth || document.body.clientWidth)) {
                     this.showStart(false)
                 }
                 w = document.documentElement.clientWidth || document.body.clientWidth
@@ -259,14 +260,17 @@ export default {
             }
         },
         settingStart() {
+            let reg = new RegExp(/\d/);
             if (this.previewTag) {
                 return this.$Message.warning({content: '请取消预览再进行操作', closable: true});
             } else if (!this.editTag) {
                 return this.$Message.warning({content: '请重置布局再进行操作', closable: true});
             }
+            if (!reg.test(Number(this.rowNum)) || !reg.test(Number(this.colNum))) {
+                return this.$Message.warning({content: '请输入数字', closable: true});
+            }
             if (Number(this.rowNum) <= 0 || Number(this.colNum) <= 0) {
-                this.$Message.warning({content: '输入数字不能少于0', closable: true});
-                return;
+                return this.$Message.warning({content: '请输入数字大于0', closable: true});
             }
             this.seatList = [];
             for(let i = 0; i < Number(this.rowNum) + 2; i++) {
@@ -673,7 +677,6 @@ export default {
             if (isLoad) this.$forceUpdate();
         },
         buildImage() {
-            console.log(this.seatList);
             this.$Loading.start();
             this.html2canvas(this.$refs.imageDom, this.opts).then(canvas => {
                 console.log(canvas)
@@ -800,10 +803,16 @@ export default {
         & .title-area {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
+            align-items: flex-start;
+            padding: 10px 0 5px 0;
             & .step-bar {
                 width: 60%;
+                height: 40px;
+            }
+            @media screen and (max-width: 1350px) {
+               & .step-bar {
+                    width: 730px;
+                }
             }
             & .button-area {
                 // padding: 0 50px;
@@ -870,6 +879,11 @@ export default {
                         //     margin-left: 20px;
                         // }
                         &.full {
+                            //位置偏移调整
+                            height: 50px;
+                            width: 50px;
+                        }
+                        & .full-icon {
                             //位置偏移调整
                             height: 50px;
                             width: 50px;
@@ -945,8 +959,9 @@ export default {
     overflow: auto;
     & img {
         margin: 0 auto;
-        border: gray 1px solid;
-        border-radius: 10px;
+        // border-radius: 10px;
+        // border: gray 1px solid;
+        // padding: 10px;
         // height: 100%;
         // width: 100%;
     }
