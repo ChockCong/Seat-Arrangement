@@ -148,14 +148,15 @@
                 <Button type="primary" size="large" @click="modal = false">{{'确定'}}</Button>
             </div>
         </Modal>
+        <Loading v-if="loading"></Loading>
     </div>
 </template>
 <script>
-// import AlertPopup from '../../frame/AlertPopup'
+import Loading from '../../common/loading';
 import { setInterval, setTimeout, clearInterval } from 'timers';
 export default {
     name: 'Setting',
-    // components: {AlertPopup},
+    components: {Loading},
     data() {
         return {
             rowNum: 0,
@@ -189,7 +190,8 @@ export default {
             mutipliStep: 0, //多选的整体步骤，记录在seatList内
             timeReplace: [], //用于恢复时消失背景色
             posMutipliSelect: [],
-            originPosMutipliSelect: []
+            originPosMutipliSelect: [],
+            loading: false
         }
     },
     computed: {
@@ -586,7 +588,7 @@ export default {
                 // this.mutipliSelect = [];
                 this.seatList.forEach((item, i) => {
                     item.forEach((val, j) => {
-                        if (val.hasOwnProperty('step') && val.step === this.mutipliStep) {
+                        if (_.has(val, 'step') && val.step === this.mutipliStep) {
                             val.active = true;
                             rowPreItemsIndex.push(i)
                             colPreItemsIndex.push(j);
@@ -597,7 +599,7 @@ export default {
                 let vituralPreStep = this.mutipliStep - 1;
                 this.seatList.forEach((item, i) => {
                     item.forEach((val, j) => {
-                        if (val.hasOwnProperty('step')) {
+                        if (_.has(val, 'step')) {
                             delete val.active;
                             if (val.step === this.mutipliStep) {
                                 val.No = 0;
@@ -678,15 +680,18 @@ export default {
         },
         buildImage() {
             this.$Loading.start();
+            this.loading = true;
             this.html2canvas(this.$refs.imageDom, this.opts).then(canvas => {
                 console.log(canvas)
                 // 转成图片，生成图片地址
                 this.imgUrl = canvas.toDataURL("image/png");
                 if (this.imgUrl) {
                     this.$Loading.finish();
+                    this.loading = false;
                     this.modal = true;
                 } else {
                     this.$Loading.error();
+                    this.loading = false;
                 }
             });
         }
