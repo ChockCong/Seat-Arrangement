@@ -17,6 +17,7 @@
 </template>
 <script>
 import { MESSAGE_TYPE } from 'vue-baberrage'
+import logo from '../../../assets/logo.png';
 export default {
     name: 'Baberrage',
     data() {
@@ -33,7 +34,7 @@ export default {
         addToList (){
             this.barrageList.push({
                 id: ++this.currentId,
-                avatar: "./static/avatar.jpg",
+                avatar: logo,
                 msg: this.msg,
                 time: 5,
                 type: MESSAGE_TYPE.NORMAL
