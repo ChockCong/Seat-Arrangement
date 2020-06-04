@@ -82,6 +82,9 @@ module.exports = {
 		// 			// 修改它的选项...
 		// 			// return options
 		// 		}),
+		// config.resolve.alias
+		// 	.set('@', path.join(__dirname, 'src')) // key,value自行定义
+		// 	.set('_c', resolve('src/components'))
 		config
 			.plugin('html')
 			.tap(args => {
