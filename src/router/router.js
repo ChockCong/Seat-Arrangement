@@ -1,7 +1,16 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-Vue.use(VueRouter);
 // import Login from '../view/admin/login';
+
+//TODO: 禁止全局路由错误处理打印，这个也是vue-router开发者给出的解决方案
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+  return originalPush.call(this, location).catch(err => err)
+}
+
+
+Vue.use(VueRouter);
 
 const router = new VueRouter({
 	mode: 'hash',
@@ -69,6 +78,7 @@ const router = new VueRouter({
 		}
 	]
 });
+
 
 // router.beforeEach(async (to, from, next) => {
 //     console.log(to, from, next);

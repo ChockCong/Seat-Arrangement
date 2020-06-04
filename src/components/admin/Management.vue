@@ -65,12 +65,13 @@
                         </div>
                         <!-- 用户头像 -->
                         <div class="user-img-c">
-                            <img :src="userImg">
+                            <Icon type="logo-android" />
+                            <!-- <img :src="userImg"> -->
                         </div>
                         <!-- 下拉菜单 -->
                         <Dropdown trigger="click" @on-click="userOperate" @on-visible-change="showArrow">
                             <div class="pointer">
-                                <span>{{userName}}</span>
+                                <span>{{adminInfo.username}}</span>
                                 <Icon v-show="arrowDown" type="md-arrow-dropdown"/>
                                 <Icon v-show="arrowUp" type="md-arrow-dropup"/>
                             </div>
@@ -128,6 +129,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
     name: 'Management',
     data() {
@@ -239,6 +241,9 @@ export default {
         },
     },
     computed: {
+        ...mapGetters({
+			adminInfo: 'getAdminInfo'
+		}),
         // 菜单栏
         menuItems() {
             // console.log(this.$store.state.menuItems);
@@ -549,6 +554,9 @@ aside {
     height: 100%;
     transition: width .3s;
     overflow: auto;
+    li {
+        text-align: left;
+    }
 }
 .logo-c {
     display: flex;
@@ -617,12 +625,18 @@ header .ivu-icon {
     top: 0;
 }
 .user-img-c {
-    width: 34px;
-    height: 34px;
-    background: #ddd;
+    width: 35px;
+    height: 35px;
+    background: gray;
     border-radius: 50%;
     margin: 0 40px;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    & i {
+        color: #6af64a
+    }
 }
 .tag-options {
     cursor: pointer;

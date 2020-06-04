@@ -16,10 +16,10 @@
                     <p class="title">ThunderCode酒店辅助系统</p>
                     <Form ref="loginF" :model="loginForm" :rules="loginRuleValidate" class="loginForm">
                         <FormItem label="用户名" prop="account">
-                            <Input size="large" type="text" prefix="ios-contact" v-model="loginForm.account" :placeholder="'用户名'" clearable/>
+                            <Input size="large" type="text" prefix="ios-contact" v-model.trim="loginForm.account" :placeholder="'用户名'" clearable/>
                         </FormItem>
                         <FormItem label="密码" prop="pwd">
-                            <Input size="large" type="password" v-model="loginForm.pwd" prefix="md-lock" placeholder="密码" clearable/>
+                            <Input size="large" type="password" v-model.trim="loginForm.pwd" prefix="md-lock" placeholder="密码" clearable/>
                         </FormItem>
                         <!-- <div class="input-c">
                             <Input size="large" prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-change="verifyAccount"/>
@@ -41,38 +41,38 @@
                         <Row class="row" type="flex" justify="space-between">
                             <ICol span="11">
                                 <FormItem label="登录名" prop="stLoginName">
-                                    <Input type="text" prefix="ios-contact" v-model="registForm.stLoginName" placeholder="登录名" clearable />
+                                    <Input type="text" prefix="md-contact" v-model="registForm.stLoginName" placeholder="登录名" clearable />
                                 </FormItem>
                             </ICol>
                             <ICol span="11">
                                 <FormItem label="用户名" prop="stName">
-                                    <Input prefix="ios-contact" v-model="registForm.stName" placeholder="用户名" clearable />
+                                    <Input prefix="md-happy" v-model="registForm.stName" placeholder="用户名" clearable />
                                 </FormItem>
                             </ICol>
                         </Row>
                         <Row class="row" type="flex" justify="space-between">
                             <ICol span="24">
                                 <FormItem label="手机号码" prop="stPhoneNum">
-                                    <Input prefix="ios-contact" v-model="registForm.stPhoneNum" placeholder="手机号码" clearable />
+                                    <Input prefix="ios-phone-portrait" v-model.trim="registForm.stPhoneNum" placeholder="手机号码" clearable />
                                 </FormItem>
                             </ICol>
                         </Row>
                         <Row class="row" type="flex" justify="space-between">
                             <ICol span="24">
                                 <FormItem label="邮箱地址" prop="stEmail">
-                                    <Input prefix="ios-contact" v-model="registForm.stEmail" placeholder="邮箱地址" clearable />
+                                    <Input prefix="md-mail" v-model.trim="registForm.stEmail" placeholder="邮箱地址" clearable />
                                 </FormItem>
                             </ICol>
                         </Row>
                         <Row class="row" type="flex" justify="space-between">
                             <ICol span="11">
                                 <FormItem label="登录密码" prop="stPassword">
-                                    <Input type="password" prefix="ios-contact" v-model="registForm.stPassword" placeholder="登录密码" clearable />
+                                    <Input type="password" prefix="ios-lock" v-model.trim="registForm.stPassword" placeholder="登录密码" clearable />
                                 </FormItem>
                             </ICol>
                             <ICol span="11">
                                 <FormItem label="确认密码" prop="comfirmPassword">
-                                    <Input type="password" prefix="ios-contact" v-model="registForm.comfirmPassword" placeholder="确认密码" clearable />
+                                    <Input type="password" prefix="ios-lock-outline" v-model.trim="registForm.comfirmPassword" placeholder="确认密码" clearable />
                                 </FormItem>
                             </ICol>
                         </Row>
@@ -90,10 +90,22 @@
 export default {
     name: 'loginPage',
     data() {
+        const validatePassWord = (rule, value, callback) => {
+            let reg = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
+            if (value === '') {
+                callback(new Error('请输入密码'));
+            } else if (!reg.test(value)) {
+                callback(new Error('密码必须包含英文和数字'));
+            } else if (this.registForm.comfirmPassword && value !== this.registForm.comfirmPassword) {
+                callback(new Error('两次密码输入不一致请重新输入'));
+            } else {
+                callback();
+            }
+        };
         const validatePassCheck = (rule, value, callback) => {
             if (value === '') {
                 callback(new Error('请二次输入确认密码'));
-            } else if (value !== this.registForm.stPassword) {
+            } else if (this.registForm.stPassword && value !== this.registForm.stPassword) {
                 callback(new Error('两次密码输入不一致请重新输入'));
             } else {
                 callback();
@@ -143,16 +155,16 @@ export default {
                     { required: true, message: '请输入登录名', trigger: ['blur','change'] }
                 ],
                 stPhoneNum: [
-                    { validator: validatePhoneCheck, trigger: ['blur','change'] }
+                    { required: true, validator: validatePhoneCheck, trigger: ['blur','change'] }
                 ],
                 stEmail: [
                     { required: true, message: '请输入邮箱', trigger: ['blur','change'] },
                     { type: 'email', message: '请输入正确邮箱', trigger: 'blur' }
                 ],
                 stPassword: [
-                    { required: true, message: '请输入密码', trigger: ['blur','change'] }
+                    { required: true, validator: validatePassWord, trigger: ['blur','change'] }
                 ],
-                comfirmPassword: { validator: validatePassCheck, trigger: ['blur','change'] }
+                comfirmPassword: { required: true, validator: validatePassCheck, trigger: ['blur','change'] }
             }
         }
     },
@@ -169,9 +181,10 @@ export default {
         },
         tab(value) {
             if (value) {
+                this.$refs['registF'].resetFields();
                 // this.$refs['loginF'].resetFields();
             } else {
-                // this.$refs['registF'].resetFields();
+                this.$refs['loginF'].resetFields();
             }
         }
     },
@@ -298,6 +311,9 @@ export default {
                 align-items: center;
                 font-size: 13px;
                 font-weight: bold;
+                & i {
+                    color: white !important
+                }
             }
         }
     }
@@ -326,18 +342,18 @@ export default {
         outline: #fff;
         border-color: #fff;
     }
-    & ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
-        color: rgba(255, 255, 255, .8);
-    }
-    & :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-        color: rgba(255, 255, 255, .8);
-    }
-    & ::-moz-placeholder { /* Mozilla Firefox 19+ */
-        color: rgba(255, 255, 255, .8);
-    }
-    & :-ms-input-placeholder { /* Internet Explorer 10-11 */
-        color: rgba(255, 255, 255, .8);
-    }
+    // & ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    //     color: rgba(255, 255, 255, .8);
+    // }
+    // & :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    //     color: rgba(255, 255, 255, .8);
+    // }
+    // & ::-moz-placeholder { /* Mozilla Firefox 19+ */
+    //     color: rgba(255, 255, 255, .8);
+    // }
+    // & :-ms-input-placeholder { /* Internet Explorer 10-11 */
+    //     color: rgba(255, 255, 255, .8);
+    // }
     & .title {
         font-size: 25px;
         margin-bottom: 10px;

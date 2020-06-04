@@ -131,9 +131,9 @@ const state = {
     ],
     adminInfo: {
         admin_token: '',
-        username: '',
-        email: '',
-        phoneNo: '',
+        username: '惊雷管理员666',
+        email: '123@123123qq.com',
+        phoneNo: '13555555555',
         company: {
             
         }
