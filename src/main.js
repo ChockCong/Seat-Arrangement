@@ -16,6 +16,7 @@ window._ = _;
 Vue.config.productionTip = false;
 
 // Vue.use(iView);
+Vue.use(tools.vueBaberrage);
 Vue.prototype.html2canvas = tools.html2canvas;
 
 new Vue({

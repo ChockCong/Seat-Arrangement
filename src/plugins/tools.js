@@ -1,6 +1,8 @@
 import html2canvas from 'html2canvas';
+import { vueBaberrage } from 'vue-baberrage'
 const tools = {
-    html2canvas
+    html2canvas,
+    vueBaberrage
 }
 export default tools;
 
