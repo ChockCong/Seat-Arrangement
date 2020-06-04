@@ -59,7 +59,7 @@ const state = {
             type: 'md-folder',
             size: 18, // icon大小
             category: 'all',
-            name: ''
+            name: 'baberrage'
             // 互动留言*互动抽奖*宴会反馈*菜品评价*菜品推荐*电子请帖*互动游戏*
         },
         {
@@ -131,9 +131,9 @@ const state = {
     ],
     adminInfo: {
         admin_token: '',
-        username: '惊雷管理员666',
-        email: '123@123123qq.com',
-        phoneNo: '13555555555',
+        username: '',
+        email: '',
+        phoneNo: '',
         company: {
             
         }

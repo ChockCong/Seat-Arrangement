@@ -211,7 +211,7 @@ export default {
                 if (this.loginForm.account && this.loginForm.pwd && tag) {
                     let data = {
                         admin_token: 'ghfkjahksgsd54234234sdfgsdfsfsdgsdg',
-                        username: '叻叻猪呢你都',
+                        username: '惊雷管理员账户',
                         email: '123@123.com',
                         phoneNo: '12023698547',
                         company: {

@@ -58,7 +58,20 @@ const router = new VueRouter({
                         {
                             path: 'seat-setting',
                             name: 'seat-setting',
-                            component: () => import('../components/admin/main/Setting'),
+                            component: () => import('../components/admin/main/Setting.vue'),
+                        },
+                        {
+                            path: 'others',
+                            name: 'others',
+                            component: () => import('../components/admin/others/index.vue'),
+                            redirect: 'others/baberrage',
+                            children: [
+                                {
+                                    path: 'baberrage',
+                                    name: 'baberrage',
+                                    component: () => import('../components/admin/others/Baberrage.vue'),
+                                }
+                            ]
                         }
                     ]
                 }
