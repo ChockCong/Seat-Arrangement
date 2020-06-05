@@ -26,12 +26,10 @@ Vue.config.warnHandler = function (msg, vm, trace) {
 
 window._ = _;
 Vue.prototype.html2canvas = tools.html2canvas;
-
+Vue.use(tools.vueBaberrage);
 
 Vue.config.productionTip = false;
-// Vue.use(iView);
-Vue.use(tools.vueBaberrage);
-Vue.prototype.html2canvas = tools.html2canvas;
+
 
 new Vue({
   router,

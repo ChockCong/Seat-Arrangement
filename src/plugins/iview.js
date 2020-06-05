@@ -1,5 +1,12 @@
 import Vue from 'vue';
-import { Menu, Submenu, MenuItem, Button, Input, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Spin, Modal, Alert, Message, LoadingBar, Icon, Steps, Step, Switch, Row, Col } from 'iview';
+import {
+    Menu, Submenu, MenuItem, Button, Input, Form, FormItem, Dropdown, DropdownMenu, DropdownItem,
+    Spin, Modal, Alert, Message, LoadingBar, Icon, Steps, Step, Switch, Row, Col, Layout, Header, Content, Footer
+} from 'iview';
+Vue.component('Layout', Layout);
+Vue.component('Header', Header);
+Vue.component('Content', Content);
+Vue.component('Footer', Footer);
 Vue.component('Row', Row);
 Vue.component('ICol', Col);
 Vue.component('Menu', Menu);

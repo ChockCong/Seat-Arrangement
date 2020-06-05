@@ -18,7 +18,12 @@ const router = new VueRouter({
 		{
 			path: '/',
 			component: () => import('../components/HelloWorld.vue'),
-		},
+        },
+        {
+            path: '/unlogin',
+            name: 'unLogin',
+            component: () => import('../components/common/UnLoginFrame.vue'),
+        },
 		{
 			path: '/admin',
 			name: 'admin',
@@ -29,6 +34,7 @@ const router = new VueRouter({
                     name: 'login',
                     component: () => import('../view/admin/login.vue'),
                 },
+                
                 {
                     path: 'management',
                     name: 'management',

@@ -1,19 +1,20 @@
 <template>
     <div class="login-vue" :style="bg">
         <div class="container">
-            <section>
+            <img class="logo-section" src="../../assets/logo.png" alt="logo">
+            <section class="switch-section">
+                <!-- <span class="word" v-if="tab">
+                    <span>还没有账号？点击注册</span>
+                    <Icon type="md-arrow-round-forward" />
+                </span> -->
                 <SwitchTab size="large" class="tab-item" v-model="tab">
                     <span slot="open">{{'注册'}}</span>
                     <span slot="close">{{'登录'}}</span>
                 </SwitchTab>
-                <span class="word" v-if="tab">
-                    <Icon type="md-arrow-round-back" />
-                    <span>还没有账号？点击注册</span>
-                </span>
             </section>
             <transition name="login">
                 <div v-if="tab" class="flex-container">
-                    <p class="title">ThunderCode酒店辅助系统</p>
+                    <!-- <p class="title">CodeThunder</p> -->
                     <Form ref="loginF" :model="loginForm" :rules="loginRuleValidate" class="loginForm">
                         <FormItem label="用户名" prop="account">
                             <Input size="large" type="text" prefix="ios-contact" v-model.trim="loginForm.account" :placeholder="'用户名'" clearable/>
@@ -36,7 +37,7 @@
             </transition>
             <transition name="regist">
                 <div v-if="!tab"  class="flex-container">
-                    <p class="title regist">注册账号</p>
+                    <!-- <p class="title regist">注册账号</p> -->
                     <Form ref="registF" :model="registForm" :rules="registRuleValidate" class="registForm">
                         <Row class="row" type="flex" justify="space-between">
                             <ICol span="11">
@@ -53,7 +54,7 @@
                         <Row class="row" type="flex" justify="space-between">
                             <ICol span="24">
                                 <FormItem label="手机号码" prop="stPhoneNum">
-                                    <Input prefix="ios-phone-portrait" v-model.trim="registForm.stPhoneNum" placeholder="手机号码" clearable />
+                                    <Input min prefix="ios-phone-portrait" v-model.trim="registForm.stPhoneNum" placeholder="手机号码" clearable />
                                 </FormItem>
                             </ICol>
                         </Row>
@@ -113,10 +114,13 @@ export default {
         };
         const validatePhoneCheck = (rule, value, callback) => {
             let reg = new RegExp(/\d$/);
+            console.log(value.lenght);
             if (value === '') {
                 callback(new Error('请输入手机号码'));
             } else if (!reg.test(value)) {
                 callback(new Error('请输入正确的手机号码'));
+            } else if (value.length < 11) {
+                callback(new Error('请输入至少11位手机号码'));
             } else {
                 callback();
             }
@@ -171,6 +175,7 @@ export default {
     created() {
         // this.bg.backgroundImage = 'url(' + require('../assets/imgs/bg0' + new Date().getDay() + '.jpg') + ')'
         this.bg.backgroundImage = `url(${require('../../assets/bg03.jpg')})`;
+        this.bg.backgroundImage = `url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1591357660532&di=28d8e7bd58201a4e00260116a0f098bc&imgtype=0&src=http%3A%2F%2Fattachments.gfan.net.cn%2Fforum%2F201504%2F14%2F075409wgwijxiax3i4wihw.jpg)`
     },
     watch: {
         $route: {
@@ -204,6 +209,7 @@ export default {
         //     }
         // },
         forgetPwd() {
+            this.$router.push('/unlogin')
         },
         async login() {
             let tag = false;
@@ -261,7 +267,7 @@ export default {
     transition: all .1s ease;
 }
 .login-enter, .login-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    transform: translateX(-60px);
+    transform: translateX(-40px);
     opacity: 0;
 }
 .regist-enter-active {
@@ -271,7 +277,7 @@ export default {
     transition: all .1s ease;
 }
 .regist-enter, .regist-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    transform: translateX(60px);
+    transform: translateX(40px);
     opacity: 0;
 }
 .login-vue {
@@ -282,31 +288,39 @@ export default {
     color: #fff;
     background-size: cover;
     & .container {
-        background: rgba(255, 255, 255, .6);
-        width: 600px;
-        height: 545px;
+        background: rgba(0, 0, 0, .7);
+        width: 575px;
+        height: 475px;
         // text-align: center;
         border-radius: 10px;
-        padding: 30px;
+        padding: 0 20px;
         display: flex;
         align-items: center;
         position: relative;
         & .flex-container {
             width: 100%;
         }
-        & section {
+        & .logo-section {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+        }
+        & .switch-section {
             display: flex;
             align-items: center;
             position: absolute;
             top: 20px;
-            left: 20px;
+            right: 20px;
             & .tab-item {
                 font-weight: bold;
                 border-color: #2d8cf0;
                 background-color: #2d8cf0;
-                margin-right: 10px;
             }
             & .word {
+                margin-right: 10px;
                 display: flex;
                 align-items: center;
                 font-size: 13px;
@@ -325,6 +339,7 @@ export default {
         & .ivu-form-item {
             width: 80%;
             & .ivu-form-item-label {
+                color: white;
                 font-size: 14px;
             }
         }
@@ -332,6 +347,7 @@ export default {
     ::v-deep .registForm {
         & .ivu-form-item {
             & .ivu-form-item-label {
+                color: white;
                 font-size: 14px;
             }
         }
@@ -355,12 +371,16 @@ export default {
     //     color: rgba(255, 255, 255, .8);
     // }
     & .title {
-        font-size: 25px;
-        margin-bottom: 10px;
+        position: absolute;
+        font-size: 16px;
+        top: 20px;
+        left: 40%;
     }
     & .row {
         // padding-bottom: 5px;
         height: 80px;
+        width: 90%;
+        margin: 0 auto;
         & .ivu-col {
             text-align: left;
             & label {
@@ -379,7 +399,7 @@ export default {
         width: 80%;
         font-size: 16px;
         &.regist {
-            width: 100%;
+            width: 90%;
         }
     }
     & .account {
