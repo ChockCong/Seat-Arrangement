@@ -44,7 +44,20 @@
                 </div>
             </Menu>
         </aside>
-
+        <Drawer title="系统通知" width="20" :closable="true" v-model="noticesShow">
+            <Alert class="notice-item">
+                An info prompt
+                <template slot="desc">Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. Content of prompt. </template>
+            </Alert>
+            <Alert  class="notice-item">
+                An info prompt
+                <template slot="desc">Content of prompt. Content of prompt. Content of prompt. Content of prompt. </template>
+            </Alert>
+            <Alert  class="notice-item">
+                An info prompt
+                <template slot="desc">Content of prompt. Content of prompt. Content of prompt. Content of prompt. </template>
+            </Alert>
+        </Drawer>
         <!-- 右侧部分 -->
         <section class="sec-right">
             <!-- 头部 -->
@@ -59,7 +72,7 @@
                     </div>
                     <div class="h-right">
                         <!-- 消息 -->
-                        <div class="notice-c" @click="info" title="查看新消息">
+                        <div class="notice-c" @click="noticesShow = true" title="查看新消息">
                             <div :class="{newMsg: hasNewMsg}"></div>
                             <Icon type="ios-notifications-outline" />
                         </div>
@@ -77,9 +90,9 @@
                             </div>
                             <DropdownMenu slot="list">
                                 <!-- name标识符 -->
-                                <DropdownItem name="1">修改密码</DropdownItem>
-                                <DropdownItem name="2">基本资料</DropdownItem>
-                                <DropdownItem divided  name="3">退出登陆</DropdownItem>
+                                <!-- <DropdownItem name="1">修改密码</DropdownItem>
+                                <DropdownItem name="2">基本资料</DropdownItem> divided-->
+                                <DropdownItem  name="3">退出登陆</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>
@@ -160,6 +173,7 @@ export default {
             userImg: '',
             // 主页路由名称
             home: 'home',
+            noticesShow: false
         }
     },
     created() {
@@ -280,8 +294,6 @@ export default {
                 }
                 this.tagsArry.push({ name, text: this.nameToTitle[name] })
             }
-            console.log(this.crumbs)
-            console.log(this.paths[name])
             setTimeout(() => {
                 this.crumbs = this.paths[name]
             }, 0)
@@ -608,9 +620,6 @@ header .ivu-icon {
     display: flex;
     align-items: center;
 }
-.user-img-c img {
-    width: 100%;
-}
 .notice-c {
     cursor: pointer;
     position: relative;
@@ -634,6 +643,7 @@ header .ivu-icon {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
     & i {
         color: #6af64a
     }

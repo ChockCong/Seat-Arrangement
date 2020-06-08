@@ -1,88 +1,94 @@
 <template>
     <div class="login-vue" :style="bg">
-        <div class="container">
-            <img class="logo-section" src="../../assets/logo.png" alt="logo">
-            <section class="switch-section">
-                <!-- <span class="word" v-if="tab">
-                    <span>还没有账号？点击注册</span>
-                    <Icon type="md-arrow-round-forward" />
-                </span> -->
-                <SwitchTab size="large" class="tab-item" v-model="tab">
-                    <span slot="open">{{'注册'}}</span>
-                    <span slot="close">{{'登录'}}</span>
-                </SwitchTab>
-            </section>
-            <transition name="login">
-                <div v-if="tab" class="flex-container">
-                    <!-- <p class="title">CodeThunder</p> -->
-                    <Form ref="loginF" :model="loginForm" :rules="loginRuleValidate" class="loginForm">
-                        <FormItem label="用户名" prop="account">
-                            <Input size="large" type="text" prefix="ios-contact" v-model.trim="loginForm.account" :placeholder="'用户名'" clearable/>
-                        </FormItem>
-                        <FormItem label="密码" prop="pwd">
-                            <Input size="large" type="password" v-model.trim="loginForm.pwd" prefix="md-lock" placeholder="密码" clearable/>
-                        </FormItem>
-                        <!-- <div class="input-c">
-                            <Input size="large" prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-change="verifyAccount"/>
-                            <p class="error">{{accountError}}</p>
-                        </div> -->
-                        <!-- <div class="input-c">
-                            <Input size="large" type="password" v-model="loginForm.pwd" prefix="md-lock" placeholder="密码" clearable @on-change="verifyPwd"/>
-                            <p class="error">{{pwdError}}</p>
-                        </div> -->
-                        <Button size="large" :loading="isShowLoading" class="submit" type="primary" @click="login">登陆</Button>
-                        <p class="account"><span @click="forgetPwd">忘记密码</span></p>
-                    </Form>
-                </div>
-            </transition>
-            <transition name="regist">
-                <div v-if="!tab"  class="flex-container">
-                    <!-- <p class="title regist">注册账号</p> -->
-                    <Form ref="registF" :model="registForm" :rules="registRuleValidate" class="registForm">
-                        <Row class="row" type="flex" justify="space-between">
-                            <ICol span="11">
-                                <FormItem label="登录名" prop="stLoginName">
-                                    <Input type="text" prefix="md-contact" v-model="registForm.stLoginName" placeholder="登录名" clearable />
-                                </FormItem>
-                            </ICol>
-                            <ICol span="11">
-                                <FormItem label="用户名" prop="stName">
-                                    <Input prefix="md-happy" v-model="registForm.stName" placeholder="用户名" clearable />
-                                </FormItem>
-                            </ICol>
-                        </Row>
-                        <Row class="row" type="flex" justify="space-between">
-                            <ICol span="24">
-                                <FormItem label="手机号码" prop="stPhoneNum">
-                                    <Input min prefix="ios-phone-portrait" v-model.trim="registForm.stPhoneNum" placeholder="手机号码" clearable />
-                                </FormItem>
-                            </ICol>
-                        </Row>
-                        <Row class="row" type="flex" justify="space-between">
-                            <ICol span="24">
-                                <FormItem label="邮箱地址" prop="stEmail">
-                                    <Input prefix="md-mail" v-model.trim="registForm.stEmail" placeholder="邮箱地址" clearable />
-                                </FormItem>
-                            </ICol>
-                        </Row>
-                        <Row class="row" type="flex" justify="space-between">
-                            <ICol span="11">
-                                <FormItem label="登录密码" prop="stPassword">
-                                    <Input type="password" prefix="ios-lock" v-model.trim="registForm.stPassword" placeholder="登录密码" clearable />
-                                </FormItem>
-                            </ICol>
-                            <ICol span="11">
-                                <FormItem label="确认密码" prop="comfirmPassword">
-                                    <Input type="password" prefix="ios-lock-outline" v-model.trim="registForm.comfirmPassword" placeholder="确认密码" clearable />
-                                </FormItem>
-                            </ICol>
-                        </Row>
-                        <Button size="large" :loading="isShowLoading" class="submit regist" type="primary" @click="register">注册</Button>
-                        <!-- <p class="account"><span @click="tab = true">用户登录</span></p> -->
-                    </Form>
-                </div>
-            </transition>
-        </div>
+        <!-- <transition name="contain"> -->
+            <div class="container" :class="!tab ? 'registH' : 'loginH'">
+                <img class="logo-section" src="../../assets/logo.png" alt="logo">
+                <section class="switch-section">
+                    <!-- <span class="word" v-if="tab">
+                        <span>还没有账号？点击注册</span>
+                        <Icon type="md-arrow-round-forward" />
+                    </span> -->
+                    <SwitchTab size="large" class="tab-item" v-model="tab">
+                        <span slot="open">{{'注册'}}</span>
+                        <span slot="close">{{'登录'}}</span>
+                    </SwitchTab>
+                </section>
+                <transition name="login">
+                    <div v-if="tab" class="flex-container">
+                        <!-- <p class="title">CodeThunder</p> -->
+                        <Form ref="loginF" :model="loginForm" :rules="loginRuleValidate" class="loginForm">
+                            <FormItem label="用户名" prop="account">
+                                <Input size="large" type="text" prefix="ios-contact" v-model.trim="loginForm.account" :placeholder="'用户名'" clearable/>
+                            </FormItem>
+                            <FormItem label="密码" prop="pwd">
+                                <Input size="large" type="password" v-model.trim="loginForm.pwd" prefix="md-lock" placeholder="密码" clearable/>
+                            </FormItem>
+                            <!-- <div class="input-c">
+                                <Input size="large" prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-change="verifyAccount"/>
+                                <p class="error">{{accountError}}</p>
+                            </div> -->
+                            <!-- <div class="input-c">
+                                <Input size="large" type="password" v-model="loginForm.pwd" prefix="md-lock" placeholder="密码" clearable @on-change="verifyPwd"/>
+                                <p class="error">{{pwdError}}</p>
+                            </div> -->
+                            <Button size="large" :loading="isShowLoading" class="submit" type="primary" @click="login">登陆</Button>
+                            <p class="account"><span @click="forgetPwd">忘记密码</span></p>
+                        </Form>
+                    </div>
+                </transition>
+                <transition name="regist">
+                    <div v-if="!tab"  class="flex-container">
+                        <!-- <p class="title regist">注册账号</p> -->
+                        <Form ref="registF" :model="registForm" :rules="registRuleValidate" class="registForm">
+                            <Row class="row">
+                                <ICol span="24">
+                                    <FormItem label="登录名" prop="stLoginName">
+                                        <Input type="text" prefix="md-contact" v-model="registForm.stLoginName" placeholder="登录名" clearable />
+                                    </FormItem>
+                                </ICol>
+                            </Row>
+                            <Row class="row">
+                                <ICol span="24">
+                                    <FormItem label="用户名" prop="stName">
+                                        <Input prefix="md-happy" v-model="registForm.stName" placeholder="用户名" clearable />
+                                    </FormItem>
+                                </ICol>
+                            </Row>
+                            <Row class="row">
+                                <ICol span="24">
+                                    <FormItem label="手机号码" prop="stPhoneNum">
+                                        <Input min prefix="ios-phone-portrait" v-model.trim="registForm.stPhoneNum" placeholder="手机号码" clearable />
+                                    </FormItem>
+                                </ICol>
+                            </Row>
+                            <Row class="row">
+                                <ICol span="24">
+                                    <FormItem label="邮箱地址" prop="stEmail">
+                                        <Input prefix="md-mail" v-model.trim="registForm.stEmail" placeholder="邮箱地址" clearable />
+                                    </FormItem>
+                                </ICol>
+                            </Row>
+                            <Row class="row">
+                                <ICol span="24">
+                                    <FormItem label="登录密码" prop="stPassword">
+                                        <Input type="password" prefix="ios-lock" v-model.trim="registForm.stPassword" placeholder="登录密码" clearable />
+                                    </FormItem>
+                                </ICol>
+                            </Row>
+                            <Row class="row">
+                                <ICol span="24">
+                                    <FormItem label="确认密码" prop="comfirmPassword">
+                                        <Input type="password" prefix="ios-lock-outline" v-model.trim="registForm.comfirmPassword" placeholder="确认密码" clearable />
+                                    </FormItem>
+                                </ICol>
+                            </Row>
+                            <Button size="large" :loading="isShowLoading" class="submit regist" type="primary" @click="register">注册</Button>
+                            <!-- <p class="account"><span @click="tab = true">用户登录</span></p> -->
+                        </Form>
+                    </div>
+                </transition>
+            </div>
+        <!-- </transition> -->
     </div>
 </template>
 
@@ -267,7 +273,7 @@ export default {
     transition: all .1s ease;
 }
 .login-enter, .login-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    transform: translateX(-40px);
+    transform: translateX(-50px);
     opacity: 0;
 }
 .regist-enter-active {
@@ -277,7 +283,7 @@ export default {
     transition: all .1s ease;
 }
 .regist-enter, .regist-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    transform: translateX(40px);
+    transform: translateX(50px);
     opacity: 0;
 }
 .login-vue {
@@ -289,14 +295,20 @@ export default {
     background-size: cover;
     & .container {
         background: rgba(0, 0, 0, .7);
-        width: 575px;
-        height: 475px;
+        width: 540px;
+        // height: 475px;
         // text-align: center;
         border-radius: 10px;
         padding: 0 20px;
         display: flex;
         align-items: center;
         position: relative;
+        transition: height ease-out 0.3s;
+        height: 475px;
+        &.registH {
+            transition: height ease-in 0.3s;
+            height: 715px 
+        }
         & .flex-container {
             width: 100%;
         }
@@ -378,8 +390,9 @@ export default {
     }
     & .row {
         // padding-bottom: 5px;
-        height: 80px;
+        // height: 80px;
         width: 90%;
+        // padding: 40px;
         margin: 0 auto;
         & .ivu-col {
             text-align: left;
