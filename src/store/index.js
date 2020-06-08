@@ -16,7 +16,7 @@ const store = new Vuex.Store({
             return state.userInfo.name;
         },
         getAdminInfo: state => {
-            return state.adminInfo 
+            return state.adminInfo;
         }
     }
 })

@@ -52,6 +52,11 @@ const router = new VueRouter({
                             component: () => import('../components/admin/self/Info.vue'),
                         },
                         {
+                            path: 'logs',
+                            name: 'logs',
+                            component: () => import('../components/admin/self/DailyLog.vue')
+                        },
+                        {
                             path: 'function-setting',
                             name: 'function-setting',
                             component: () => import('../components/admin/self/FunctionSetting.vue'),

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-    Menu, Submenu, MenuItem, Button, Input, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer,
+    Menu, Submenu, MenuItem, Button, Input, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table,
     Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, Row, Col, Layout, Header, Content, Footer
 } from 'iview';
 Vue.component('Layout', Layout);
@@ -25,9 +25,10 @@ Vue.component('Alert', Alert);
 Vue.component('Notice', Notice);
 Vue.component('Steps', Steps);
 Vue.component('Step', Step);
+Vue.component('Table', Table);
 Vue.component('SwitchTab', Switch);
 Vue.component('Drawer', Drawer);
-
+Vue.component('Tag', Tag);
 
 Vue.component('Icon', Icon);
 Vue.prototype.$Notice = Notice;

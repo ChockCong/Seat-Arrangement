@@ -122,7 +122,7 @@ const menuItems = [
                 type: 'md-bookmarks',
                 category: 'god',
                 size: 18, // icon大小
-                name: '',
+                name: 'logs',
                 text: '系统监控',
             }
         ]

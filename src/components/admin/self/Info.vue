@@ -7,18 +7,58 @@
             <div class="helper"></div>
         </div>
         <div class="content-wrap">
+            <div class="button-wrap">
+                <Button type="warning">会员升级</Button>
+                <Button type="info">会员续费</Button>
+            </div>
             <ul>
-                <li>用户名：管理员</li>
-                <li>角色：管理页</li>
-                <li>密码: **********</li>
-                <li>是否会员: 是</li>
+                <li>
+                    <span>用户名</span>
+                    <Tag color="green">{{adminInfo.username}}</Tag>
+                </li>
+                <li>
+                    <span>电子邮箱</span>
+                    <Tag color="green">{{adminInfo.email}}</Tag>
+                </li>
+                <li>
+                    <span>电话号码</span>
+                    <Tag color="green">{{adminInfo.phoneNo}}</Tag>
+                </li>
+                <li>
+                    <span>公司名字</span>
+                    <Tag color="green">{{adminInfo.company.name}}</Tag>
+                </li>
+                <li>
+                    <span>公司地址</span>
+                    <Tag color="green">{{adminInfo.company.address}}</Tag>
+                </li>
+                <li>
+                    <span>权限</span>
+                    <Tag color="green">{{level}}</Tag>
+                </li>
             </ul>
         </div>
     </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 export default {
-    name: 'Info'
+    name: 'Info',
+    computed: {
+        ...mapGetters({
+			adminInfo: 'getAdminInfo'
+        }),
+        level() {
+            let role = ''
+            switch(this.adminInfo.level) {
+                case 1 : role = '普通用户'; break;
+                case 2 : role = '普通会员'; break;
+                case 3 : role = 'VIP会员'; break;
+                default : role = '管理员';
+            }
+            return role;
+        }
+    }
 }
 </script>
 <style lang="scss" scoped>
@@ -59,10 +99,27 @@ export default {
         position: relative;
         display: flex;
         justify-content: center;
+        & .button-wrap {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            & button {
+                margin-left: 10px;
+            }
+        }
         & ul {
             text-align: left;
             & li {
+                font-size: 16px;
+                margin-bottom: 10px;
                 list-style-type:none;
+                & span{
+                    width: 100px;
+                    display: inline-block;
+                }
+                & .ivu-tag {
+                    font-size: 14px;
+                }
             }
         }
     }
