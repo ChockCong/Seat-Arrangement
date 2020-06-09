@@ -9,7 +9,7 @@ import './assets/iconfont/iconfont.css';
 import '@/plugins/iview'
 import tools from '@/plugins/tools'
 import _ from '@/utils/lodash';
-import { globalFunc } from '@/utils/index'
+import { globalFunc, level } from '@/utils/index'
 // const tools = require('./plugins/tools');
 
 globalFunc();
@@ -25,6 +25,7 @@ Vue.config.warnHandler = function (msg, vm, trace) {
 }
 
 window._ = _;
+Vue.prototype.level = level;
 Vue.prototype.html2canvas = tools.html2canvas;
 Vue.use(tools.vueBaberrage);
 

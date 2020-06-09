@@ -57,6 +57,11 @@ const router = new VueRouter({
                             component: () => import('../components/admin/self/DailyLog.vue')
                         },
                         {
+                            path: 'sub-account',
+                            name: 'sub-account',
+                            component: () => import('../components/admin/self/SubAccounts.vue')
+                        },
+                        {
                             path: 'function-setting',
                             name: 'function-setting',
                             component: () => import('../components/admin/self/FunctionSetting.vue'),

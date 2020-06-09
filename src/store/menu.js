@@ -108,21 +108,21 @@ const menuItems = [
             {
                 type: 'md-bookmarks',
                 size: 18, // icon大小
-                name: '',
+                name: 'sub-account',
                 text: '子账号管理',
             },
             {
                 type: 'md-bookmarks',
                 category: 'god',
                 size: 18, // icon大小
-                name: '',
+                name: 'logs',
                 text: '操作日志',
             },
             {
                 type: 'md-bookmarks',
                 category: 'god',
                 size: 18, // icon大小
-                name: 'logs',
+                name: '',
                 text: '系统监控',
             }
         ]

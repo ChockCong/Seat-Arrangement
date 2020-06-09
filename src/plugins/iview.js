@@ -31,6 +31,7 @@ Vue.component('Drawer', Drawer);
 Vue.component('Tag', Tag);
 
 Vue.component('Icon', Icon);
+Vue.prototype.$Modal = Modal;
 Vue.prototype.$Notice = Notice;
 Vue.prototype.$Message = Message;
 Vue.prototype.$Message.config({ top: 70, duration: 3 });

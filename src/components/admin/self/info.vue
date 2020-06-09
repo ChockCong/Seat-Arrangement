@@ -34,7 +34,7 @@
                 </li>
                 <li>
                     <span>权限</span>
-                    <Tag color="green">{{level}}</Tag>
+                    <Tag color="green">{{level(adminInfo.company.level)}}</Tag>
                 </li>
             </ul>
         </div>
@@ -47,17 +47,7 @@ export default {
     computed: {
         ...mapGetters({
 			adminInfo: 'getAdminInfo'
-        }),
-        level() {
-            let role = ''
-            switch(this.adminInfo.level) {
-                case 1 : role = '普通用户'; break;
-                case 2 : role = '普通会员'; break;
-                case 3 : role = 'VIP会员'; break;
-                default : role = '管理员';
-            }
-            return role;
-        }
+        })
     }
 }
 </script>
