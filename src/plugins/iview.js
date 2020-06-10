@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-    Menu, Submenu, MenuItem, Button, Input, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table,
+    Menu, Submenu, MenuItem, Button, Input, Select, Option, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table,
     Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, Row, Col, Layout, Header, Content, Footer
 } from 'iview';
 Vue.component('Layout', Layout);
@@ -12,6 +12,8 @@ Vue.component('ICol', Col);
 Vue.component('Menu', Menu);
 Vue.component('Button', Button);
 Vue.component('Input', Input);
+Vue.component('Select', Select);
+Vue.component('Option', Option);
 Vue.component('Form', Form);
 Vue.component('FormItem', FormItem);
 Vue.component('Submenu', Submenu);

@@ -7,7 +7,7 @@ const menuItems = [
         text: '主页', // 文本内容
     },
     {
-        text: '会场管理',
+        text: '会场中心',
         type: 'md-bowtie',
         size: 18, // icon大小
         category: 'all',
@@ -54,7 +54,7 @@ const menuItems = [
         ]
     },
     {
-        text: '其他功能',
+        text: '工具中心',
         type: 'md-folder',
         size: 18, // icon大小
         category: 'all',
@@ -62,54 +62,63 @@ const menuItems = [
         // 互动留言*互动抽奖*宴会反馈*菜品评价*菜品推荐*电子请帖*互动游戏*
     },
     {
-        text: '账号管理',
-        type: 'md-body',
-        size: 18, // icon大小
-        category: 'all',
-        children: [
-            {
-                type: 'md-person',
-                size: 18, // icon大小
-                name: '',
-                text: '忘记密码',
-            },
-            {
-                type: 'md-person',
-                size: 18, // icon大小
-                name: '',
-                text: '更改密码',
-            },
-            {
-                type: 'md-person',
-                size: 18, // icon大小
-                name: '',
-                text: '增值服务',
-            }
-        ]
-    },
-    {
-        text: '账号服务',
-        type: 'md-bookmarks',
+        text: '账号中心',
+        type: 'md-person',
         size: 18, // icon大小
         category: 'admin',
         children: [
             {
-                type: 'md-bookmarks',
+                type: 'md-person',
                 size: 18, // icon大小
-                name: 'info',
-                text: '基本资料',
+                text: '账号管理',
+                children: [
+                    {
+                        type: 'md-person',
+                        size: 18, // icon大小
+                        name: 'info',
+                        text: '主账号管理',
+                    },
+                    {
+                        type: 'md-person',
+                        size: 18, // icon大小
+                        name: 'sub-account',
+                        text: '子账号管理',
+                    }
+                ]
             },
             {
+                type: 'md-person',
+                size: 18, // icon大小
+                text: '增值服务',
+                children: [
+                    {
+                        type: 'md-person',
+                        size: 18, // icon大小
+                        name: '',
+                        text: '尊享套餐',
+                    },
+                    {
+                        type: 'md-person',
+                        size: 18, // icon大小
+                        name: '',
+                        text: '个性定制',
+                    } 
+                ]
+            }
+        ]
+    },
+    {
+        text: '控制中心',
+        type: 'md-bookmarks',
+        size: 18, // icon大小
+        category: 'god',
+        children: [
+            {
                 type: 'md-bookmarks',
+                category: 'god',
                 size: 18, // icon大小
                 name: '',
-                text: '主账号管理',
-            },
-            {
-                type: 'md-bookmarks',
-                size: 18, // icon大小
-                name: 'sub-account',
-                text: '子账号管理',
+                text: '功能管理',
             },
             {
                 type: 'md-bookmarks',
@@ -126,7 +135,7 @@ const menuItems = [
                 text: '系统监控',
             }
         ]
-    },
+    }
 ];
 
 module.exports = menuItems;

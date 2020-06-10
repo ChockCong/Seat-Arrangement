@@ -1,23 +1,68 @@
 <template>
     <div class="index-vue-sub-accounts">
-        <div class="button-area">
+        <div class="button-area top">
             <Button type="primary" icon="md-add" @click="alertModal('add')">新增子账户</Button>
             <Button type="primary" icon="md-trash" @click="deletes">删除子账户</Button>
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight" :width="862" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight" :width="1012" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row, index }" slot="level">
                 <Tag color="green">{{level(row.level)}}</Tag>
             </template>
+            <template slot-scope="{ row, index }" slot="disabled">
+                <SwitchTab v-model="row.disabled" size="small" />
+            </template>
             <template slot-scope="{ row, index }" slot="action">
-                <Button type="primary" size="small" @click="alertModal('edit')">修改用户信息</Button>
+                <div class="button-area">
+                    <Button type="primary" size="small" @click="alertModal('edit', row.user)">编辑</Button>
+                    <Button type="primary" size="small" @click="alertFunctionModel(row.user)">功能分配</Button>
+                </div>
             </template>
         </Table>
         <Modal
             v-model="modal"
-            :title="modalType === 'add' ? '添加子账号' : '编辑用户信息'"
+            :title="modalType === 'add' ? '新增子账户' : '编辑账户信息'"
             :loading="modalLoading"
-            @on-ok="asyncOK"
+            @on-ok="sureOK"
             @on-cancel="() => { this.modalType = ''; this.modal = false }">
+            <Form ref="subForm" :model="subForm" :rules="subFormRules" class="subForm">
+                <FormItem label="" prop="stLoginName">
+                    <Input type="text" prefix="md-contact" v-model="subForm.stLoginName" placeholder="登录名" clearable />
+                </FormItem>
+                <FormItem label="" prop="stName">
+                    <Input prefix="md-happy" v-model="subForm.stName" placeholder="用户名" clearable />
+                </FormItem>
+                <FormItem label="" prop="stPhoneNum">
+                    <Input min prefix="ios-phone-portrait" v-model.trim="subForm.stPhoneNum" placeholder="手机号码" clearable />
+                </FormItem>
+                <FormItem label="" prop="stEmail">
+                    <Input prefix="md-mail" v-model.trim="subForm.stEmail" placeholder="邮箱地址" clearable />
+                </FormItem>
+                <FormItem label="" prop="stPassword">
+                    <Input :type="seePwd ? 'text' : 'password'" prefix="ios-lock" v-model.trim="subForm.stPassword" placeholder="登录密码">
+                        <Icon style="cursor: pointer;" @click="seePwd = !seePwd" :type="seePwd ? 'ios-eye' : 'ios-eye-off'" slot="suffix" />
+                    </Input>
+                </FormItem>
+                <FormItem label="" prop="comfirmPassword">
+                    <Input :type="seeSubPwd ? 'text' : 'password'" prefix="ios-lock-outline" v-model.trim="subForm.comfirmPassword" placeholder="确认密码">
+                        <Icon style="cursor: pointer;" @click="seeSubPwd = !seeSubPwd" :type="seeSubPwd ? 'ios-eye' : 'ios-eye-off'" slot="suffix" />
+                    </Input>
+                </FormItem>
+                <!-- <FormItem prop="">
+                    <Select v-model="subForm.functions" multiple prefix="ios-settings" placeholder="选择需要的功能权限">
+                        <Option v-for="(item, index) in functionList" :value="item.name" :label="item.label" :key="index"></Option>
+                    </Select>
+                </FormItem> -->
+            </Form>
+        </Modal>
+        <Modal
+            v-model="functionModel"
+            :title="'功能分配'"
+            :loading="modalLoading"
+            :width="700"
+            @on-ok="sureLevel"
+            @on-cancel="() => { this.functionModel = false }">
+            <Table ref="table" border stripe :height="functionTableHeight" :width="668" :loading="false" :columns="functionColumns" :data="functionList"  @on-selection-change="onFunctionSelectChange">
+            </Table>
         </Modal>
     </div>
 </template>
@@ -26,11 +71,46 @@ import { confirmModal } from '../../../utils/index'
 export default {
     name: 'SubAccounts',
     data () {
+        const validatePassWord = (rule, value, callback) => {
+            let reg = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
+            if (value === '') {
+                callback(new Error('请输入密码'));
+            } else if (!reg.test(value)) {
+                callback(new Error('密码必须包含英文和数字'));
+            } else if (this.subForm.comfirmPassword && value !== this.subForm.comfirmPassword) {
+                callback(new Error('两次密码输入不一致请重新输入'));
+            } else {
+                callback();
+            }
+        };
+        const validatePassCheck = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请二次输入确认密码'));
+            } else if (this.subForm.stPassword && value !== this.subForm.stPassword) {
+                callback(new Error('两次密码输入不一致请重新输入'));
+            } else {
+                callback();
+            }
+        };
+        const validatePhoneCheck = (rule, value, callback) => {
+            let reg = new RegExp(/\d$/);
+            console.log(value.lenght);
+            if (value === '') {
+                callback(new Error('请输入手机号码'));
+            } else if (!reg.test(value)) {
+                callback(new Error('请输入正确的手机号码'));
+            } else if (value.length < 11) {
+                callback(new Error('请输入至少11位手机号码'));
+            } else {
+                callback();
+            }
+        };
         return {
             modal: false,
             modalType: '',
             modalLoading: true,
             tableHeight: 0,
+            functionTableHeight: 0,
             loading: false,
             columns: [
                 {
@@ -63,11 +143,18 @@ export default {
                     width: 150
                 },
                 {
+                    title: '是否停用',
+                    key: 'disabled',
+                    slot: 'disabled',
+                    align: 'center',
+                    width: 100
+                },
+                {
                     title: '操作',
                     key: 'action',
                     slot: 'action',
                     align: 'center',
-                    width: 150
+                    width: 200
                 }
             ],
             datas: [
@@ -75,15 +162,86 @@ export default {
                     user: '子用户1',
                     created_at: '2016-10-01 00:00:00',
                     updated_at: '2016-10-01 00:00:00',
-                    level: 3
+                    disabled: true,
+                    level: 2
                 },{
                     user: '子用户2',
                     created_at: '2016-10-02 00:00:00',
                     updated_at: '2016-10-02 00:00:00',
+                    disabled: false,
                     level: 2
                 }
             ],
-            selection: []
+            selection: [],
+            functionModel: false,
+            functionColumns: [
+                {
+                    type: 'selection',
+                    width: 60,
+                    align: 'center'
+                },
+                {
+                    title: '功能',
+                    key: 'name',
+                    align: 'center',
+                    width: 100
+                },
+                {
+                    title: '所属模块',
+                    key: 'module',
+                    align: 'center',
+                    width: 100
+                },
+                {
+                    title: '所属模块',
+                    key: 'details',
+                    align: '描述',
+                    tooltip: true
+                },
+
+            ],
+            functionList: [{
+                id: 1,
+                name: '模板选择',
+                module: '会场设置',
+                details: '介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍'
+            },{
+                id: 2,
+                name: '模板定义',
+                module: '会场设置',
+                details: ''
+            }],
+            functionSelection: [],
+            seePwd: false,
+            seeSubPwd: false,
+            subForm: {
+                stName: '',
+                stLoginName: '',
+                stPassword: '',
+                stPhoneNum: '',
+                stEmail: '',
+                comfirmPassword: '',
+                functions: []
+            },
+            subFormRules: {
+                stName: [
+                    { required: true, message: '请输入用户名', trigger: ['blur','change'] }
+                ],
+                stLoginName: [
+                    { required: true, message: '请输入登录名', trigger: ['blur','change'] }
+                ],
+                stPhoneNum: [
+                    { required: true, validator: validatePhoneCheck, trigger: ['blur','change'] }
+                ],
+                stEmail: [
+                    { required: true, message: '请输入邮箱', trigger: ['blur','change'] },
+                    { type: 'email', message: '请输入正确邮箱', trigger: 'blur' }
+                ],
+                stPassword: [
+                    { required: true, validator: validatePassWord, trigger: ['blur','change'] }
+                ],
+                comfirmPassword: { required: true, validator: validatePassCheck, trigger: ['blur','change'] }
+            }
         }
     },
     methods: {
@@ -97,33 +255,59 @@ export default {
             console.log(selection);
             this.selection = _.cloneDeep(selection);
         },
-        alertModal(type) {
+        alertModal(type, id = null) {
             this.modalType = type;
+            if (this.modalType !== 'add' && id) this.updateItem(id);
             this.modal = true;
+        },
+        onFunctionSelectChange(selection) {
+            console.log(selection);
+            this.functionSelection = _.cloneDeep(selection);
+        },
+        alertFunctionModel() {
+            this.functionModel = true;
         },
         deletes() {
             if (!this.selection.length) {
-                return this.$Message.warning({content: '请先选择子账号', closable: true});
+                return this.$Message.warning({content: '请先选择子账户', closable: true});
             }
             let str = '';
             this.selection.forEach(val => {
                 str += `<p>${val.user}</p>`;
             })
-            confirmModal('confirm', '提示', `<p>是否确认删除这些账号？</p><br />${str}`, this.sureDelete);
+            confirmModal('confirm', '提示', `<p>是否确认删除这些账户？</p><br />${str}`, this.sureDelete);
         },
-        asyncOK() {
+        async updateItem(id) {
+            let item = this.datas.find(val => {
+                return val.user === id;
+            });
+            if (!_.isEmpty(item)) {
+                this.subForm = _.cloneDeep(item);
+                delete this.subForm['user'];
+                delete this.subForm['created_at'];
+                delete this.subForm['level'];
+                delete this.subForm['updated_at'];
+                delete this.subForm['disabled'];
+            } else {
+                this.modal = false;
+            }
+        },
+        async sureOK() {
             const fun = () => {
                 let newItem = {
-                    user: '子用户3',
+                    user: this.subForm.stName,
                     created_at: '2016-10-03 00:00:00',
                     updated_at: '2016-10-03 00:00:00',
-                    level: 1
+                    level: 2
                 }
+                newItem = Object.assign({}, newItem, this.subForm);
                 this.datas.push(newItem);
             }
             this.selection = [];
             setTimeout(() => {
                 if (this.modalType === 'add') fun();
+                else this.sureUpdate();
+                this.$refs.subForm.resetFields();
                 this.modal = false;
             }, 2000);
         },
@@ -135,7 +319,7 @@ export default {
                 console.log(selected);
                 let copyDatas = _.cloneDeep(this.datas);
                 copyDatas.forEach(item => {
-                    if (selected.includes(item.user) !== -1) {
+                    if (selected.includes(item.user)) {
                         this.datas.splice(this.datas.findIndex(v => { return item.user === v.user; }), 1);
                     }
                 });
@@ -147,10 +331,17 @@ export default {
                     resolve(true);
                 }, 2000);
             });
+        },
+        async sureUpdate() {
+            // TODO: 根据ID更新列表
+        },
+        sureLevel() {
+            this.functionModel = false;
         }
     },
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 250;
+        this.functionTableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 500;
     }
 }
 </script>
@@ -164,8 +355,10 @@ export default {
                 margin-right: 0;
             }
         }
-        text-align: left;
-        margin-bottom: 20px;
+        &.top {
+            text-align: left;
+            margin-bottom: 20px;
+        }
     }
 }
 </style>
