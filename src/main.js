@@ -4,6 +4,7 @@ import store from './store/index';
 import router from './router/router';
 
 // import iView from 'iview';
+// import './style/base.scss';
 import 'iview/dist/styles/iview.css';
 import './assets/iconfont/iconfont.css';
 import '@/plugins/iview'

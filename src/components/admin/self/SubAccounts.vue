@@ -3,15 +3,19 @@
         <div class="button-area top">
             <Button type="primary" icon="md-add" @click="alertModal('add')">新增子账户</Button>
             <Button type="primary" icon="md-trash" @click="deletes">删除子账户</Button>
+            <Select style="width: 100px; margin-left: 10px" v-model="searchSelect">
+                <Option value="user" label="用户名"></Option>
+            </Select>
+            <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入用户名搜索"  @input="searchFun" />
         </div>
         <Table ref="table" border stripe :max-height="tableHeight" :width="1012" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
-            <template slot-scope="{ row, index }" slot="level">
+            <template slot-scope="{ row }" slot="level">
                 <Tag color="green">{{level(row.level)}}</Tag>
             </template>
-            <template slot-scope="{ row, index }" slot="disabled">
+            <template slot-scope="{ row }" slot="disabled">
                 <SwitchTab v-model="row.disabled" size="small" />
             </template>
-            <template slot-scope="{ row, index }" slot="action">
+            <template slot-scope="{ row }" slot="action">
                 <div class="button-area">
                     <Button type="primary" size="small" @click="alertModal('edit', row.user)">编辑</Button>
                     <Button type="primary" size="small" @click="alertFunctionModel(row.user)">功能分配</Button>
@@ -61,6 +65,7 @@
             :width="700"
             @on-ok="sureLevel"
             @on-cancel="() => { this.functionModel = false }">
+            <Input style="width: 200px; margin-bottom: 10px" v-model="searchFunctionInput" placeholder="输入功能名或模块名搜索"  @input="searchFunctionFun" />
             <Table ref="table" border stripe :height="functionTableHeight" :width="668" :loading="false" :columns="functionColumns" :data="functionList"  @on-selection-change="onFunctionSelectChange">
             </Table>
         </Modal>
@@ -106,6 +111,11 @@ export default {
             }
         };
         return {
+            searchSelect: 'user',
+            searchInput: '',
+            searchFun: null,
+            searchFunctionInput: '',
+            searchFunctionFun: null,
             modal: false,
             modalType: '',
             modalLoading: true,
@@ -172,6 +182,7 @@ export default {
                     level: 2
                 }
             ],
+            copyDatas: [],
             selection: [],
             functionModel: false,
             functionColumns: [
@@ -212,6 +223,7 @@ export default {
                 details: ''
             }],
             functionSelection: [],
+            copyFunctionList: [],
             seePwd: false,
             seeSubPwd: false,
             subForm: {
@@ -245,11 +257,27 @@ export default {
         }
     },
     methods: {
-        onSelect(selection) {
-            console.log(selection)
+        debounceSearch() {
+            if (this.searchInput) {
+                let reg = new RegExp(this.searchInput, "i");
+                this.datas = this.copyDatas.filter(val => {
+                    return reg.test(val.user);
+                });
+            } else {
+                this.datas = _.cloneDeep(this.copyDatas);
+            }
+            this.selection = [];
         },
-        onSelectAll(selection) {
-            console.log(selection)
+        debounceSearchFunction() {
+            if (this.searchFunctionInput) {
+                let reg = new RegExp(this.searchFunctionInput, "i");
+                this.functionList = this.copyFunctionList.filter(val => {
+                    return reg.test(val.name) || reg.test(val.module);
+                });
+            } else {
+                this.functionList = _.cloneDeep(this.copyFunctionList);
+            }
+            this.functionSelection = [];
         },
         onSelectChange(selection) {
             console.log(selection);
@@ -338,6 +366,14 @@ export default {
         sureLevel() {
             this.functionModel = false;
         }
+    },
+    created() {
+        this.searchFun = _.debounce(this.debounceSearch, 1000);
+        this.searchFunctionFun = _.debounce(this.debounceSearchFunction, 1000);
+    },
+    beforeMount() {
+        this.copyDatas = _.cloneDeep(this.datas);
+        this.copyFunctionList = _.cloneDeep(this.functionList);
     },
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 250;

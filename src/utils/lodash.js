@@ -1,5 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
-// import debounce from 'lodash/debounce';
+import debounce from 'lodash/debounce';
 // import orderBy from 'lodash/orderBy';
 // import pick from 'lodash/pick';
 // import isArray from 'lodash/isArray';
@@ -29,7 +29,7 @@ import has from 'lodash/has';
 // import throttle from 'lodash/throttle';
 export default {
 	isEmpty,
-	// debounce,
+	debounce,
 	// orderBy,
 	// pick,
 	// isArray,
