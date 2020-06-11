@@ -63,18 +63,20 @@
             :title="'功能分配'"
             :loading="modalLoading"
             :width="700"
-            @on-ok="sureLevel"
+            @on-ok="sureFunction"
             @on-cancel="() => { this.functionModel = false }">
-            <Input style="width: 200px; margin-bottom: 10px" v-model="searchFunctionInput" placeholder="输入功能名或模块名搜索"  @input="searchFunctionFun" />
-            <Table ref="table" border stripe :height="functionTableHeight" :width="668" :loading="false" :columns="functionColumns" :data="functionList"  @on-selection-change="onFunctionSelectChange">
-            </Table>
+            <FunctionList @confirm="confirmFunction"></FunctionList>
+            <!-- <Input style="width: 200px; margin-bottom: 10px" v-model="searchFunctionInput" placeholder="输入功能名或模块名搜索"  @input="searchFunctionFun" />
+            <Table ref="table" border stripe :height="functionTableHeight" :width="668" :loading="false" :columns="functionColumns" :data="functionList"  @on-selection-change="onFunctionSelectChange"></Table> -->
         </Modal>
     </div>
 </template>
 <script>
 import { confirmModal } from '../../../utils/index'
+import FunctionList from '../../common/FunctionList'
 export default {
     name: 'SubAccounts',
+    components: {FunctionList},
     data () {
         const validatePassWord = (rule, value, callback) => {
             let reg = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
@@ -114,13 +116,10 @@ export default {
             searchSelect: 'user',
             searchInput: '',
             searchFun: null,
-            searchFunctionInput: '',
-            searchFunctionFun: null,
             modal: false,
             modalType: '',
             modalLoading: true,
             tableHeight: 0,
-            functionTableHeight: 0,
             loading: false,
             columns: [
                 {
@@ -185,45 +184,6 @@ export default {
             copyDatas: [],
             selection: [],
             functionModel: false,
-            functionColumns: [
-                {
-                    type: 'selection',
-                    width: 60,
-                    align: 'center'
-                },
-                {
-                    title: '功能',
-                    key: 'name',
-                    align: 'center',
-                    width: 100
-                },
-                {
-                    title: '所属模块',
-                    key: 'module',
-                    align: 'center',
-                    width: 100
-                },
-                {
-                    title: '所属模块',
-                    key: 'details',
-                    align: '描述',
-                    tooltip: true
-                },
-
-            ],
-            functionList: [{
-                id: 1,
-                name: '模板选择',
-                module: '会场设置',
-                details: '介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍'
-            },{
-                id: 2,
-                name: '模板定义',
-                module: '会场设置',
-                details: ''
-            }],
-            functionSelection: [],
-            copyFunctionList: [],
             seePwd: false,
             seeSubPwd: false,
             subForm: {
@@ -268,17 +228,6 @@ export default {
             }
             this.selection = [];
         },
-        debounceSearchFunction() {
-            if (this.searchFunctionInput) {
-                let reg = new RegExp(this.searchFunctionInput, "i");
-                this.functionList = this.copyFunctionList.filter(val => {
-                    return reg.test(val.name) || reg.test(val.module);
-                });
-            } else {
-                this.functionList = _.cloneDeep(this.copyFunctionList);
-            }
-            this.functionSelection = [];
-        },
         onSelectChange(selection) {
             console.log(selection);
             this.selection = _.cloneDeep(selection);
@@ -287,10 +236,6 @@ export default {
             this.modalType = type;
             if (this.modalType !== 'add' && id) this.updateItem(id);
             this.modal = true;
-        },
-        onFunctionSelectChange(selection) {
-            console.log(selection);
-            this.functionSelection = _.cloneDeep(selection);
         },
         alertFunctionModel() {
             this.functionModel = true;
@@ -363,21 +308,22 @@ export default {
         async sureUpdate() {
             // TODO: 根据ID更新列表
         },
-        sureLevel() {
+        sureFunction() {
             this.functionModel = false;
+        },
+        confirmFunction(selection) {
+            let select = selection;
+            console.log(select);
         }
     },
     created() {
         this.searchFun = _.debounce(this.debounceSearch, 1000);
-        this.searchFunctionFun = _.debounce(this.debounceSearchFunction, 1000);
     },
     beforeMount() {
         this.copyDatas = _.cloneDeep(this.datas);
-        this.copyFunctionList = _.cloneDeep(this.functionList);
     },
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 250;
-        this.functionTableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 500;
     }
 }
 </script>
