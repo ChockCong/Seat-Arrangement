@@ -50,6 +50,7 @@ export default {
         }
     }
     .content {
+        background-color: white;
         height: calc(100vh - 64px);
     }
 }
