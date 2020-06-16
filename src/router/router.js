@@ -34,7 +34,6 @@ const router = new VueRouter({
                     name: 'login',
                     component: () => import('../view/admin/login.vue'),
                 },
-                
                 {
                     path: 'management',
                     name: 'management',
@@ -50,6 +49,11 @@ const router = new VueRouter({
                             path: 'info',
                             name: 'info',
                             component: () => import('../components/admin/self/Info.vue'),
+                        },
+                        {
+                            path: 'buy',
+                            name: 'buy',
+                            component: () => import('../components/admin/Buy.vue'),
                         },
                         {
                             path: 'logs',

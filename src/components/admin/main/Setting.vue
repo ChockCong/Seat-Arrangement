@@ -233,13 +233,13 @@ export default {
         },
         monitorWindowSize() {
             let w = document.documentElement.clientWidth || document.body.clientWidth
-            if (w < 1300) {
+            if (w < 800) {
                 this.showStart(false)
             }
             window.onresize = () => {
                 // 可视窗口宽度太小 自动收缩侧边栏
                 // console.log(w);
-                if (w < 1300 && w > (document.documentElement.clientWidth || document.body.clientWidth)) {
+                if (w < 800 && w > (document.documentElement.clientWidth || document.body.clientWidth)) {
                     this.showStart(false)
                 }
                 w = document.documentElement.clientWidth || document.body.clientWidth

@@ -5,15 +5,15 @@
                 <Icon type="logo-android" />
             </div> -->
             <div class="button-wrap">
-                <Button type="warning" @click="functionModel = true">会员升级</Button>
-                <Button type="info"  @click="functionModel = true">会员续费</Button>
+                <Button type="warning" @click="goToBuy">会员升级</Button>
+                <Button type="info"  @click="goToBuy">会员续费</Button>
             </div>
         </div>
         <div class="content-wrap">
             <Table v-if="!edit" width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
                 <template slot-scope="{ row, index }" slot="content">
                     <div class="content-box">
-                        <Tag color="blue">{{index === 1 ? level(row.content) : row.content}}</Tag>
+                        <Tag :color="index === 1 ? 'green' : 'blue'">{{index === 1 ? level(row.content) : row.content}}</Tag>
                     </div>
                 </template>
             </Table>
@@ -39,6 +39,7 @@
             @on-cancel="() => { this.functionModel = false }">
             <FunctionList :sales="true" @confirm="confirmFunction"></FunctionList>
         </Modal>
+        
     </div>
 </template>
 <script>
@@ -73,6 +74,9 @@ export default {
         })
     },
     methods: {
+        goToBuy() {
+            this.$router.push('buy');
+        },
         editInfo() {
             this.edit = !this.edit;
             this.$forceUpdate();

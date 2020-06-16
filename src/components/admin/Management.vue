@@ -9,7 +9,7 @@
             </div>
             <!-- 菜单栏 -->
             <Menu class="menu" ref="asideMenu" theme="dark" width="100%" @on-select="selectMenuCallback"
-            accordion :open-names="openMenus" :active-name="currentPage" @on-open-change="menuChange">
+            :accordion="false" :open-names="openMenus" :active-name="currentPage" @on-open-change="menuChange">
                 <!-- 动态菜单 -->
                 <div v-for="(item, index) in menuItems" :key="index">
                     <Submenu :class="isShowAsideTitle? '' : 'shrink'" v-if="item.children" :name="index">
@@ -103,7 +103,7 @@
                     <ul class="ul-c">
                         <li v-for="(item, index) in tagsArry" :key="index" :class="{active: isActive(item.name)}" @click="activeTag(index)">
                             <a class="li-a">
-                                {{item.text}}
+                                {{isNoMenu(item)}}
                             </a>
                             <Icon size="16" @click="closeTag(index)" type="md-close" />
                         </li>
@@ -143,8 +143,10 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import Buy from './Buy';
 export default {
     name: 'Management',
+    components: { Buy },
     data() {
         return {
             // 用于储存页面路径
@@ -277,8 +279,18 @@ export default {
 
             return obj
         },
+        isBuy() {
+            
+        }
     },
     methods: {
+        isNoMenu(item) {
+            if (!item.text && item.name === 'buy') {
+                return '购买';
+            } else {
+                return item.text;
+            }
+        },
         getCrumbs(to) {
             const name = to.name
             this.currentPage = name
@@ -535,6 +547,9 @@ export default {
         },
         // 菜单栏改变事件
         menuChange(data) {
+            if (!this.isShowAsideTitle) {
+                this.expandAside();
+            }
             this.menuCache = data
         },
         processNameToTitle(obj, data, text) {
