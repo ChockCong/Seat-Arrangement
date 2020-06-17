@@ -34,7 +34,7 @@ export default {
                     width: 100
                 },
                 {
-                    title: '所属模块',
+                    title: '功能详情',
                     key: 'details',
                     align: 'left',
                     tooltip: true
@@ -45,13 +45,13 @@ export default {
                 name: '模板选择',
                 module: '会场设置',
                 details: '介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍',
-                price: 500.00
+                price: 300.00
             },{
                 id: 2,
                 name: '模板定义',
                 module: '会场设置',
                 details: '介绍介绍介绍介绍介绍介绍',
-                price: 500.00
+                price: 200.00
             }],
             functionSelection: [],
             copyFunctionList: [],

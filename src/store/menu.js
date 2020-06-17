@@ -117,7 +117,7 @@ const menuItems = [
                 type: 'md-bookmarks',
                 category: 'god',
                 size: 18, // icon大小
-                name: '',
+                name: 'function-setting',
                 text: '功能管理',
             },
             {

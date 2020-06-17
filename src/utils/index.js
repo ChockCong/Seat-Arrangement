@@ -3,6 +3,12 @@ const vm = new Vue();
 export function globalFunc(err) {
     console.log('-----这里是惊雷实验室-----')
 }
+
+export function FormatNum(number, type = 2, space = false) {
+    if (space && (!number || String(number) === '0.00')) return '';
+    return Number(number).toFixed(type);
+}
+
 export function confirmModal(type, titleStr = '', contentStr = '', handler = undefined) {
     const title = titleStr;
     const content = contentStr;
@@ -46,6 +52,7 @@ export function confirmModal(type, titleStr = '', contentStr = '', handler = und
             })
     }
 }
+
 export function level(level) {
     let role = ''
     switch(level) {
