@@ -143,7 +143,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Buy from './Buy';
+import Buy from './Buy/Buy';
 export default {
     name: 'Management',
     components: { Buy },

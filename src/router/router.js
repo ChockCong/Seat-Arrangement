@@ -53,7 +53,7 @@ const router = new VueRouter({
                         {
                             path: 'buy',
                             name: 'buy',
-                            component: () => import('../components/admin/Buy.vue'),
+                            component: () => import('../components/admin/Buy/Buy.vue'),
                         },
                         {
                             path: 'logs',

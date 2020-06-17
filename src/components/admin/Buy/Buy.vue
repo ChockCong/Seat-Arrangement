@@ -8,7 +8,7 @@
                 <template v-for="(item, index) in menu">
                     <div class="function-item" :key="index">
                         <div class="function-item-content" :class="item.bought ? 'bought' : ''">
-                            <img alt="Vue logo" src="../../assets/logo.png">
+                            <img alt="Vue logo" src="../../../assets/logo.png">
                             <div class="content-detail">
                                 {{`功能${index}:介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍`}}
                             </div>
@@ -25,18 +25,22 @@
                 <span>{{ `总费用：￥${showPrice}` }}</span>
             </div>
             <div class="button">
-                <Button type="warning">{{ '立刻购买' }}</Button>
+                <Button type="warning" @click="showPay = true">{{ '立刻购买' }}</Button>
             </div>
         </div>
+        <Pay v-model="showPay"></Pay>
     </div>
 </template>
 <script>
-import menuItems from '../../store/menu';
+import menuItems from '../../../store/menu';
+import Pay from './Pay';
 export default {
     name: 'Buy',
+    components: {Pay},
     data() {
         return {
             totalPrice: 0,
+            showPay: false
         }
     },
     computed: {
