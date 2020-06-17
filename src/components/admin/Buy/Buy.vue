@@ -13,7 +13,7 @@
                                 {{`功能${index}:介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍`}}
                             </div>
                             <div class="content-button">
-                                <Button type="primary" @click="bought(item)">{{ '购买' }}</Button>
+                                <Button type="primary" @click="bought(item, $event)">{{ '购买' }}</Button>
                             </div>
                         </div>
                     </div>
@@ -21,8 +21,23 @@
             </div>
         </div>
         <div class="bottom-area">
+            <Poptip class="shop-menu" :title="'已选功能'" placement="left-end" trigger="click" :disabled="!selectedMenu.length">
+                <div class="shop-car" @click="drawer = true">
+                    <div class="tip">{{ selectedMenu.length }}</div>
+                    <Icon type="md-list" />
+                </div>
+                <template slot="content">
+                    <div class="selecteds" v-for="(item, index) in selectedMenu" :key="index">
+                        <span>{{item.text}}</span>
+                        <!-- <Select v-model="model15" prefix="ios-home" style="width:200px">
+                            <Option :value="item.value" :label="''"></Option>
+                        </Select> -->
+                        <Icon type="ios-close" @click="popSelected(item)" />
+                    </div>
+                </template>
+            </Poptip>
             <div class="price">
-                <span>{{ `总费用：￥${showPrice}` }}</span>
+                <span>{{ `总费用：￥` }}{{showPrice | FormatNum}}</span>
             </div>
             <div class="button">
                 <Button type="warning" @click="showPay = true">{{ '立刻购买' }}</Button>
@@ -40,7 +55,9 @@ export default {
     data() {
         return {
             totalPrice: 0,
-            showPay: false
+            selectedMenu: [],
+            showPay: false,
+            drawer: false
         }
     },
     computed: {
@@ -58,11 +75,23 @@ export default {
         back() {
             this.$router.push('info');
         },
-        bought(item) {
+        bought(item, e) {
             this.menu.forEach(val => {
-                if (val.text === item.text) {
+                if (val.text === item.text && !val.bought) {
                     val.bought = true;
                     this.totalPrice += Math.random(0,1) * 10 + 1;
+                    this.selectedMenu.push(val);
+                }
+            });
+            this.$forceUpdate();
+        },
+        popSelected(item) {
+            this.selectedMenu = this.selectedMenu.filter(val => { return val.text !== item.text; });
+            this.menu.forEach((val, index) => {
+                if (val.text === item.text) {
+                    this.totalPrice -= Math.random(0,1) * 10 + 1;
+                    val.bought = false;
+                    
                 }
             });
             this.$forceUpdate();
@@ -82,7 +111,7 @@ export default {
         padding: 5px 10px;
         color: white;
         background-color: #2d8cf0;
-        box-shadow: -10px 0 5px #000;
+        box-shadow: 0 0 5px #000;
     }
     & .content-area {
         flex: 1;
@@ -137,16 +166,63 @@ export default {
         }
     }
     & .bottom-area {
-        // border-top: 1px solid gray;
-        box-shadow: -10px 0 5px #000;
+        position: relative;
+        box-shadow: 0 0 5px #000;
         background-color: #515a6e;
         height: 80px;
         display: flex;
-        justify-content: space-around;
+        justify-content: flex-end;
+        padding: 0 20px;
         align-items: center;
         & .price {
             font-size: 20px;
             color: white;
+            margin-right: 20px;
+        }
+        & .shop-menu {
+            position: absolute;
+            top: -50px;
+            right: 20px;
+            & .selecteds {
+                display: flex;
+                justify-content: space-between;
+                & i {
+                    font-size: 25px;
+                    cursor: pointer;
+                    &:hover {
+                        font-weight: bold;
+                    }
+                }
+            }
+            & .tip {
+                position: absolute;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                z-index: 3;
+                background-color: red;
+                color: white;
+                top: -3px;
+                right: -3px;
+                transition: 0.5s all cubic-bezier(0.14,-1.33,1,0.18);
+            }
+            & .shop-car {
+                position: relative;
+                box-shadow: -2px -2px 10px #515a6e;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                background-color: #f90;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                z-index: 2;
+                & i {
+                    font-size: 24px;
+                }
+        }
         }
     }
 }

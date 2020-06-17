@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-    Menu, Submenu, MenuItem, Button, Input, Select, Option, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table,
+    Menu, Submenu, MenuItem, Button, Input, Select, Option, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table, Poptip,
     Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, RadioGroup, Radio, Row, Col, Layout, Header, Content, Footer
 } from 'iview';
 Vue.component('Layout', Layout);
@@ -32,6 +32,7 @@ Vue.component('SwitchTab', Switch);
 Vue.component('RadioGroup', RadioGroup);
 Vue.component('Radio', Radio);
 Vue.component('Drawer', Drawer);
+Vue.component('Poptip', Poptip);
 Vue.component('Tag', Tag);
 
 Vue.component('Icon', Icon);
