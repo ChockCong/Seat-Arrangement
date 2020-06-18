@@ -35,10 +35,10 @@
                     <span v-if="step === 4" style="color:#f60;">{{ mutipliTag ? '(多选模式)':'(调位模式)' }}</span>
                 </h3> -->
                 <Steps :current="step - 1" size="small" class="step-bar">
-                    <Step :title="`第1步：确定舞台位置`" content=""></Step>
-                    <Step :title="`第2步：确定入口位置`" content=""></Step>
-                    <Step :title="`第3步：确定座位位置`" content=""></Step>
-                    <Step :title="`第4步：确定座位编号`" :content="step === 4 ? (mutipliTag ? '(多选模式)':'(调位模式)') : ''"></Step>
+                    <Step :title="`确定舞台位置`" content=""></Step>
+                    <Step :title="`确定入口位置`" content=""></Step>
+                    <Step :title="`确定座位位置`" content=""></Step>
+                    <Step :title="`确定座位编号`" :content="step === 4 ? (mutipliTag ? '(多选模式)':'(调位模式)') : ''"></Step>
                 </Steps>
                 <section  class="button-area-item" v-if="step < 4">
                     <Button :class="!posMutipliTag ? '' : 'gary'" :type="'primary'" size="small" shape="circle" @click="posSelectControl(false)">
@@ -813,10 +813,12 @@ export default {
             & .step-bar {
                 width: 60%;
                 height: 40px;
+                text-align: left;
             }
             @media screen and (max-width: 1350px) {
                & .step-bar {
                     width: 730px;
+                    // text-align: left;
                 }
             }
             & .button-area {

@@ -20,7 +20,7 @@ const menuItems = [
                     {
                         type: 'md-wine',
                         size: 18, // icon大小
-                        name: '',
+                        name: 'seat-using',
                         text: '模板选择',
                     },
                     {
@@ -28,26 +28,6 @@ const menuItems = [
                         size: 18, // icon大小
                         name: 'seat-setting',
                         text: '模板定义',
-                    }
-                ]
-            },
-            {
-                type: 'ios-people',
-                size: 18, // icon大小
-                name: '',
-                text: '名单模板',
-                children: [
-                    {
-                        type: 'ios-people',
-                        size: 18, // icon大小
-                        name: '',
-                        text: '模板下载',
-                    },
-                    {
-                        type: 'ios-people',
-                        size: 18, // icon大小
-                        name: '',
-                        text: '服务选择'
                     }
                 ]
             }
