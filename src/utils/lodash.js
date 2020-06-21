@@ -9,7 +9,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import mapValues from 'lodash/mapValues';
 // import filter from 'lodash/filter';
 // import forEach from 'lodash/forEach';
-// import isEqual from 'lodash/isEqual';
+import isEqual from 'lodash/isEqual';
 // import uniq from 'lodash/uniq';
 // import findKey from 'lodash/findKey';
 // import map from 'lodash/map';
@@ -39,7 +39,7 @@ export default {
 	mapValues,
 	// filter,
 	// forEach,
-	// isEqual,
+	isEqual,
 	// uniq,
 	// findKey,
 	// map,
