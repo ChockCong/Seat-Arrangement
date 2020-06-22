@@ -21,8 +21,8 @@
             </div>
         </div>
         <div class="bottom-area">
-            <Poptip class="shop-menu" :title="'已选功能'" placement="left-end" trigger="click" :disabled="!selectedMenu.length">
-                <div class="shop-car" @click="drawer = true">
+            <Poptip class="shop-menu" v-model="drawer" :title="'已选功能'" placement="left-end" trigger="click" :disabled="!selectedMenu.length">
+                <div class="shop-car">
                     <div class="tip">{{ selectedMenu.length }}</div>
                     <Icon type="md-list" />
                 </div>
@@ -94,6 +94,8 @@ export default {
                     
                 }
             });
+            if (!this.selectedMenu.length) this.drawer = false;
+            else this.drawer = true;
             this.$forceUpdate();
         }
     }

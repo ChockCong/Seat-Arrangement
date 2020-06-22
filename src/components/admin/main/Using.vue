@@ -29,7 +29,7 @@
                             <span v-else>无</span>
                         </span>
                     </div>
-                    <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+                    <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="false" :columns="seatColumns" :data="seatDatas"  @on-selection-change="onSelectChange">
                         <template slot-scope="{ row }" slot="select">
                             <Checkbox :disabled="row.disabled" v-model="row.chceked" @on-change="onSelectChange(row)"></Checkbox>
                         </template>
@@ -39,13 +39,46 @@
                     </Table>
                 </template>
                 <template v-if="step === 2">
-                    <div class="button-area">
-                        <Upload action="//jsonplaceholder.typicode.com/posts/">
-                            <Button icon="ios-cloud-upload-outline" type="primary">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
-                        </Upload>
+                    <div class="button-area clear-flex">
+                        <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
+                        <Button icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
+                        <Button type="primary" icon="md-add" @click="mModel = true">新增宾客</Button>
+                        <Button type="primary" icon="md-trash" @click="deletes">删除宾客</Button>
+                        <Select style="width: 100px;" v-model="searchClientSelect">
+                            <Option value="clientName" label="宾客名"></Option>
+                            <Option value="seatNo" label="座位号"></Option>
+                        </Select>
+                        <Input style="width: 200px; margin: 0 10px" v-model="searchClientInput" placeholder="输入宾客名搜索"  @input="searchClientFun" />
                     </div>
+                    <Table v-if="hasFile || hasClients" ref="table" border stripe :max-height="tableHeight" :width="462" :loading="false" :columns="excelColumns" :data="excelDatas"  @on-selection-change="onSelectClientChange">
+                        <template slot-scope="{ row }" slot="client_name">
+                            <template v-if="!row.edit">{{ row.client_name }}</template>
+                            <Input v-else v-model="row.client_name" />
+                        </template>
+                        <template slot-scope="{ row }" slot="seat_no">
+                            <template v-if="!row.edit">{{ row.seat_no }}</template>
+                            <Input v-else v-model="row.seat_no" />
+                        </template>
+                        <template slot-scope="{ row }" slot="action">
+                            <Button type="primary" size="small" @click="row.edit = !row.edit">{{ row.edit ? '保存' : '编辑' }}</Button>
+                        </template>
+                    </Table>
                 </template>
             </div>
+            <Modal
+                v-model="mModel"
+                :title="'新增宾客'"
+                @on-ok="sureOK"
+                @on-cancel="() => { this.mModel = false }">
+                <Form ref="subForm" :model="Form" :rules="FormRules" class="subForm">
+                    <FormItem label="" prop="client_name">
+                        <Input type="text" v-model="Form.client_name" placeholder="宾客名" clearable />
+                    </FormItem>
+                    <FormItem label="" prop="seat_no">
+                        <Input type="number" v-model="Form.seat_no" placeholder="座位号" clearable />
+                    </FormItem>
+                </Form>
+            </Modal>
             <Modal v-model="nModel" :title="'模板预览'">
                 <div class="modal-form">
                     <img :src="'../../../assets/logo.png'" />
@@ -56,6 +89,7 @@
     </div>
 </template>
 <script>
+import { confirmModal } from '../../../utils/index'
 export default {
     name: 'Using',
     data() {
@@ -68,7 +102,7 @@ export default {
             searchFun: null,
             nModel: false,
             tableHeight: 0,
-            columns: [
+            seatColumns: [
                 {
                     title: '选择',
                     key: 'select',
@@ -104,7 +138,7 @@ export default {
                     width: 200
                 }
             ],
-            datas: [
+            seatDatas: [
                 {
                     moduleName: 'xx婚宴',
                     keyName: 'xxxx婚宴专用.....',
@@ -191,7 +225,72 @@ export default {
                     disabled: false
                 }
             ],
-            file: {}
+            file: null,
+            excelColumns: [
+                {
+                    type: 'selection',
+                    width: 60,
+                    align: 'center'
+                },
+                {
+                    title: '宾客姓名',
+                    key: 'client_name',
+                    slot: 'client_name',
+                    // align: 'center',
+                    width: 200,
+                    tooltip: true
+                },
+                {
+                    title: '座位号',
+                    key: 'seat_no',
+                    slot: 'seat_no',
+                    // align: 'center',
+                    width: 100,
+                    sortable: true
+                },
+                {
+                    title: '操作',
+                    key: 'action',
+                    slot: 'action',
+                    align: 'center',
+                    width: 100
+                }
+            ],
+            excelDatas: [
+                {
+                    client_name: '测试宾客1',
+                    seat_no:1,
+                    edit: false,
+                },
+                {
+                    client_name: '测试宾客2',
+                    seat_no:1,
+                    edit: false
+                },
+                {
+                    client_name: '迈克尔.乔丹',
+                    seat_no:2,
+                    edit: false
+                }
+            ],
+            copyExcelDatas: [],
+            searchClientFun: null,
+            selectedClients: [],
+            searchClientSelect: 'clientName',
+            searchClientInput: '',
+            mModel: false,
+            Form: {
+                client_name: '',
+                seat_no: 0
+            },
+            FormRules: {
+                client_name: [
+                    { required: true, message: '请输入宾客名', trigger: ['blur','change'] }
+                ],
+                seat_no: [
+                    { required: true, message: '请输入台号', trigger: ['blur','change'] },
+                ]
+            }
         }
     },
     computed: {
@@ -199,21 +298,86 @@ export default {
             return !_.isEmpty(this.selectedModule);
         },
         hasFile() {
-            return !_.isEmpty(this.file);
+            return this.file;
+        },
+        hasClients() {
+            return this.excelDatas.length;
+        }
+    },
+    watch:{
+        searchClientSelect() {
+            this.searchClientInput = '';
+            this.debounceClientsSearch();
         }
     },
     methods: {
+        async upload(e) {
+            const file = e.target.files;
+            this.file = file[0];
+            console.log(this.file);
+            this.$refs.fileInput.value = null;
+        },
+        clickFile() {
+            this.$refs.fileInput.click();
+        },
+        sureOK() {
+            this.copyExcelDatas.push(Object.assign({}, this.Form, { edit: false }));
+            this.debounceClientsSearch();
+            this.mModel = false;
+        },
+        deletes() {
+            if (!this.selectedClients.length) {
+                return this.$Message.warning({content: '请先选择宾客', closable: true});
+            }
+            let str = '';
+            this.selectedClients.forEach(val => {
+                str += `<p>${val.client_name}</p>`;
+            })
+            confirmModal('confirm', '提示', `<p>是否确认删除这些宾客？</p><br />${str}`, this.sureDelete);
+        },
+        async sureDelete() {
+            const fun = () => {
+                let selected = this.selectedClients.map(val => {
+                    return val.client_name;
+                });
+                console.log(selected);
+                let copyDatas = _.cloneDeep(this.copyExcelDatas);
+                copyDatas.forEach(item => {
+                    if (selected.includes(item.client_name)) {
+                        this.copyExcelDatas.splice(this.copyExcelDatas.findIndex(v => { return item.client_name === v.client_name; }), 1);
+                    }
+                });
+                this.selectedClients = [];
+                this.debounceClientsSearch();
+            }
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    fun();
+                    resolve(true);
+                }, 2000);
+            });
+        },
         debounceSearch() {
             if (this.searchInput) {
                 let reg = new RegExp(this.searchInput, "i");
-                this.datas = this.copyDatas.filter(val => {
+                this.seatDatas = this.copyDatas.filter(val => {
                     return reg.test(val.moduleName);
                 });
             } else {
-                this.datas = _.cloneDeep(this.copyDatas);
+                this.seatDatas = _.cloneDeep(this.copyDatas);
             }
             if (!_.isEmpty(this.selectedModule)) {
                 this.onSelectChange(this.selectedModule);
+            }
+        },
+        debounceClientsSearch() {
+            if (this.searchClientInput) {
+                let reg = new RegExp(this.searchClientInput, "i");
+                this.excelDatas = this.copyExcelDatas.filter(val => {
+                    return this.searchClientSelect === 'clientName' ? reg.test(val.client_name) : reg.test(val.seat_no);
+                });
+            } else {
+                this.excelDatas = _.cloneDeep(this.copyExcelDatas);
             }
         },
         onSelectChange(selection) {
@@ -221,7 +385,7 @@ export default {
             this.selectedModule = !bol ? _.cloneDeep(selection) : {};
             console.log(this.selectedModule);
             if (!_.isEmpty(this.selectedModule)) {
-                this.datas.forEach(item => {
+                this.seatDatas.forEach(item => {
                     if (item.moduleName !== this.selectedModule.moduleName) {
                         item.disabled = true;
                     } else {
@@ -229,7 +393,7 @@ export default {
                     }
                 });
             } else {
-                this.datas.forEach(item => {
+                this.seatDatas.forEach(item => {
                     item.chceked = false;
                     item.disabled = false;
                 });
@@ -237,10 +401,19 @@ export default {
             this.$forceUpdate();
         },
         changeStep(type) {
+            const fun = (type) => {
+                this.step = type === 'next' ? this.step + 1 : this.step - 1;
+            }
             if (this.step === 1) {
                 if (!this.showSelected) return this.$Message.warning({content: '请先选择一个模板', closable: true});
             }
-            this.step = type === 'next' ? this.step + 1 : this.step - 1;
+            if (this.step === 2 && type === 'next') {
+                confirmModal('confirm', '提示', `<p>是否确认宾客名单无误？</p>`, fun(type));
+            }
+            fun(type);
+        },
+        onSelectClientChange(selection) {
+            this.selectedClients = selection;
         },
         preViewImage(row) {
             this.nModel = true;
@@ -248,13 +421,14 @@ export default {
     },
     created() {
         this.searchFun = _.debounce(this.debounceSearch, 1000);
+        this.searchClientFun = _.debounce(this.debounceClientsSearch, 1000);
     },
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 80;
     },
     beforeMount() {
         // for(let i = 0; i < 200; i++) {
-        //     this.datas.push({
+        //     this.seatDatas.push({
         //             moduleName: 'xx婚宴',
         //             keyName: 'xxxx婚宴专用.....',
         //             category: '婚宴型',
@@ -263,7 +437,8 @@ export default {
         //             disabled: false
         //         })
         // }
-        this.copyDatas = _.cloneDeep(this.datas);
+        this.copyDatas = _.cloneDeep(this.seatDatas);
+        this.copyExcelDatas = _.cloneDeep(this.excelDatas);
     }
 }
 </script>
@@ -358,7 +533,12 @@ export default {
             text-align: left;
             display: flex;
             align-items: center;
-            &.
+            &.clear-flex {
+                display: block;
+                & button {
+                    margin-right: 10px;
+                }
+            }
         }
     }
 }
