@@ -105,7 +105,7 @@
                             <a class="li-a">
                                 {{isNoMenu(item)}}
                             </a>
-                            <Icon size="16" @click="closeTag(index)" type="md-close" />
+                            <Icon v-if="item.name !== 'home'" size="16" @click="closeTag(index)" type="md-close" />
                         </li>
                     </ul>
                     <!-- 标签栏相关功能 -->
@@ -213,6 +213,12 @@ export default {
         // 第一个标签
         const name = this.$route.name
         this.currentPage = name
+        if (name !== 'home') {
+            this.tagsArry.push({
+                text: '主页',
+                name: this.home,
+            })
+        }
         this.tagsArry.push({
             text: this.nameToTitle[name],
             name,
@@ -247,9 +253,9 @@ export default {
 
             if (!this.keepAliveData.includes(name)) {
                 // 如果标签超过8个 则将第一个标签删除
-                if (this.tagsArry.length == 8) {
-                    this.tagsArry.shift()
-                }
+                // if (this.tagsArry.length == 8) {
+                //     this.tagsArry.shift()
+                // }
                 this.tagsArry.push({ name, text: this.nameToTitle[name] })
             }
             setTimeout(() => {
@@ -302,9 +308,9 @@ export default {
 
             if (!this.keepAliveData.includes(name)) {
                 // 如果标签超过8个 则将第一个标签删除
-                if (this.tagsArry.length == 8) {
-                    this.tagsArry.shift()
-                }
+                // if (this.tagsArry.length == 8) {
+                //     this.tagsArry.shift()
+                // }
                 this.tagsArry.push({ name, text: this.nameToTitle[name] })
             }
             setTimeout(() => {
@@ -377,9 +383,9 @@ export default {
             this.$router.replace({ name, params })
             if (!this.keepAliveData.includes(name)) {
                 // 如果标签超过8个 则将第一个标签删除
-                if (this.tagsArry.length == 8) {
-                    this.tagsArry.shift()
-                }
+                // if (this.tagsArry.length == 8) {
+                //     this.tagsArry.shift()
+                // }
                 this.tagsArry.push({ name, text: this.nameToTitle[name] })
             }
         },
@@ -516,7 +522,10 @@ export default {
         closeTags(flag) {
             if (flag == 1) {
                 // 关闭其他标签
-                this.tagsArry = []
+                this.tagsArry = [{
+                    name: this.home,
+                    text: '主页'
+                }];
                 this.gotoPage(this.$route.name)
             } else {
                 // 关闭所有标签
@@ -733,6 +742,9 @@ a {
 }
 .active a {
     color: #fff;
+}
+.ivu-icon-md-close {
+    color:lightgray;
 }
 .active .ivu-icon {
     color: #fff;
