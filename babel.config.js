@@ -7,6 +7,13 @@ if (process.env.NODE_ENV !== 'development') {
 module.exports = {
   presets: [
     '@vue/cli-plugin-babel/preset'
+    // [
+		// 	'@vue/app',
+		// 	{
+		// 		polyfills: ['es6.promise', 'es6.symbol', 'es7.promise.finally'],
+		// 		useBuiltIns: 'entry'
+		// 	}
+		// ]
   ],
   plugins: plugins
 }

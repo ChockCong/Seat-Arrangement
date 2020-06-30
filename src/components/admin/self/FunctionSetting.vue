@@ -8,12 +8,17 @@
             </Select>
             <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入功能名搜索"  @input="searchFun" />
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight" :width="1062" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight" :width="1092" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row }" slot="disabled">
                 <SwitchTab v-model="row.disabled" :disabled="!row.active" size="small" />
             </template>
             <template slot-scope="{ row }" slot="price">
-                <span>￥{{ row.price | FormatNum }}</span>
+                <span v-if="!row.active">￥{{ row.price | FormatNum }}</span>
+                <template v-else>
+                    <Input type="text" v-model="row.price" @on-change="changePrice(row)">
+                        <div style="padding-top: 6px;" slot="prefix">￥</div>
+                    </Input>
+                </template>
             </template>
             <template slot-scope="{ row }" slot="action">
                 <div class="button-area">
@@ -81,7 +86,7 @@ export default {
                     key: 'price',
                     slot: 'price',
                     align: 'center',
-                    width: 100
+                    minWidth: 100
                 },
                 {
                     title: '操作',
@@ -119,6 +124,10 @@ export default {
         }
     },
     methods: {
+        changePrice(row) {
+            row.price = row.price.replace(/[^0-9\.]+/, '');
+            // return value;
+        },
         debounceSearch() {
             if (this.searchInput) {
                 let reg = new RegExp(this.searchInput, "i");

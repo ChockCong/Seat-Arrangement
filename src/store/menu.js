@@ -15,21 +15,14 @@ const menuItems = [
             {
                 type: 'md-wine',
                 size: 18, // icon大小
-                text: '会场设置',
-                children: [
-                    {
-                        type: 'md-wine',
-                        size: 18, // icon大小
-                        name: 'seat-using',
-                        text: '模板选择',
-                    },
-                    {
-                        type: 'md-wine',
-                        size: 18, // icon大小
-                        name: 'seat-setting',
-                        text: '模板定义',
-                    }
-                ]
+                name: 'seat-using',
+                text: '会场模板',
+            },
+            {
+                type: 'md-wine',
+                size: 18, // icon大小
+                name: 'seat-setting',
+                text: '会场定义',
             }
         ]
     },
@@ -74,13 +67,13 @@ const menuItems = [
                     {
                         type: 'md-person',
                         size: 18, // icon大小
-                        name: '',
+                        name: 'package-buy',
                         text: '尊享套餐',
                     },
                     {
                         type: 'md-person',
                         size: 18, // icon大小
-                        name: '',
+                        name: 'free-buy',
                         text: '个性定制',
                     } 
                 ]

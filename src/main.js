@@ -10,7 +10,7 @@ import './assets/iconfont/iconfont.css';
 import '@/plugins/iview'
 import tools from '@/plugins/tools'
 import _ from '@/utils/lodash';
-import { globalFunc, level, FormatNum } from '@/utils/index'
+import { globalFunc, level, FormatNum, openNewWindow } from '@/utils/index'
 // const tools = require('./plugins/tools');
 
 globalFunc();
@@ -29,6 +29,7 @@ window._ = _;
 
 Vue.filter('FormatNum', FormatNum);
 
+Vue.prototype.openNewWindow = openNewWindow;
 Vue.prototype.FormatNum = FormatNum;
 Vue.prototype.level = level;
 Vue.prototype.html2canvas = tools.html2canvas;

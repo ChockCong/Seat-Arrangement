@@ -1,7 +1,24 @@
 import Vue from 'vue';
+import router from '../router/router'
 const vm = new Vue();
 export function globalFunc(err) {
     console.log('-----这里是惊雷实验室-----')
+}
+
+// 通用工具类
+export function openNewWindow({ url, full, query = {} }) {
+	if (!full) {
+		const pageRoute = router.resolve({
+			path: url,
+			query
+		});
+		url = pageRoute.href;
+	}
+    const newLink = document.createElement('a');
+    newLink.target = '_blank';
+	newLink.rel = 'noreferrer noopener';
+	newLink.href = url;
+	newLink.click();
 }
 
 export function FormatNum(number, type = 2, space = false) {
@@ -9,6 +26,7 @@ export function FormatNum(number, type = 2, space = false) {
     return Number(number).toFixed(type);
 }
 
+// 业务工具类
 export function confirmModal(type, titleStr = '', contentStr = '', handler = undefined) {
     const title = titleStr;
     const content = contentStr;
@@ -63,3 +81,5 @@ export function level(level) {
     }
     return role;
 }
+
+

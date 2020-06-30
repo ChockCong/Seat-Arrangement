@@ -175,7 +175,8 @@ export default {
             userImg: '',
             // 主页路由名称
             home: 'home',
-            noticesShow: false
+            noticesShow: false,
+            buyPage: ['package-buy', 'free-buy'],
         }
     },
     created() {
@@ -367,16 +368,24 @@ export default {
         },
         // 跳转页面 路由名称和参数
         gotoPage(name, params) {
+            if (this.buyPage.includes(name)) {
+                this.goToBuy(name);
+                return;
+            }
             this.currentPage = name
             this.crumbs = this.paths[name]
             this.$router.replace({ name, params })
-
             if (!this.keepAliveData.includes(name)) {
                 // 如果标签超过8个 则将第一个标签删除
                 if (this.tagsArry.length == 8) {
                     this.tagsArry.shift()
                 }
                 this.tagsArry.push({ name, text: this.nameToTitle[name] })
+            }
+        },
+        goToBuy(name) {
+            if (this.buyPage.includes(name)) {
+                this.openNewWindow({ url: `/admin/${name}` })
             }
         },
         // 选择菜单回调函数

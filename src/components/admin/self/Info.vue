@@ -4,10 +4,10 @@
             <!-- <div class="user-img-c">
                 <Icon type="logo-android" />
             </div> -->
-            <div class="button-wrap">
+            <!-- <div class="button-wrap">
                 <Button type="warning" @click="goToBuy">会员升级</Button>
                 <Button type="info"  @click="goToBuy">会员续费</Button>
-            </div>
+            </div> -->
         </div>
         <div class="content-wrap">
             <Table v-if="!edit" width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
@@ -27,7 +27,8 @@
                 </template>
             </Table>
             <div class="button-box">
-                <Button type="primary" @click="editInfo">{{ edit ? '保存信息' : '编辑信息' }}</Button>
+                <Button class="button" type="default" v-if="edit" @click="editInfo">{{ '取消' }}</Button>
+                <Button class="button" type="primary" @click="editInfo">{{ edit ? '确认修改' : '编辑信息' }}</Button>
             </div>
         </div>
         <Modal
@@ -172,6 +173,11 @@ export default {
         & .button-box {
             padding: 20px 0;
             text-align: left;
+            & .button {
+                &:first-child {
+                    margin-right: 10px;
+                }
+            }
         }
         ::v-deep .title-cell {
             // background-image: linear-gradient(to bottom right, #2d8cf0, #9ddafb);

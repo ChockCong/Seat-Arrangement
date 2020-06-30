@@ -35,6 +35,16 @@ const router = new VueRouter({
                     component: () => import('../view/admin/login.vue'),
                 },
                 {
+                    path: 'free-buy',
+                    name: 'free-buy',
+                    component: () => import('../components/admin/Buy/Buy.vue'),
+                },
+                {
+                    path: 'package-buy',
+                    name: 'package-buy',
+                    component: () => import('../components/admin/Buy/Buy.vue'),
+                },
+                {
                     path: 'management',
                     name: 'management',
                     component: () => import('../components/admin/Management.vue'),
@@ -49,11 +59,6 @@ const router = new VueRouter({
                             path: 'info',
                             name: 'info',
                             component: () => import('../components/admin/self/Info.vue'),
-                        },
-                        {
-                            path: 'buy',
-                            name: 'buy',
-                            component: () => import('../components/admin/Buy/Buy.vue'),
                         },
                         {
                             path: 'logs',
