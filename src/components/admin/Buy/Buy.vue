@@ -1,8 +1,19 @@
 <template>
     <div class="index-vue-buy">
-        <div class="title">
+        <Header></Header>
+        <div class="ad-carousel">
+            <Carousel autoplay v-model="carousel" :autoplay-speed="2000" loop>
+                <CarouselItem>
+                    <div class="demo-carousel">广告宣传-1</div>
+                </CarouselItem>
+                <CarouselItem>
+                    <div class="demo-carousel">广告宣传-2</div>
+                </CarouselItem>
+            </Carousel>
+        </div>
+        <!-- <div class="title">
                 {{ '功能列表' }}
-            </div>
+        </div> -->
         <div class="content-area">
             <div class="function-list">
                 <template v-for="(item, index) in menu">
@@ -13,20 +24,32 @@
                                 {{`功能${index}:介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍`}}
                             </div>
                             <div class="content-button">
-                                <Button v-if="!item.bought" type="primary" @click="bought(item, $event)">{{ '购买' }}</Button>
+                                <div class="time-type" v-if="!item.bought">
+                                    <template v-if="item.showTime">
+                                        <Input v-model="item.timeValue" @input="item.timeValue = item.timeValue.replace(/[^0-9]$/, '')" style="width:40px"/>
+                                        <Select v-model="item.timeType" style="width:50px">
+                                            <Option :value="'month'">{{ '月' }}</Option>
+                                            <Option :value="'year'">{{ '年' }}</Option>
+                                        </Select>
+                                    </template>
+                                    <Button type="primary" @click="bought(item, $event)">{{ '选择' }}</Button>
+                                </div>
                                 <Icon v-else type="md-checkmark-circle-outline" class="icon-click" />
                             </div>
                         </div>
                     </div>
                 </template>
             </div>
-            <Drawer title="已选功能" class-name="menu-popup" :transfer="false" :inner="true"  v-model="drawer">
+            <Drawer title="已选功能" class-name="menu-popup" width="300" :closable="false" :transfer="false" :inner="true"  v-model="drawer">
                 <template v-if="selectedMenu.length">
                     <div class="selecteds" v-for="(item, index) in selectedMenu" :key="index">
-                        <span>{{item.text}}</span>
-                        <!-- <Select v-model="model15" prefix="ios-home" style="width:200px">
-                            <Option :value="item.value" :label="''"></Option>
-                        </Select> -->
+                        <span style="width: 60px;">{{item.text}}</span>
+                        <Input v-model="item.timeValue" :disabled="!item.edit"  @input="item.timeValue = item.timeValue.replace(/[^0-9]$/, '')" style="width:40px"/>
+                        <Select v-model="item.timeType" :disabled="!item.edit" style="width:50px">
+                            <Option :value="'month'">{{ '月' }}</Option>
+                            <Option :value="'year'">{{ '年' }}</Option>
+                        </Select>
+                        <Button size="small" type="primary" @click="editTime(item)">{{ item.edit ? '确认' : '编辑' }}</Button>
                         <Icon type="ios-close" @click="popSelected(item)" />
                     </div>
                 </template>
@@ -54,30 +77,36 @@
                 <span>{{ `总费用：￥` }}{{showPrice | FormatNum}}</span>
             </div>
             <div class="button">
-                <Button type="warning" @click="showPay = true">{{ '立刻购买' }}</Button>
+                <Button type="warning" @click="()=>{ drawer = false; showPay = true; }">{{ '立刻购买' }}</Button>
             </div>
         </div>
         <Pay v-model="showPay"></Pay>
     </div>
 </template>
 <script>
+import Header from '../Header';
 import menuItems from '../../../store/menu';
 import Pay from './Pay';
 export default {
     name: 'Buy',
-    components: {Pay},
+    components: {Header, Pay},
     data() {
         return {
             totalPrice: 0,
             selectedMenu: [],
             showPay: false,
-            drawer: false
+            drawer: false,
+            carousel: 0
         }
     },
     computed: {
         menu() {
             return menuItems.map(val =>　{
                 val.bought = false;
+                val.showTime = false;
+                val.edit = false;
+                val.timeValue = '';
+                val.timeType = 'month';
                 return val;
             });
         },
@@ -93,13 +122,22 @@ export default {
             this.drawer = !this.drawer;
         },
         bought(item, e) {
-            this.menu.forEach(val => {
-                if (val.text === item.text && !val.bought) {
-                    val.bought = true;
-                    this.totalPrice += Math.random(0,1) * 10 + 1;
-                    this.selectedMenu.push(val);
-                }
-            });
+            if (!item.showTime) item.showTime = true;
+            else {
+                if (!Number(item.timeValue)) return this.$Message.warning({content: '请选择购买时长', closable: true});
+                this.menu.forEach(val => {
+                    if (val.text === item.text && !val.bought) {
+                        val.bought = true;
+                        this.totalPrice += Math.random(0,1) * 10 + 1;
+                        this.selectedMenu.push(val);
+                    }
+                });
+            }
+            this.$forceUpdate();
+        },
+        editTime(item) {
+            if (!Number(item.timeValue)) return this.$Message.warning({content: '请选择购买时长', closable: true});
+            item.edit = !item.edit;
             this.$forceUpdate();
         },
         popSelected(item) {
@@ -109,7 +147,9 @@ export default {
                 if (val.text === item.text) {
                     this.totalPrice -= Math.random(0,1) * 10 + 1;
                     val.bought = false;
-                    
+                    item.showTime = false;
+                    val.timeValue = '';
+                    val.timeType = 'month';
                 }
             });
             if (!this.selectedMenu.length) this.drawer = false;
@@ -126,8 +166,19 @@ export default {
 <style lang="scss" scoped>
 .index-vue-buy {
     height: 100vh;
-    display: flex;
-    flex-direction: column;
+    // display: flex;
+    // flex-direction: column;
+    & .ad-carousel {
+        // height: 200px;
+        & .demo-carousel {
+            height: 200px;
+            line-height: 200px;
+            text-align: center;
+            color: #fff;
+            font-size: 20px;
+            background: #506b9e;
+        }
+    }
     & .title {
         font-size: 14px;
         font-weight: bold;
@@ -138,9 +189,9 @@ export default {
         box-shadow: 0 0 5px #000;
     }
     & .content-area {
-        flex: 1;
+        // flex: 1;
         padding: 20px;
-        overflow: auto;
+        // overflow: auto;
         position: relative;
         & .function-list {
             display: flex;
@@ -160,9 +211,9 @@ export default {
                 box-sizing: border-box;
                 &-content {
                     height: 100%;
-                    border-radius: 10px;
-                    padding: 10px 20px;
-                    border: 1px solid #57a3f3;
+                    // border-radius: 10px;
+                    padding: 10px 15px;
+                    border: 1px solid lightgray;
                     background-color: white;
                     display: flex;
                     flex-direction: column;
@@ -170,7 +221,7 @@ export default {
                     &:hover {
                         // border: 2px solid #57a3f3;
                         border: 1px solid white;
-                        transform: scale(1.1);
+                        transform: scale(1.06);
                         box-shadow: 5px 5px 10px #000;
                     }
                     &.bought {
@@ -191,8 +242,12 @@ export default {
                             text-align: left;
                         }
                         &-button {
-                            padding: 10px;
+                            padding: 10px 0;
                             text-align: center;
+                            & .time-type {
+                                display: flex;
+                                justify-content: space-evenly;
+                            }
                             & .icon-click {
                                 font-weight: bold;
                                 color: #57a3f3;
@@ -224,13 +279,13 @@ export default {
         position: relative;
         box-shadow: 0 0 5px #000;
         background-color: #515a6e;
-        height: 80px;
+        height: 60px;
         display: flex;
         justify-content: flex-end;
         padding: 0 20px;
         align-items: center;
         & .price {
-            font-size: 20px;
+            font-size: 18px;
             color: white;
             margin-right: 20px;
         }

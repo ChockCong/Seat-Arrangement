@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import {
     Menu, Submenu, MenuItem, Button, Input, Select, Checkbox, Option, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table, Poptip,
-    Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, RadioGroup, Radio, Row, Col, Layout, Header, Content, Footer, Upload
+    Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, RadioGroup, Radio, Row, Col, Layout, Header, Content, Footer, Upload,
+    Carousel, CarouselItem
 } from 'iview';
 Vue.component('Layout', Layout);
 Vue.component('Header', Header);
@@ -37,6 +38,8 @@ Vue.component('Poptip', Poptip);
 Vue.component('Tag', Tag);
 Vue.component('Upload', Upload);
 
+Vue.component('Carousel', Carousel);
+Vue.component('CarouselItem', CarouselItem);
 Vue.component('Icon', Icon);
 Vue.prototype.$Modal = Modal;
 Vue.prototype.$Notice = Notice;

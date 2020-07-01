@@ -11,13 +11,13 @@
 ::-webkit-scrollbar-track 
 { 
   border-radius: 10px; 
-  background-color: rgba(#20222A, 0.1); 
+  background-color: rgba(lightgray, 0.1); 
 } 
   
 /*定义滑块 内阴影+圆角*/
 ::-webkit-scrollbar-thumb 
 { 
   border-radius: 10px; 
-  -webkit-box-shadow: inset 0 0 6px rgba(#20222A,.5); 
-  background-color: rgba(#20222A, 0.9);
+  -webkit-box-shadow: inset 0 0 6px rgba(lightgray,.5); 
+  background-color: rgba(lightgray, 0.9);
 } 
