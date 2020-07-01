@@ -13,20 +13,15 @@
                                 {{`功能${index}:介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍`}}
                             </div>
                             <div class="content-button">
-                                <Button type="primary" @click="bought(item, $event)">{{ '购买' }}</Button>
+                                <Button v-if="!item.bought" type="primary" @click="bought(item, $event)">{{ '购买' }}</Button>
+                                <Icon v-else type="md-checkmark-circle-outline" class="icon-click" />
                             </div>
                         </div>
                     </div>
                 </template>
             </div>
-        </div>
-        <div class="bottom-area">
-            <Poptip class="shop-menu" v-model="drawer" :title="'已选功能'" placement="left-end" trigger="click" :disabled="!selectedMenu.length">
-                <div class="shop-car">
-                    <div class="tip">{{ selectedMenu.length }}</div>
-                    <Icon type="md-list" />
-                </div>
-                <template slot="content">
+            <Drawer title="已选功能" class-name="menu-popup" :transfer="false" :inner="true"  v-model="drawer">
+                <template v-if="selectedMenu.length">
                     <div class="selecteds" v-for="(item, index) in selectedMenu" :key="index">
                         <span>{{item.text}}</span>
                         <!-- <Select v-model="model15" prefix="ios-home" style="width:200px">
@@ -35,7 +30,26 @@
                         <Icon type="ios-close" @click="popSelected(item)" />
                     </div>
                 </template>
-            </Poptip>
+                <template v-else>
+                    空
+                </template>
+            </Drawer>
+        </div>
+        <div class="bottom-area">
+            <div class="shop-menu" @click="showDraw">
+                <div class="shop-car">
+                    <div class="tip">{{ selectedMenu.length }}</div>
+                    <Icon type="md-list" />
+                </div>
+                <!-- <template slot="content">
+                    <template v-for="(item, index) in selectedMenu">
+                        <div class="selecteds" :key="index">
+                            <span>{{item.text}}</span>
+                            <Icon type="ios-close" @click="popSelected(item)" />
+                        </div>
+                    </template>
+                </template> -->
+            </div>
             <div class="price">
                 <span>{{ `总费用：￥` }}{{showPrice | FormatNum}}</span>
             </div>
@@ -75,6 +89,9 @@ export default {
         back() {
             this.$router.push('info');
         },
+        showDraw() {
+            this.drawer = !this.drawer;
+        },
         bought(item, e) {
             this.menu.forEach(val => {
                 if (val.text === item.text && !val.bought) {
@@ -86,7 +103,8 @@ export default {
             this.$forceUpdate();
         },
         popSelected(item) {
-            this.selectedMenu = this.selectedMenu.filter(val => { return val.text !== item.text; });
+            let index = this.selectedMenu.findIndex(val => { return val.text === item.text; });
+            this.selectedMenu.splice(index, 1);
             this.menu.forEach((val, index) => {
                 if (val.text === item.text) {
                     this.totalPrice -= Math.random(0,1) * 10 + 1;
@@ -96,14 +114,18 @@ export default {
             });
             if (!this.selectedMenu.length) this.drawer = false;
             else this.drawer = true;
-            this.$forceUpdate();
+            // this.$nextTick(() => {
+            //     if (!this.selectedMenu.length) this.drawer = false;
+            //     else this.drawer = true;
+            // })
+            // this.$forceUpdate();
         }
     }
 }
 </script>
 <style lang="scss" scoped>
 .index-vue-buy {
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     & .title {
@@ -119,32 +141,42 @@ export default {
         flex: 1;
         padding: 20px;
         overflow: auto;
+        position: relative;
         & .function-list {
             display: flex;
             flex-wrap: wrap;
             max-width: 1070px;
             margin: 0 auto;
             overflow: auto;
+            padding: 10px;
             & .function-item {
-                padding: 10px;
+                padding: 5px;
                 width: 210px;
                 height: 300px;
+                margin: 0 60px 30px 0;
+                &:nth-child(4n+0) {
+                    margin-right: 0px;
+                }
                 box-sizing: border-box;
                 &-content {
                     height: 100%;
                     border-radius: 10px;
                     padding: 10px 20px;
-                    box-shadow: 5px 5px 10px #000;
-                    border: 2px solid white;
+                    border: 1px solid #57a3f3;
                     background-color: white;
                     display: flex;
                     flex-direction: column;
                     box-sizing: border-box;
                     &:hover {
-                        border: 2px solid #57a3f3;
+                        // border: 2px solid #57a3f3;
+                        border: 1px solid white;
+                        transform: scale(1.1);
+                        box-shadow: 5px 5px 10px #000;
                     }
                     &.bought {
-                        border: 2px solid #57a3f3;
+                        border: 1px solid white;
+                        box-shadow: 5px 5px 15px #282828;
+                        // border: 2px solid #57a3f3;
                     }
                     & img {
                         width: 100px;
@@ -161,7 +193,28 @@ export default {
                         &-button {
                             padding: 10px;
                             text-align: center;
+                            & .icon-click {
+                                font-weight: bold;
+                                color: #57a3f3;
+                                font-size: 30px;
+                            }
                         }
+                    }
+                }
+            }
+        }
+        & .menu-popup {
+            & .selecteds {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+                padding-bottom: 5px;
+                & i {
+                    font-size: 25px;
+                    cursor: pointer;
+                    &:hover {
+                        font-weight: bold;
                     }
                 }
             }
@@ -185,23 +238,12 @@ export default {
             position: absolute;
             top: -50px;
             right: 20px;
-            & .selecteds {
-                display: flex;
-                justify-content: space-between;
-                & i {
-                    font-size: 25px;
-                    cursor: pointer;
-                    &:hover {
-                        font-weight: bold;
-                    }
-                }
-            }
             & .tip {
                 position: absolute;
                 border-radius: 50%;
                 width: 16px;
                 height: 16px;
-                z-index: 3;
+                // z-index: 3;
                 background-color: red;
                 color: white;
                 top: -3px;
@@ -220,11 +262,11 @@ export default {
                 justify-content: center;
                 align-items: center;
                 cursor: pointer;
-                z-index: 2;
+                z-index: 1002;
                 & i {
                     font-size: 24px;
                 }
-        }
+            }
         }
     }
 }
