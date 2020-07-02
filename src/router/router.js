@@ -28,6 +28,7 @@ const router = new VueRouter({
 			path: '/admin',
 			name: 'admin',
             component: () => import('../view/admin/index.vue'),
+            redirect: 'admin/management/home',
             children: [
                 {
                     path: 'login',
@@ -42,7 +43,7 @@ const router = new VueRouter({
                 {
                     path: 'package-buy',
                     name: 'package-buy',
-                    component: () => import('../components/admin/Buy/Buy.vue'),
+                    component: () => import('../components/admin/Buy/BuyPackage.vue'),
                 },
                 {
                     path: 'management',

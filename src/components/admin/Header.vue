@@ -1,6 +1,14 @@
 <template>
 <div class="index-vue">
     <header>
+        <div class="h-left">
+            <!-- <div class="pointer" @click="isShrinkAside" title="收缩/展开">
+                <Icon type="ios-apps" />
+            </div> -->
+            <!-- 面包屑功能 -->
+            <p class="crumbs" @click="gotoPage('package-buy')" :class="isPackage ? 'active' : ''">{{ '尊享套餐' }}</p>
+            <p class="crumbs" @click="gotoPage('free-buy')" :class="isFree ? 'active' : ''">{{ '个性定制' }}</p>
+        </div>
         <div class="h-right">
             <!-- 消息 -->
             <!-- <div class="notice-c" @click="noticesShow = true" title="查看新消息">
@@ -43,7 +51,13 @@ export default {
     computed: {
         ...mapGetters({
 			adminInfo: 'getAdminInfo'
-        })
+        }),
+        isPackage() {
+            return this.$route.name === 'package-buy'
+        },
+        isFree() {
+            return this.$route.name === 'free-buy'
+        }
     },
     methods: {
         // 用户操作
@@ -67,6 +81,9 @@ export default {
             this.arrowUp = flag
             this.arrowDown = !flag
         },
+        gotoPage(name) {
+            this.$router.replace({ name })
+        }
     }
 }
 </script>
@@ -78,13 +95,28 @@ export default {
         background: #fff;
         display: flex;
         align-items: center;
-        justify-content: flex-end;
-        padding-right: 40px;
-        padding-left: 10px;
+        justify-content: space-between;
+        padding-right: 30px;
+        padding-left: 30px;
         font-size: 14px;
     }
     header .ivu-icon {
         font-size: 24px;
+    }
+    .h-left {
+        display: flex;
+        align-items: center;
+    }
+    .crumbs {
+        margin-left: 10px;
+        color: #97a8be;
+        cursor: pointer;
+        &.active {
+            color: #2d8cf0;
+            border-bottom: 1px #2d8cf0 solid;
+            // font-size: 13px;
+            font-weight: bold;
+        }
     }
     .h-right {
         display: flex;

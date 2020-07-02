@@ -2,7 +2,7 @@ import Vue from 'vue';
 import router from '../router/router'
 const vm = new Vue();
 export function globalFunc(err) {
-    console.log('-----这里是惊雷实验室-----')
+    console.log('-----这里是码雷实验室-----')
 }
 
 // 通用工具类

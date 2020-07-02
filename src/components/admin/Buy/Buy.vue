@@ -19,7 +19,9 @@
                 <template v-for="(item, index) in menu">
                     <div class="function-item" :key="index">
                         <div class="function-item-content" :class="item.bought ? 'bought' : ''">
-                            <img alt="Vue logo" src="../../../assets/logo.png">
+                            <div class="img">
+                                <img alt="Vue logo" src="//product4.djicdn.com/uploads/spu/cover/929cf1848642494cc2e3c920c3aa3af1@retina_small.png">
+                            </div>
                             <div class="content-detail">
                                 {{`功能${index}:介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍`}}
                             </div>
@@ -32,7 +34,7 @@
                                             <Option :value="'year'">{{ '年' }}</Option>
                                         </Select>
                                     </template>
-                                    <Button type="primary" @click="bought(item, $event)">{{ '选择' }}</Button>
+                                    <Button type="primary" @click="bought(item, $event)">{{ '确定' }}</Button>
                                 </div>
                                 <Icon v-else type="md-checkmark-circle-outline" class="icon-click" />
                             </div>
@@ -49,7 +51,7 @@
                             <Option :value="'month'">{{ '月' }}</Option>
                             <Option :value="'year'">{{ '年' }}</Option>
                         </Select>
-                        <Button size="small" type="primary" @click="editTime(item)">{{ item.edit ? '确认' : '编辑' }}</Button>
+                        <Button size="small" type="primary" @click="editTime(item)">{{ item.edit ? '确定' : '编辑' }}</Button>
                         <Icon type="ios-close" @click="popSelected(item)" />
                     </div>
                 </template>
@@ -61,7 +63,9 @@
         <div class="bottom-area">
             <div class="shop-menu" @click="showDraw">
                 <div class="shop-car">
-                    <div class="tip">{{ selectedMenu.length }}</div>
+                    <div class="tip">
+                        <span>{{ selectedMenu.length }}</span>
+                    </div>
                     <Icon type="md-list" />
                 </div>
                 <!-- <template slot="content">
@@ -88,7 +92,7 @@ import Header from '../Header';
 import menuItems from '../../../store/menu';
 import Pay from './Pay';
 export default {
-    name: 'Buy',
+    name: 'BuyFree',
     components: {Header, Pay},
     data() {
         return {
@@ -101,7 +105,8 @@ export default {
     },
     computed: {
         menu() {
-            return menuItems.map(val =>　{
+            let menus = _.cloneDeep(menuItems);
+            return menus.map(val =>　{
                 val.bought = false;
                 val.showTime = false;
                 val.edit = false;
@@ -166,8 +171,9 @@ export default {
 <style lang="scss" scoped>
 .index-vue-buy {
     height: 100vh;
-    // display: flex;
-    // flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    min-width: 1080px;
     & .ad-carousel {
         // height: 200px;
         & .demo-carousel {
@@ -189,8 +195,9 @@ export default {
         box-shadow: 0 0 5px #000;
     }
     & .content-area {
-        // flex: 1;
+        flex: 1;
         padding: 20px;
+        background: #f2f2f2;
         // overflow: auto;
         position: relative;
         & .function-list {
@@ -201,7 +208,7 @@ export default {
             overflow: auto;
             padding: 10px;
             & .function-item {
-                padding: 5px;
+                padding: 2px;
                 width: 210px;
                 height: 300px;
                 margin: 0 60px 30px 0;
@@ -212,8 +219,8 @@ export default {
                 &-content {
                     height: 100%;
                     // border-radius: 10px;
-                    padding: 10px 15px;
-                    border: 1px solid lightgray;
+                    // padding: 10px 15px;
+                    border: 1px solid #f2f2f2;
                     background-color: white;
                     display: flex;
                     flex-direction: column;
@@ -225,19 +232,25 @@ export default {
                         box-shadow: 5px 5px 10px #000;
                     }
                     &.bought {
-                        border: 1px solid white;
-                        box-shadow: 5px 5px 15px #282828;
+                        // border: 1px solid white;
+                        // box-shadow: 5px 5px 15px #282828;
                         // border: 2px solid #57a3f3;
                     }
-                    & img {
-                        width: 100px;
-                        height: 80px;
+                    & .img {
+                        // width: 100px;
+                        // height: 80px;
+                        width: 100%;
+                        height: 125px;
                         margin: 0 auto;
+                        & img {
+                            max-width: 100%;
+                            max-height: 100%;
+                        }
                     }
                     & .content {
                         &-detail {
                             flex: 1;
-                            padding: 10px 0;
+                            padding: 10px;
                             word-break: break-all;
                             text-align: left;
                         }
@@ -284,26 +297,33 @@ export default {
         justify-content: flex-end;
         padding: 0 20px;
         align-items: center;
+        line-height: 60px;
         & .price {
             font-size: 18px;
             color: white;
             margin-right: 20px;
         }
         & .shop-menu {
-            position: absolute;
-            top: -50px;
-            right: 20px;
+            // position: absolute;
+            // top: -50px;
+            // right: 20px;
+            position: fixed;
+            bottom: 75px;
+            z-index: 1005;
             & .tip {
                 position: absolute;
                 border-radius: 50%;
                 width: 16px;
                 height: 16px;
-                // z-index: 3;
                 background-color: red;
                 color: white;
                 top: -3px;
                 right: -3px;
-                transition: 0.5s all cubic-bezier(0.14,-1.33,1,0.18);
+                line-height: normal;
+                & span {
+                    vertical-align: middle;
+                }
+                // transition: 0.5s all cubic-bezier(0.14,-1.33,1,0.18);
             }
             & .shop-car {
                 position: relative;
