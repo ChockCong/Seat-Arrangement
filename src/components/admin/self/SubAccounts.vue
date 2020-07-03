@@ -8,7 +8,7 @@
             </Select>
             <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入用户名搜索"  @input="searchFun" />
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight" :width="1012" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight" :width="963" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row }" slot="level">
                 <Tag color="green">{{level(row.level)}}</Tag>
             </template>
@@ -18,7 +18,7 @@
             <template slot-scope="{ row }" slot="action">
                 <div class="button-area">
                     <Button type="primary" size="small" @click="alertModal('edit', row.user)">编辑</Button>
-                    <Button type="primary" size="small" @click="alertFunctionModel(row.user)">功能分配</Button>
+                    <Button type="primary" size="small" @click="alertFunctionModel(row.user)">功能权限</Button>
                 </div>
             </template>
         </Table>
@@ -128,7 +128,12 @@ export default {
                     align: 'center'
                 },
                 {
-                    title: '子用户',
+                    title: '子用户ID',
+                    key: 'id',
+                    width: 100
+                },
+                {
+                    title: '子用户名',
                     key: 'user',
                     width: 200
                 },
@@ -143,13 +148,6 @@ export default {
                     key: 'updated_at',
                     width: 150,
                     sortable: true
-                },
-                {
-                    title: '权限',
-                    key: 'level',
-                    slot: 'level',
-                    align: 'center',
-                    width: 150
                 },
                 {
                     title: '是否停用',
@@ -168,12 +166,14 @@ export default {
             ],
             datas: [
                 {
+                    id: 111,
                     user: '子用户1',
                     created_at: '2016-10-01 00:00:00',
                     updated_at: '2016-10-01 00:00:00',
                     disabled: true,
                     level: 2
                 },{
+                    id: 222,
                     user: '子用户2',
                     created_at: '2016-10-02 00:00:00',
                     updated_at: '2016-10-02 00:00:00',

@@ -27,13 +27,13 @@
                             </div>
                             <div class="content-button">
                                 <div class="time-type" v-if="!item.bought">
-                                    <template v-if="item.showTime">
+                                    <!-- <template v-if="item.showTime">
                                         <Input v-model="item.timeValue" @input="item.timeValue = item.timeValue.replace(/[^0-9]$/, '')" style="width:40px"/>
                                         <Select v-model="item.timeType" style="width:50px">
                                             <Option :value="'month'">{{ '月' }}</Option>
                                             <Option :value="'year'">{{ '年' }}</Option>
                                         </Select>
-                                    </template>
+                                    </template> -->
                                     <Button type="primary" @click="bought(item, $event)">{{ '确定' }}</Button>
                                 </div>
                                 <Icon v-else type="md-checkmark-circle-outline" class="icon-click" />
@@ -85,6 +85,22 @@
             </div>
         </div>
         <Pay v-model="showPay"></Pay>
+        <Modal
+            v-model="showTime"
+            :title="'选择购买时限'"
+            :loading="false"
+            :width="700">
+            <div v-if="showTime" class="time-flex">
+                <Input v-model="currentItem.timeValue" @input="currentItem.timeValue = currentItem.timeValue.replace(/[^0-9]$/, '')" style="width:100px; margin-right: 20px"/>
+                <Select v-model="currentItem.timeType" style="width:50px">
+                    <Option :value="'month'">{{ '月' }}</Option>
+                    <Option :value="'year'">{{ '年' }}</Option>
+                </Select>
+            </div>
+            <div slot="footer">
+                <Button type="primary" @click="bought()">{{ '确定' }}</Button>
+            </div>
+        </Modal>
     </div>
 </template>
 <script>
@@ -100,7 +116,9 @@ export default {
             selectedMenu: [],
             showPay: false,
             drawer: false,
-            carousel: 0
+            showTime: false,
+            carousel: 0,
+            currentItem: {}
         }
     },
     computed: {
@@ -126,17 +144,28 @@ export default {
         showDraw() {
             this.drawer = !this.drawer;
         },
-        bought(item, e) {
-            if (!item.showTime) item.showTime = true;
+        bought(item = {}, e = null) {
+            console.log(item, this.currentItem);
+            if (!_.isEmpty(item) && _.isEmpty(this.currentItem)) {
+                this.showTime = true;
+                this.currentItem = _.cloneDeep(item);
+                console.log(1, this.currentItem);
+            }
             else {
-                if (!Number(item.timeValue)) return this.$Message.warning({content: '请选择购买时长', closable: true});
+                if (!Number(this.currentItem.timeValue)) return this.$Message.warning({content: '请选择购买时限', closable: true});
                 this.menu.forEach(val => {
-                    if (val.text === item.text && !val.bought) {
+                    if (val.text === this.currentItem.text && !val.bought) {
                         val.bought = true;
+                        val.timeValue = this.currentItem.timeValue;
+                        val.timeType = this.currentItem.timeType;
                         this.totalPrice += Math.random(0,1) * 10 + 1;
                         this.selectedMenu.push(val);
+                        this.currentItem = Object.assign({});
+                        console.log(2, this.currentItem);
+                        this.currentItem = Object.assign({});
                     }
                 });
+                this.showTime = false;
             }
             this.$forceUpdate();
         },
@@ -344,5 +373,9 @@ export default {
             }
         }
     }
+}
+.time-flex {
+    display: flex;
+    justify-content: center;
 }
 </style>

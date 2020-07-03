@@ -2,10 +2,12 @@
 <div class="index-vue">
     <header>
         <div class="h-left">
+            <Icon type="logo-windows" />
             <!-- <div class="pointer" @click="isShrinkAside" title="收缩/展开">
                 <Icon type="ios-apps" />
             </div> -->
             <!-- 面包屑功能 -->
+            <p class="crumbs" @click="gotoPage('home')">{{ '主页' }}</p>
             <p class="crumbs" @click="gotoPage('package-buy')" :class="isPackage ? 'active' : ''">{{ '尊享套餐' }}</p>
             <p class="crumbs" @click="gotoPage('free-buy')" :class="isFree ? 'active' : ''">{{ '个性定制' }}</p>
         </div>

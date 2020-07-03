@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-    Menu, Submenu, MenuItem, Button, Input, Select, Checkbox, Option, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table, Poptip,
+    Menu, Submenu, MenuItem, Button, Input, Select, CheckboxGroup, Checkbox, Option, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table, Poptip,
     Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, RadioGroup, Radio, Row, Col, Layout, Header, Content, Footer, Upload,
     Carousel, CarouselItem
 } from 'iview';
@@ -13,6 +13,7 @@ Vue.component('ICol', Col);
 Vue.component('Menu', Menu);
 Vue.component('Button', Button);
 Vue.component('Input', Input);
+Vue.component('CheckboxGroup', CheckboxGroup);
 Vue.component('Checkbox', Checkbox);
 Vue.component('Select', Select);
 Vue.component('Option', Option);

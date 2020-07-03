@@ -702,7 +702,7 @@ header .ivu-icon {
 }
 /* 标签栏 */
 .ul-c {
-    height: 34px;
+    height: 40px;
     background: #fff;
     display: flex;
     justify-content: flex-start;
@@ -715,13 +715,20 @@ header .ivu-icon {
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
-    height: 24px;
+    height: 25px;
     padding: 0 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 3px 5px 2px 3px;
     border: 1px solid #e6e6e6;
+    flex-basis: 10%;
+    justify-content: space-between;
+    font-size: 13px;
+    & i:hover {
+        background-color: gray;
+        border-radius: 50%;
+    }
 }
 a {
     color: #666;
@@ -784,6 +791,10 @@ a {
 }
 .shrink {
     text-align: center;
+}
+::v-deep .ivu-menu-item-active:not(.ivu-menu-submenu) {
+    background: #2d8cf0!important;
+    color: white;
 }
 }
 </style>
