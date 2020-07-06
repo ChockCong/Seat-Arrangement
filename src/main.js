@@ -11,6 +11,7 @@ import '@/plugins/iview'
 import tools from '@/plugins/tools'
 import _ from '@/utils/lodash';
 import { globalFunc, level, FormatNum, openNewWindow } from '@/utils/index'
+import { errorPopHandler } from '@/utils/errorHandler'
 // const tools = require('./plugins/tools');
 
 globalFunc();
@@ -33,6 +34,7 @@ Vue.prototype.openNewWindow = openNewWindow;
 Vue.prototype.FormatNum = FormatNum;
 Vue.prototype.level = level;
 Vue.prototype.html2canvas = tools.html2canvas;
+Vue.prototype.errorPopHandler = errorPopHandler;
 
 Vue.use(tools.vueBaberrage);
 

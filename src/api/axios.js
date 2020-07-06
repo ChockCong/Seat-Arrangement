@@ -19,6 +19,9 @@ export const reqJsonData = async ({
 	method = 'post',
 	isformData = false,
 }) => {
+	if (process.env.NODE_ENV === 'production') {
+		url = url.split('/api')[1];
+	}
 	const config = {
 		method,
 		url,
@@ -62,12 +65,17 @@ export const reqJsonData = async ({
 			const Axios = !isformData ? axios(config) : axios.post(config.url, transformRequest, config);
 			Axios
 				.then(res => {
+					if (res.data.errorCode !== 200) {
+						Vue.prototype.errorPopHandler('登陆失败，请重试'); //TODO
+						router.push({ path: '/admin/login' });
+						return resolve();
+					}
 					resolve(res.data || {});
 				})
 				.catch(err => {
 					if (err.response && err.response.status === 401) {
 						// removeLoginInfo();
-						router.push({ path: 'admin/login' });
+						router.push({ path: '/admin/login' });
 						resolve();
 						return;
 					}

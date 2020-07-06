@@ -93,7 +93,7 @@
 </template>
 
 <script>
-// import { adminLogin } from '../../api/api';
+import { adminLogin } from '../../api/api';
 export default {
     name: 'loginPage',
     data() {
@@ -219,26 +219,38 @@ export default {
         },
         async login() {
             let tag = false;
-            const gotoSuccess = (tag) => {
+            const gotoSuccess = async (tag) => {
                 if (this.loginForm.account && this.loginForm.pwd && tag) {
-                    let data = {
-                        admin_token: 'ghfkjahksgsd54234234sdfgsdfsfsdgsdg',
-                        username: '码雷管理员账户',
-                        email: '123@123.com',
-                        phoneNo: '12023698547',
-                        company: {
-                            address: 'sdgfjkhsdkfksdb三大框架还疯狂水底纳瓜',
-                            phoneNo: ''
+                    this.isShowLoading = true;
+                    const res = await adminLogin({
+                        ctLoginName: this.loginForm.account,
+                        ctPassword: this.loginForm.pwd
+                    });
+                    this.isShowLoading = false;
+                    // console.log(res, !_.isEmpty(res))
+                    if (res && !_.isEmpty(res)) {
+                        let data = res.data;
+                        data.admin_token = res.data.token;
+                        delete data.token;
+                        // {
+                        //     admin_token: 'ghfkjahksgsd54234234sdfgsdfsfsdgsdg',
+                        //     username: '码雷管理员账户',
+                        //     email: '123@123.com',
+                        //     phoneNo: '12023698547',
+                        //     company: {
+                        //         address: 'sdgfjkhsdkfksdb三大框架还疯狂水底纳瓜',
+                        //         phoneNo: ''
+                        //     }
+                        // };
+                        this.$store.commit('SET_ADMIN_INFO', data);
+                        if (this.$store.getters.getAdminToken) {
+                            this.$router.push({ path: 'management' });
                         }
-                    };
-                    this.$store.commit('SET_ADMIN_INFO', data);
-                    if (this.$store.getters.getAdminToken) {
-                        this.$router.push({ path: 'management' });
                     }
                     // this.$router.push({ path: 'management' })
                 }
             }
-             this.$refs['loginF'].validate((valid) => {
+            this.$refs['loginF'].validate((valid) => {
                 if (valid) {
                     tag = true;
                     gotoSuccess(tag);

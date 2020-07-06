@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import store from '@/store/index';
 // import Login from '../view/admin/login';
 
 //TODO: 禁止全局路由错误处理打印，这个也是vue-router开发者给出的解决方案
@@ -119,8 +120,8 @@ const router = new VueRouter({
 });
 
 
-// router.beforeEach(async (to, from, next) => {
-//     console.log(to, from, next);
-//     return next();
-// });
+router.beforeEach(async (to, from, next) => {
+    // console.log(to, from, next);
+    return next();
+});
 export default router;
