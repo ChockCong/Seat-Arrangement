@@ -143,10 +143,9 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Buy from './Buy/Buy';
 export default {
     name: 'Management',
-    components: { Buy },
+    // components: { Buy },
     data() {
         return {
             // 用于储存页面路径

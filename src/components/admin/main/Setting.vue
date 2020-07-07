@@ -152,7 +152,7 @@
     </div>
 </template>
 <script>
-import Loading from '../../common/loading';
+import Loading from '@/components/common/loading.vue';
 import { setInterval, setTimeout, clearInterval } from 'timers';
 export default {
     name: 'Setting',
