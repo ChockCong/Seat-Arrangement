@@ -230,8 +230,7 @@ export default {
                     // console.log(res, !_.isEmpty(res))
                     if (res && !_.isEmpty(res)) {
                         let data = res.data;
-                        data.admin_token = res.data.token;
-                        delete data.token;
+                        data.sysOrgMain.admin_token = res.data.token;
                         // {
                         //     admin_token: 'ghfkjahksgsd54234234sdfgsdfsfsdgsdg',
                         //     username: '码雷管理员账户',
@@ -242,7 +241,7 @@ export default {
                         //         phoneNo: ''
                         //     }
                         // };
-                        this.$store.commit('SET_ADMIN_INFO', data);
+                        this.$store.commit('SET_ADMIN_INFO', data.sysOrgMain);
                         if (this.$store.getters.getAdminToken) {
                             this.$router.push({ path: 'management' });
                         }

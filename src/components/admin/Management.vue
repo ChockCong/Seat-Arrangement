@@ -84,7 +84,7 @@
                         <!-- 下拉菜单 -->
                         <Dropdown trigger="click" @on-click="userOperate" @on-visible-change="showArrow">
                             <div class="pointer">
-                                <span>{{adminInfo.username}}</span>
+                                <span>{{adminInfo.ctName}}</span>
                                 <Icon v-show="arrowDown" type="md-arrow-dropdown"/>
                                 <Icon v-show="arrowUp" type="md-arrow-dropup"/>
                             </div>
@@ -128,9 +128,9 @@
             <!-- 页面主体 -->
             <div class="main-content">
                 <div class="view-c">
-                    <keep-alive :include="keepAliveData">
+                    <keep-alive >
                         <!-- 子页面 -->
-                        <router-view v-if="isShowRouter"/>
+                        <router-view />
                     </keep-alive>
                     <div class="loading-c" v-show="showLoading">
                         <Spin size="large"></Spin>
@@ -695,7 +695,7 @@ header .ivu-icon {
     justify-content: flex-start;
     align-items: center;
     background: #fff;
-    height: 34px;
+    height: 40px;
     width: 160px;
     font-size: 18px;
 }

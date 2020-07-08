@@ -88,49 +88,52 @@ export default {
         }
     },
     beforeMount() {
+        console.log(1111);
         this.datas = [{
             title: '用户名',
-            content: this.adminInfo.username,
+            content: this.adminInfo.ctName,
             cellClassName: {
                 title: 'title-cell',
                 content: 'info-cell',
             }
         },{
             title: '会员权限',
-            content: this.adminInfo.level,
+            content: this.adminInfo.ctType,
             cellClassName: {
                 title: 'title-cell',
                 content: 'info-cell',
             }
         },{
             title: '邮箱地址',
-            content: this.adminInfo.email,
+            content: this.adminInfo.ctEmail,
             cellClassName: {
                 title: 'title-cell',
                 content: 'info-cell',
             }
         },{
             title: '电话号码',
-            content: this.adminInfo.phoneNo,
+            content: this.adminInfo.ctPhone,
             cellClassName: {
                 title: 'title-cell',
                 content: 'info-cell',
             }
-        },{
-            title: '公司名称',
-            content: this.adminInfo.company.name,
-            cellClassName: {
-                title: 'title-cell',
-                content: 'info-cell',
-            }
-        },{
-            title: '公司地址',
-            content: this.adminInfo.company.address,
-            cellClassName: {
-                title: 'title-cell',
-                content: 'info-cell',
-            }
-        }];
+        },
+        // {
+        //     title: '公司名称',
+        //     content: this.adminInfo.company.name,
+        //     cellClassName: {
+        //         title: 'title-cell',
+        //         content: 'info-cell',
+        //     }
+        // },{
+        //     title: '公司地址',
+        //     content: this.adminInfo.company.address,
+        //     cellClassName: {
+        //         title: 'title-cell',
+        //         content: 'info-cell',
+        //     }
+        // }
+        ];
     }
 }
 </script>

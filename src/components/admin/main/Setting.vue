@@ -226,6 +226,9 @@ export default {
             clearTimeout(timeout);
         }
     },
+    activated() {
+        console.log(222);
+    },
     methods: {
         showStart(type = null) {
             if (type == null) this.startModal = !this.startModal;

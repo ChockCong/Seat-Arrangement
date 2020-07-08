@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from '@/store/index';
 // import Login from '../view/admin/login';
+import { adminLogin } from '@/api/api'
 
 //TODO: 禁止全局路由错误处理打印，这个也是vue-router开发者给出的解决方案
 const originalPush = VueRouter.prototype.push
@@ -25,9 +26,9 @@ const router = new VueRouter({
             name: 'unLogin',
             component: () => import('../components/common/UnLoginFrame.vue'),
         },
-		{
-			path: '/admin',
-			name: 'admin',
+        {
+            path: '/admin',
+            name: 'admin',
             component: () => import('../view/admin/index.vue'),
             redirect: 'admin/management/home',
             children: [
@@ -56,6 +57,9 @@ const router = new VueRouter({
                             path: 'home',
                             name: 'home',
                             component: () => import('../components/admin/Home.vue'),
+                            meta: {
+                                requiresAuth: true
+                            }
                         },
                         {
                             path: 'info',
@@ -81,11 +85,17 @@ const router = new VueRouter({
                             path: 'seat-using',
                             name: 'seat-using',
                             component: () => import('../components/admin/main/Using.vue'),
+                            meta: {
+                                keepAlive: true // 需要被缓存
+                            }
                         },
                         {
                             path: 'seat-setting',
                             name: 'seat-setting',
                             component: () => import('../components/admin/main/Setting.vue'),
+                            meta: {
+                                keepAlive: true // 需要被缓存
+                            }
                         },
                         {
                             path: 'others',
@@ -97,6 +107,9 @@ const router = new VueRouter({
                                     path: 'baberrage',
                                     name: 'baberrage',
                                     component: () => import('../components/admin/others/Baberrage.vue'),
+                                    meta: {
+                                        keepAlive: true // 需要被缓存
+                                    }
                                 }
                             ]
                         }
@@ -121,7 +134,15 @@ const router = new VueRouter({
 
 
 router.beforeEach(async (to, from, next) => {
-    // console.log(to, from, next);
+    console.log(to, from)
+    if (to.matched.some(route => route.meta && route.meta.requiresAuth) && !store.state.adminInfo.admin_token) {
+        const res = await adminLogin({ token: 'token' });
+        if (res && !_.isEmpty(res)) {
+            let data = res.data;
+            data.sysOrgMain.admin_token = res.data.token;
+            store.commit('SET_ADMIN_INFO', data.sysOrgMain);
+        }
+    }
     return next();
 });
 export default router;
