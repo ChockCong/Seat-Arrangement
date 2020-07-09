@@ -31,7 +31,15 @@ const menuItems = [
         type: 'md-folder',
         size: 18, // icon大小
         category: 'all',
-        name: 'baberrage'
+        children: [
+            {
+                type: 'md-folder',
+                size: 18, // icon大小
+                name: 'baberrage',
+                text: '互动视频',
+            }
+        ]
+        
         // 互动留言*互动抽奖*宴会反馈*菜品评价*菜品推荐*电子请帖*互动游戏*
     },
     {

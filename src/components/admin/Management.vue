@@ -1,7 +1,8 @@
 <template>
     <div class="index-vue">
+        <!-- <Baberrage v-if="fullScreen" class="full-screen"></Baberrage> -->
         <!-- 侧边栏 -->
-        <aside :class="asideClassName">
+        <aside v-if="!fullScreen" :class="asideClassName">
             <!-- logo -->
             <div class="logo-c">
                 <img src="../../assets/logo.png" alt="logo" class="logo">
@@ -59,9 +60,9 @@
             </Alert>
         </Drawer>
         <!-- 右侧部分 -->
-        <section class="sec-right">
+        <section class="sec-right" :class="fullScreen ? 'full' : ''">
             <!-- 头部 -->
-            <div class="top-c">
+            <div class="top-c" v-if="!fullScreen">
                 <header>
                     <div class="h-left">
                         <div class="pointer" @click="isShrinkAside" title="收缩/展开">
@@ -126,7 +127,7 @@
                 </div>
             </div>
             <!-- 页面主体 -->
-            <div class="main-content">
+            <div class="main-content" :class="fullScreen ? 'full' : ''">
                 <div class="view-c">
                     <keep-alive >
                         <!-- 子页面 -->
@@ -142,10 +143,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex';
+import Baberrage from '@/components/admin/others/Baberrage'
 export default {
     name: 'Management',
-    // components: { Buy },
+    components: { Baberrage },
     data() {
         return {
             // 用于储存页面路径
@@ -285,8 +287,8 @@ export default {
 
             return obj
         },
-        isBuy() {
-            
+        fullScreen() {
+            return this.$store.state.fullScreen;
         }
     },
     methods: {
@@ -602,6 +604,13 @@ aside {
         text-align: left;
     }
 }
+.full-screen {
+    z-index: 999;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+}
 .logo-c {
     display: flex;
     align-items: center;
@@ -624,6 +633,9 @@ aside {
     transition: margin-left .3s;
     overflow: hidden;;
     background: #f3f7fd;
+    &.full {
+        margin-left: 0;
+    }
 }
 /* 主体页面头部 */
 header {
@@ -759,6 +771,9 @@ a {
 .main-content {
     height: calc(100% - 88px);
     overflow: hidden;
+    &.full {
+        height: 100%;
+    }
 }
 .view-c {
     position: relative;

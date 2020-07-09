@@ -3,7 +3,7 @@
     <!-- <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/> -->
     <router-view></router-view>
-    <BTip></BTip>
+    <BTip v-if="!fullScreen"></BTip>
   </div>
 </template>
 
@@ -11,7 +11,12 @@
 import BTip from './components/common/BottomTip';
 export default {
   name: 'App',
-  components: {BTip}
+  components: {BTip},
+  computed: {
+      fullScreen() {
+        return this.$store.state.fullScreen;
+      }
+  }
 }
 </script>
 
