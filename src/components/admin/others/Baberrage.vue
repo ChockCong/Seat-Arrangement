@@ -1,7 +1,7 @@
 <template>
-    <div class="index-vue-video-main">
+    <div class="index-vue-video-main" @mousemove="hoverControl">
         <Drawer title="播放列表" class-name="menu-popup" width="300" :closable="true" :transfer="false" :inner="true"  v-model="drawer">
-            <Button type="primary" @click="uploadFile">{{'上传视频'}}</Button>
+            <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{'上传视频'}}</Button>
             <div class="play-list">
                 <div v-for="(item, index) in playList" :key="index" class="play-list-item">
                     <div class="word" :class="item.url === videoSrc ? 'selected' : ''">
@@ -27,7 +27,7 @@
                 <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{videoSrc ? '重新上传' : '上传视频'}}</Button>
             </div>
         </div>
-        <div class="button-area" v-if="videoSrc" @mouseenter="hoverControl" @mouseleave="hoverControl">
+        <div class="button-area" v-if="videoSrc">
             <section class="control-bar" v-if="showControl">
                 <Slider class="progress" v-model="currentTimeProgress" @on-change="progressChange"></Slider>
                 <div class="btn">
@@ -60,6 +60,7 @@
 <script>
 import { MESSAGE_TYPE } from 'vue-baberrage'
 import logo from '../../../assets/logo.png';
+import { setInterval, clearInterval } from 'timers';
 export default {
     name: 'Baberrage',
     data() {
@@ -74,10 +75,11 @@ export default {
             barrageLoop: true,
             barrageList: [],
             slider: 100,
-            showControl: true,
+            showControl: false,
             drawer: false,
             currentTimeProgress: 0,
             playList: [],
+            timer: null,
         }
     },
     computed: {
@@ -88,8 +90,21 @@ export default {
     watch: {
         currentTimeProgress(value) {
             let index = this.playList.findIndex(val => { return val.url === this.videoSrc });
-            if (value === 100 && index < this.playList.length) {
-                this.changeList(this.playList[index + 1]);
+            if (value === 100) {
+                if (index < this.playList.length) {
+                    this.changeList(this.playList[index + 1]);
+                } else {
+                    this.changeList(this.playList[0]);
+                }
+            }
+        },
+        showControl(value) {
+            if (value) {
+                if (this.timer) clearTimeout(this.timer);
+                let timeout = setTimeout(() => {
+                    this.showControl = false;
+                }, 8000);
+                this.timer = timeout;
             }
         }
     },
@@ -111,6 +126,7 @@ export default {
             let file = target.files[0];
             this.videoSrc = this.getObjectURL(file);
             this.playList.push({ name: file.name, url: this.videoSrc});
+            this.showControl = true;
         },
         getObjectURL (file) {
             let url = null ;
@@ -127,7 +143,7 @@ export default {
             if(!this.playing) {
                 return this.showControl = true;
             }
-            this.showControl = !this.showControl;
+            this.showControl = true;
         },
         play(val) {
             if (this.playing) {
@@ -139,7 +155,7 @@ export default {
                 this.pause = false;
             }
             this.playing = !this.playing;
-            this.showControl = false;
+            // this.showControl = false;
         },
          // 停止播放,显示图片清零进度条
         stop(val) {
@@ -178,8 +194,16 @@ export default {
             this.playing = false;
         },
         deleteList(item) {
-            let index = this.playList.findIndex(val => { val.name === item.name });
+            let index = this.playList.findIndex(val => { return val.name === item.name });
+            if (this.playList[index].url === this.videoSrc) this.videoSrc = '';
+            if (index > 0) {
+                this.videoSrc = this.playList[index - 1].url;
+            } else {
+                console.log(index);
+                this.videoSrc = this.playList.length ? this.playList[index + 1].url : ''
+            }
             this.playList.splice(index, 1);
+            // this.$forceUpdate();
         }
     },
     beforeMounted() {

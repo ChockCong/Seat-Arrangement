@@ -129,7 +129,7 @@
             <!-- 页面主体 -->
             <div class="main-content" :class="fullScreen ? 'full' : ''">
                 <div class="view-c">
-                    <keep-alive >
+                    <keep-alive :include="keepAliveData">
                         <!-- 子页面 -->
                         <router-view />
                     </keep-alive>
@@ -144,10 +144,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Baberrage from '@/components/admin/others/Baberrage'
 export default {
     name: 'Management',
-    components: { Baberrage },
+    // components: { Baberrage },
     data() {
         return {
             // 用于储存页面路径

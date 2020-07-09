@@ -15,13 +15,13 @@ const menuItems = [
             {
                 type: 'md-wine',
                 size: 18, // icon大小
-                name: 'seat-using',
+                name: 'Using',
                 text: '会场模板',
             },
             {
                 type: 'md-wine',
                 size: 18, // icon大小
-                name: 'seat-setting',
+                name: 'Setting',
                 text: '会场定义',
             }
         ]
@@ -35,7 +35,7 @@ const menuItems = [
             {
                 type: 'md-folder',
                 size: 18, // icon大小
-                name: 'baberrage',
+                name: 'Baberrage',
                 text: '互动视频',
             }
         ]

@@ -83,7 +83,7 @@ const router = new VueRouter({
                         },
                         {
                             path: 'seat-using',
-                            name: 'seat-using',
+                            name: 'Using',
                             component: () => import('../components/admin/main/Using.vue'),
                             meta: {
                                 keepAlive: true // 需要被缓存
@@ -91,27 +91,19 @@ const router = new VueRouter({
                         },
                         {
                             path: 'seat-setting',
-                            name: 'seat-setting',
+                            name: 'Setting',
                             component: () => import('../components/admin/main/Setting.vue'),
                             meta: {
                                 keepAlive: true // 需要被缓存
                             }
                         },
                         {
-                            path: 'others',
-                            name: 'others',
-                            component: () => import('../components/admin/others/index.vue'),
-                            redirect: 'others/baberrage',
-                            children: [
-                                {
-                                    path: 'baberrage',
-                                    name: 'baberrage',
-                                    component: () => import('../components/admin/others/Baberrage.vue'),
-                                    meta: {
-                                        keepAlive: true // 需要被缓存
-                                    }
-                                }
-                            ]
+                            path: 'baberrage-show',
+                            name: 'Baberrage',
+                            component: () => import('../components/admin/others/Baberrage.vue'),
+                            meta: {
+                                keepAlive: true // 需要被缓存
+                            }
                         }
                     ]
                 }

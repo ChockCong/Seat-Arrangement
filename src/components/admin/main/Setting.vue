@@ -153,7 +153,7 @@
 </template>
 <script>
 import Loading from '@/components/common/loading.vue';
-import { setInterval, setTimeout, clearInterval } from 'timers';
+// import { setInterval, setTimeout, clearInterval } from 'timers';
 export default {
     name: 'Setting',
     components: {Loading},
@@ -214,16 +214,16 @@ export default {
     },
     watch: {
         step() {
-            if (this.timer) return;
-            this.timer = setInterval(() => {
-                this.bling = !this.bling;
-            }, 500);
-            let timeout = setTimeout(() => {
-                clearInterval(this.timer);
-                this.bling = false;
-                this.timer = null;
-            }, 3000);
-            clearTimeout(timeout);
+            // if (this.timer) return;
+            // this.timer = setInterval(() => {
+            //     this.bling = !this.bling;
+            // }, 500);
+            // let timeout = setTimeout(() => {
+            //     clearInterval(this.timer);
+            //     this.bling = false;
+            //     this.timer = null;
+            // }, 3000);
+            // clearTimeout(timeout);
         }
     },
     activated() {
