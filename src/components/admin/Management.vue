@@ -10,7 +10,7 @@
             </div>
             <!-- 菜单栏 -->
             <Menu class="menu" ref="asideMenu" theme="dark" width="100%" @on-select="selectMenuCallback"
-            :accordion="false" :open-names="openMenus" :active-name="currentPage" @on-open-change="menuChange">
+            :accordion="true" :open-names="openMenus" :active-name="currentPage" @on-open-change="menuChange">
                 <!-- 动态菜单 -->
                 <div v-for="(item, index) in menuItems" :key="index">
                     <Submenu :class="isShowAsideTitle? '' : 'shrink'" v-if="item.children" :name="index">

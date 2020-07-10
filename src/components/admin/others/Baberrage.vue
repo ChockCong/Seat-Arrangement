@@ -29,7 +29,10 @@
         </div>
         <div class="button-area" @mouseenter="initControl(true)" @mouseleave="initControl(false)" v-if="videoSrc">
             <section class="control-bar" v-if="showControl">
-                <Slider class="progress" v-model="currentTimeProgress" @on-change="progressChange"></Slider>
+                <div class="progress">
+                    <Slider class="bar" v-model="currentTimeProgress" @on-change="progressChange" @click="progressChange"></Slider>
+                    <!-- <span class="time">{{returnTime()}}</span> -->
+                </div>
                 <div class="btn">
                     <div class="loop-item">
                         <label>{{'循环：'}}</label>
@@ -92,10 +95,10 @@ export default {
         currentTimeProgress(value) {
             let index = this.playList.findIndex(val => { return val.url === this.videoSrc });
             if (value === 100) {
-                if (index < this.playList.length) {
-                    this.changeList(this.playList[index + 1]);
+                if (index < this.playList.length - 1) {
+                    this.changeList(this.playList[index + 1], true);
                 } else {
-                    this.changeList(this.playList[0]);
+                    this.changeList(this.playList[0], true);
                 }
             }
         },
@@ -119,6 +122,25 @@ export default {
         }
     },
     methods: {
+        returnTime() {
+            let hours_1 = 0;
+            let minutes_1 = 0;
+            let seconds_1 = 0;
+            let hours_2 = 0;
+            let minutes_2 = 0;
+            let seconds_2 = 0;
+            if (this.$refs.videoAll) {
+                let currentTime = this.$refs.videoAll.currentTime.toFixed(0);
+                let duration = this.$refs.videoAll.duration.toFixed(0);
+                hours_1 = parseInt((currentTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                minutes_1 = parseInt((currentTime % (1000 * 60 * 60)) / (1000 * 60));
+                seconds_1 = (currentTime % (1000 * 60)) / 1000;
+                hours_2 = parseInt((duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                minutes_2 = parseInt((duration % (1000 * 60 * 60)) / (1000 * 60));
+                seconds_2 = (duration % (1000 * 60)) / 1000;
+            }
+            return `${hours_1}:${minutes_1}:${seconds_1}/${hours_2}:${minutes_2}:${seconds_2}`;
+        },
         addToList (){
             this.barrageList.push({
                 id: ++this.currentId,
@@ -186,9 +208,9 @@ export default {
         changeTime(val) {
             // if (this.$refs.videoAll.currentTime <= 0 || this.$refs.videoAll.currentTime >= this.$refs.videoAll.duration) return;
             if (val === 'forward') {
-                this.$refs.videoAll.currentTime += this.$refs.videoAll.currentTime < this.$refs.videoAll.duration ? 5 : 0;
+                this.$refs.videoAll.currentTime += this.$refs.videoAll.currentTime < this.$refs.videoAll.duration ? 2 : 0;
             } else {
-                this.$refs.videoAll.currentTime -= this.$refs.videoAll.currentTime > 0 ? 5 : 0;
+                this.$refs.videoAll.currentTime -= this.$refs.videoAll.currentTime > 0 ? 2 : 0;
             }
         },
         commonVideoUpdata(id) {
@@ -199,12 +221,12 @@ export default {
             this.currentTimeProgress = pre * 100;
         },
         progressChange(e) {
-            this.$refs.videoAll.currentTime = this.currentTimeProgress;
+            this.$refs.videoAll.currentTime = this.currentTimeProgress / 100 * this.$refs.videoAll.duration;
         },
-        changeList(item) {
+        changeList(item, playing = false) {
             if (this.videoSrc === item.url) return;
             this.videoSrc = item.url;
-            this.playing = false;
+            this.playing = playing;
         },
         deleteList(item) {
             let index = this.playList.findIndex(val => { return val.name === item.name });
@@ -293,8 +315,16 @@ export default {
                 }
             }
             & .progress {
+                display: flex;
+                align-items: center;
                 width: 98%;
                 padding: 0 5px;
+                & .bar {
+                    flex: 1;
+                }
+                & .time {
+                    width: 100px;
+                }
             }
             & .btn {
                 width: 100%;
