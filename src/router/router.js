@@ -52,6 +52,9 @@ const router = new VueRouter({
                     name: 'management',
                     component: () => import('../components/admin/Management.vue'),
                     redirect: 'management/home',
+                    meta: {
+                        requiresAuth: true
+                    },
                     children: [
                         {
                             path: 'home',
@@ -99,7 +102,7 @@ const router = new VueRouter({
                         },
                         {
                             path: 'baberrage-show',
-                            name: 'Baberrage',
+                            name: 'baberrage',
                             component: () => import('../components/admin/others/Baberrage.vue'),
                             meta: {
                                 keepAlive: true // 需要被缓存

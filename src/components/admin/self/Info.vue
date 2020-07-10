@@ -10,7 +10,7 @@
             </div> -->
         </div>
         <div class="content-wrap">
-            <Table v-if="!edit" width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
+            <Table stripe v-if="!edit" width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
                 <template slot-scope="{ row, index }" slot="content">
                     <div class="content-box">
                         <Tag :color="index === 1 ? 'green' : 'blue'">{{index === 1 ? level(row.content) : row.content}}</Tag>
@@ -29,6 +29,7 @@
             <div class="button-box">
                 <Button class="button" type="default" v-if="edit" @click="editInfo">{{ '取消' }}</Button>
                 <Button class="button" type="primary" @click="editInfo">{{ edit ? '确认修改' : '编辑信息' }}</Button>
+                <Button class="button" type="primary" @click="pwdModel = true">{{ '修改密码' }}</Button>
             </div>
         </div>
         <Modal
@@ -36,11 +37,29 @@
             :title="'功能分配'"
             :loading="true"
             :width="700"
-            @on-ok="() => { this.functionModel = true }"
+            @on-ok="() => { this.functionModel = false }"
             @on-cancel="() => { this.functionModel = false }">
             <FunctionList :sales="true" @confirm="confirmFunction"></FunctionList>
         </Modal>
-        
+        <Modal
+            v-model="pwdModel"
+            :title="'修改密码'"
+            :loading="true"
+            @on-ok="okPwd(true)"
+            @on-cancel="okPwd(false)">
+            <Form ref="subForm" :model="subForm" :rules="subFormRules" class="subForm">
+                <FormItem label="" prop="stPassword">
+                    <Input :type="seePwd ? 'text' : 'password'" prefix="ios-lock" v-model.trim="subForm.stPassword" placeholder="登录密码">
+                        <Icon style="cursor: pointer;" @click="seePwd = !seePwd" :type="seePwd ? 'ios-eye' : 'ios-eye-off'" slot="suffix" />
+                    </Input>
+                </FormItem>
+                <FormItem label="" prop="comfirmPassword">
+                    <Input :type="seeSubPwd ? 'text' : 'password'" prefix="ios-lock-outline" v-model.trim="subForm.comfirmPassword" placeholder="确认密码">
+                        <Icon style="cursor: pointer;" @click="seeSubPwd = !seeSubPwd" :type="seeSubPwd ? 'ios-eye' : 'ios-eye-off'" slot="suffix" />
+                    </Input>
+                </FormItem>
+            </Form>
+        </Modal>
     </div>
 </template>
 <script>
@@ -50,6 +69,27 @@ export default {
     name: 'Info',
     components: {FunctionList},
     data() {
+        const validatePassWord = (rule, value, callback) => {
+            let reg = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
+            if (value === '') {
+                callback(new Error('请输入密码'));
+            } else if (!reg.test(value)) {
+                callback(new Error('密码必须包含英文和数字'));
+            } else if (this.subForm.comfirmPassword && value !== this.subForm.comfirmPassword) {
+                callback(new Error('两次密码输入不一致请重新输入'));
+            } else {
+                callback();
+            }
+        };
+        const validatePassCheck = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请二次输入确认密码'));
+            } else if (this.subForm.stPassword && value !== this.subForm.stPassword) {
+                callback(new Error('两次密码输入不一致请重新输入'));
+            } else {
+                callback();
+            }
+        };
         return {
             edit: false,
             functionModel: false,
@@ -66,7 +106,20 @@ export default {
                     slot: 'content',
                     width: 400
                 }],
-            datas: []
+            datas: [],
+            pwdModel: false,
+            seePwd: false,
+            seeSubPwd: false,
+            subForm: {
+                stPassword: '',
+                comfirmPassword: '',
+            },
+            subFormRules: {
+                stPassword: [
+                    { required: true, validator: validatePassWord, trigger: ['blur','change'] }
+                ],
+                comfirmPassword: { required: true, validator: validatePassCheck, trigger: ['blur','change'] }
+            }
         }
     },
     computed: {
@@ -85,37 +138,48 @@ export default {
         confirmFunction(selection) {
             let select = selection;
             console.log(select);
+        },
+        okPwd(type) {
+            let bol = true;
+            //TODO: 异步接收校验
+            if (type) {
+                this.$refs['subForm'].validate((valid) => {
+                    bol = valid;
+                });
+            }
+            if (!bol) return;
+            this.$refs.subForm.resetFields();
+            this.pwdModel = false;
         }
     },
     beforeMount() {
-        console.log(1111);
         this.datas = [{
             title: '用户名',
             content: this.adminInfo.ctName,
             cellClassName: {
-                title: 'title-cell',
-                content: 'info-cell',
+                // title: 'title-cell',
+                // content: 'info-cell',
             }
         },{
             title: '会员权限',
             content: this.adminInfo.ctType,
             cellClassName: {
-                title: 'title-cell',
-                content: 'info-cell',
+                // title: 'title-cell',
+                // content: 'info-cell',
             }
         },{
             title: '邮箱地址',
             content: this.adminInfo.ctEmail,
             cellClassName: {
-                title: 'title-cell',
-                content: 'info-cell',
+                // title: 'title-cell',
+                // content: 'info-cell',
             }
         },{
             title: '电话号码',
             content: this.adminInfo.ctPhone,
             cellClassName: {
-                title: 'title-cell',
-                content: 'info-cell',
+                // title: 'title-cell',
+                // content: 'info-cell',
             }
         },
         // {

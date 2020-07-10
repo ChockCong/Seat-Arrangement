@@ -35,7 +35,7 @@ const menuItems = [
             {
                 type: 'md-folder',
                 size: 18, // icon大小
-                name: 'Baberrage',
+                name: 'baberrage',
                 text: '互动视频',
             }
         ]

@@ -27,7 +27,7 @@
                 <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{videoSrc ? '重新上传' : '上传视频'}}</Button>
             </div>
         </div>
-        <div class="button-area" v-if="videoSrc">
+        <div class="button-area" @mouseenter="initControl(true)" @mouseleave="initControl(false)" v-if="videoSrc">
             <section class="control-bar" v-if="showControl">
                 <Slider class="progress" v-model="currentTimeProgress" @on-change="progressChange"></Slider>
                 <div class="btn">
@@ -62,7 +62,7 @@ import { MESSAGE_TYPE } from 'vue-baberrage'
 import logo from '../../../assets/logo.png';
 import { setInterval, clearInterval } from 'timers';
 export default {
-    name: 'Baberrage',
+    name: 'baberrage',
     data() {
         return {
             videoSrc:'',
@@ -80,6 +80,7 @@ export default {
             currentTimeProgress: 0,
             playList: [],
             timer: null,
+            inControl: false,
         }
     },
     computed: {
@@ -101,6 +102,15 @@ export default {
         showControl(value) {
             if (value) {
                 if (this.timer) clearTimeout(this.timer);
+                let timeout = setTimeout(() => {
+                    this.showControl = false;
+                }, 8000);
+                this.timer = timeout;
+            }
+        },
+        inControl(value) {
+            if (this.timer) clearTimeout(this.timer);
+            if (!value) {
                 let timeout = setTimeout(() => {
                     this.showControl = false;
                 }, 8000);
@@ -144,6 +154,9 @@ export default {
                 return this.showControl = true;
             }
             this.showControl = true;
+        },
+        initControl(bol) {
+            this.inControl = bol;
         },
         play(val) {
             if (this.playing) {
@@ -199,7 +212,6 @@ export default {
             if (index > 0) {
                 this.videoSrc = this.playList[index - 1].url;
             } else {
-                console.log(index);
                 this.videoSrc = this.playList.length ? this.playList[index + 1].url : ''
             }
             this.playList.splice(index, 1);
