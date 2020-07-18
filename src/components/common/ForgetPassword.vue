@@ -19,7 +19,10 @@
                     </FormItem>
                 </ICol>
             </Row>
-            <Button size="large" class="submit" type="primary" @click="send">{{ inputButton }}</Button>
+            <div class="buton-box">
+                <Button size="large" type="" @click="back">{{ '返回' }}</Button>
+                <Button size="large" class="submit" type="primary" @click="send">{{ inputButton }}</Button>
+            </div>
         </Form>
     </div>
 </template>
@@ -82,6 +85,9 @@ export default {
                     this.$Message.error('请填写登录名和选择找回方式');
                 }
             });
+        },
+        back() {
+            this.$router.back();
         }
     },
     created() {
@@ -102,6 +108,12 @@ export default {
     justify-content: center;
     ::v-deep .forgetForm {
         width: 500px;
+    }
+    .buton-box {
+        width: 300px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-around;
     }
 }
 </style>

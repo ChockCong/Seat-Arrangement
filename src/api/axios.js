@@ -65,6 +65,7 @@ export const reqJsonData = async ({
 			const Axios = !isformData ? axios(config) : axios.post(config.url, transformRequest, config);
 			Axios
 				.then(res => {
+					// console.log(res.data.errorCode);
 					if (res.data.errorCode !== 200) {
 						Vue.prototype.errorPopHandler('登陆失败，请重试'); //TODO
 						router.push({ path: '/admin/login' });

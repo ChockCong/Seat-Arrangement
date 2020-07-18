@@ -29,7 +29,7 @@
             <div class="button-box">
                 <Button class="button" type="default" v-if="edit" @click="editInfo">{{ '取消' }}</Button>
                 <Button class="button" type="primary" @click="editInfo">{{ edit ? '确认修改' : '编辑信息' }}</Button>
-                <Button class="button" type="primary" @click="pwdModel = true">{{ '修改密码' }}</Button>
+                <Button class="button" type="primary" v-if="!edit" @click="pwdModel = true">{{ '修改密码' }}</Button>
             </div>
         </div>
         <Modal
@@ -241,8 +241,9 @@ export default {
             padding: 20px 0;
             text-align: left;
             & .button {
-                &:first-child {
-                    margin-right: 10px;
+                margin-right: 10px;
+                &:last-child {
+                    margin-right: 0;
                 }
             }
         }

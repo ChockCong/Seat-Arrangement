@@ -25,7 +25,7 @@
             <!-- 下拉菜单 -->
             <Dropdown trigger="click" @on-click="userOperate" @on-visible-change="showArrow">
                 <div class="pointer">
-                    <span>{{adminInfo.username}}</span>
+                    <span>{{adminInfo.ctName}}</span>
                     <Icon v-show="arrowDown" type="md-arrow-dropdown"/>
                     <Icon v-show="arrowUp" type="md-arrow-dropup"/>
                 </div>
@@ -53,7 +53,7 @@ export default {
     computed: {
         ...mapGetters({
 			adminInfo: 'getAdminInfo'
-        }),
+		}),
         isPackage() {
             return this.$route.name === 'package-buy'
         },
@@ -86,6 +86,9 @@ export default {
         gotoPage(name) {
             this.$router.replace({ name })
         }
+    },
+    beforeMount() {
+        console.log(this.adminInfo);
     }
 }
 </script>

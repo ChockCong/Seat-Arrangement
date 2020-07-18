@@ -230,18 +230,8 @@ export default {
                     // console.log(res, !_.isEmpty(res))
                     if (res && !_.isEmpty(res)) {
                         let data = res.data;
-                        data.sysOrgMain.admin_token = res.data.token;
-                        // {
-                        //     admin_token: 'ghfkjahksgsd54234234sdfgsdfsfsdgsdg',
-                        //     username: '码雷管理员账户',
-                        //     email: '123@123.com',
-                        //     phoneNo: '12023698547',
-                        //     company: {
-                        //         address: 'sdgfjkhsdkfksdb三大框架还疯狂水底纳瓜',
-                        //         phoneNo: ''
-                        //     }
-                        // };
-                        this.$store.commit('SET_ADMIN_INFO', data.sysOrgMain);
+                        console.log(res.data);
+                        this.$store.commit('SET_ADMIN_INFO', data);
                         if (this.$store.getters.getAdminToken) {
                             this.$router.push({ path: 'management' });
                         }

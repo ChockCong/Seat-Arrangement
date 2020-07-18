@@ -41,11 +41,17 @@ const router = new VueRouter({
                     path: 'free-buy',
                     name: 'free-buy',
                     component: () => import('../components/admin/Buy/Buy.vue'),
+                    meta: {
+                        requiresAuth: true
+                    }
                 },
                 {
                     path: 'package-buy',
                     name: 'package-buy',
                     component: () => import('../components/admin/Buy/BuyPackage.vue'),
+                    meta: {
+                        requiresAuth: true
+                    }
                 },
                 {
                     path: 'management',
@@ -131,11 +137,11 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     console.log(to, from)
     if (to.matched.some(route => route.meta && route.meta.requiresAuth) && !store.state.adminInfo.admin_token) {
+        //TODO: token过期后应刷新保持登录，反之退出登录
         const res = await adminLogin({ token: 'token' });
         if (res && !_.isEmpty(res)) {
             let data = res.data;
-            data.sysOrgMain.admin_token = res.data.token;
-            store.commit('SET_ADMIN_INFO', data.sysOrgMain);
+            store.commit('SET_ADMIN_INFO', data);
         }
     }
     return next();
