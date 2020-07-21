@@ -203,6 +203,7 @@ export default {
         },
         full() {
             let bol = this.fullScreen ? false : true;
+            if (!this.fullScreen) this.$Message.info({content: '按Esc键退出全屏视频', closable: true});
             this.$store.commit('FULL_VEDIO', {status: bol});
         },
         changeTime(val) {
@@ -239,6 +240,18 @@ export default {
             this.playList.splice(index, 1);
             // this.$forceUpdate();
         }
+    },
+    mounted() {
+        //监听键盘按键事件
+        let self = this;
+        this.$nextTick(() => {
+            document.addEventListener('keyup', (e) => {
+            //此处填写你的业务逻辑即可
+                if (e.keyCode == 27 && this.fullScreen) {
+                    self.full();
+                }
+            })
+        })
     },
     beforeMounted() {
         this.addToList();
