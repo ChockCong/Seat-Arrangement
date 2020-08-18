@@ -633,7 +633,7 @@ aside {
     overflow: hidden;;
     background: #f3f7fd;
     &.full {
-        margin-left: 0;
+        margin-left: 0 !important;
     }
 }
 /* 主体页面头部 */
