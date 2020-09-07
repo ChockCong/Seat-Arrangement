@@ -22,8 +22,8 @@ const router = new VueRouter({
 			component: () => import('../components/HelloWorld.vue'),
         },
         {
-            path: '/unlogin',
-            name: 'unLogin',
+            path: '/:page',
+            // name: 'unLogin',
             component: () => import('../components/common/UnLoginFrame.vue'),
         },
         {

@@ -232,10 +232,11 @@ export default {
         & .function-list {
             display: flex;
             flex-wrap: wrap;
-            max-width: 1070px;
+            max-width: 1200px;
             margin: 0 auto;
             overflow: auto;
             padding: 10px;
+            box-sizing: border-box;
             & .function-item {
                 padding: 2px;
                 width: 210px;

@@ -99,7 +99,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .index-vue-forget-main {
-    width: 80%;
+    width: 1200px;
     margin: 0 auto;
     height: 100%;
     background: #f3f7fd;
@@ -110,10 +110,10 @@ export default {
         width: 500px;
     }
     .buton-box {
-        width: 300px;
+        // width: 300px;
         margin: 0 auto;
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
     }
 }
 </style>
