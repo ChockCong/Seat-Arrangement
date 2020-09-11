@@ -1,7 +1,7 @@
 <template>
 <div class="index-vue-main">
     <div class="ad-carousel">
-        <Carousel autoplay v-model="carousel" :autoplay-speed="2000" loop>
+        <Carousel autoplay v-model="carousel" :autoplay-speed="3000" :arrow="'never'" loop>
             <CarouselItem>
                 <div class="demo-carousel">
                     <img src="https://www1.djicdn.com/cms/uploads/2e2375062b1f0a7a717358036c6b381c.jpg" />
@@ -9,7 +9,7 @@
             </CarouselItem>
             <CarouselItem>
                 <div class="demo-carousel">
-                    <img src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=3492285453,982599627&fm=26&gp=0.jpg" />
+                    <img src="https://img.zcool.cn/community/01b5555a0d934ca80121985ce63b3b.jpg@1280w_1l_2o_100sh.jpg" />
                 </div>
             </CarouselItem>
         </Carousel>
@@ -36,6 +36,13 @@
             </template>
         </div>
     </div>
+    <div class="index-vue-main-introduc">
+        <div class="introduc-content">
+            <h1>会场敏捷专家</h1>
+            <p>互联网+会场，从准备到布置再到流程以及场内互动，一站式管理您的会场，让您成为主角，带给用户新式体验</p>
+            <div class="click">了解更多</div>
+        </div>
+    </div>
 </div>
 </template>
 
@@ -48,8 +55,8 @@ export default {
                 { name: '会场系统', desc: '宴会/会议便捷解决方案', img: 'https://www1.djicdn.com/cms/uploads/bccdb5d218eb2c32dccb5c88babc7679@1x.webp', hoverIt: false },
                 { name: '视频互动', desc: '婚宴会场的互动新模式', img: 'https://www1.djicdn.com/cms/uploads/bccdb5d218eb2c32dccb5c88babc7679@1x.webp', hoverIt: false },
                 { name: '专业影像', desc: '天地一体的专业拍摄解决方案', img: 'https://www1.djicdn.com/cms/uploads/bccdb5d218eb2c32dccb5c88babc7679@1x.webp', hoverIt: false },
-                { name: '会场系统', desc: '天地一体的专业拍摄解决方案', img: 'https://www1.djicdn.com/cms/uploads/bccdb5d218eb2c32dccb5c88babc7679@1x.webp', hoverIt: false },
-                { name: '会场系统', desc: '天地一体的专业拍摄解决方案', img: 'https://www1.djicdn.com/cms/uploads/bccdb5d218eb2c32dccb5c88babc7679@1x.webp', hoverIt: false }],
+                { name: '专业影像', desc: '天地一体的专业拍摄解决方案', img: 'https://www1.djicdn.com/cms/uploads/bccdb5d218eb2c32dccb5c88babc7679@1x.webp', hoverIt: false },
+                { name: '专业影像', desc: '天地一体的专业拍摄解决方案', img: 'https://www1.djicdn.com/cms/uploads/bccdb5d218eb2c32dccb5c88babc7679@1x.webp', hoverIt: false }],
             hoverIt: false
         }
     },
@@ -76,13 +83,50 @@ export default {
 }
 .index-vue-main {
     width: 100%;
+    &-introduc {
+        width: 100%;
+        height: 300px;
+        background: lightgrey;
+        & .introduc-content {
+            width: 1200px;
+            height: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            & h1 {
+                font-size: 45px;
+            }
+            & p {
+               font-size: 14px;
+            }
+            & .click {
+                display: inline-block;
+                width: 130px;
+                height: 40px;
+                line-height: 40px;
+                text-align: center;
+                font-size: 14px;
+                color: #f68b1f;
+                border: 1px solid #f68b1f;
+                border-radius: 21px !important;
+                margin-top: 30px;
+                text-decoration: none;
+                &:hover {
+                    background: #f68b1f;
+                    color: white;
+                }
+            }
+        }
+    }
     &-content {
         width: 1200px;
         box-sizing: border-box;
         margin: 0 auto;
-        padding: 10px 0;
         /* height: 100%; */
          & .content-title {
+            padding: 10px 0 0 0;
             font-size: 40px;
             line-height: 44px;
             font-weight: 500;
@@ -91,6 +135,7 @@ export default {
             padding: 20px 0;
         }
         & .content-block {
+            padding: 0 0 10px 0;
             display: flex;
             flex-wrap: wrap;
             & .content-item {
