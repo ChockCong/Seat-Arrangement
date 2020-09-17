@@ -1,71 +1,77 @@
 <template>
-    <div class="index-vue-video-main" @mousemove="hoverControl">
-        <Drawer title="播放列表" class-name="menu-popup" width="300" :closable="true" :transfer="false" :inner="true"  v-model="drawer">
-            <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{'上传视频'}}</Button>
-            <div class="play-list">
-                <div v-for="(item, index) in playList" :key="index" class="play-list-item">
-                    <div class="word" :class="item.url === videoSrc ? 'selected' : ''">
-                        <span @click="changeList(item)">{{ item.name }}</span>
-                        <Icon type="ios-close" @click="deleteList(item)" />
+        <div class="index-vue-video-main" @mousemove="hoverControl">
+            <Drawer title="播放列表" class-name="menu-popup" width="300" :closable="true" :transfer="false" :inner="true"  v-model="drawer">
+                <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{'上传视频'}}</Button>
+                <div class="play-list">
+                    <div v-for="(item, index) in playList" :key="index" class="play-list-item">
+                        <div class="word" :class="item.url === videoSrc ? 'selected' : ''">
+                            <span @click="changeList(item)">{{ item.name }}</span>
+                            <Icon type="ios-close" @click="deleteList(item)" />
+                        </div>
                     </div>
                 </div>
-            </div>
-        </Drawer>
-        <div class="play-area" v-if="videoSrc">
-            <video ref="videoAll" class="play-area-video" :src="videoSrc"  @timeupdate="commonVideoUpdata()" :loop="loop"></video>
-            <vue-baberrage
-                :isShow="barrageIsShow"
-                :barrageList="barrageList"
-                :loop ="barrageLoop"
-                class="barrage"
-                >
-            </vue-baberrage>
-        </div>
-        <div class="play-area" v-else>
-            <div class="play-area-video-null">
-                <h2>{{'视频区域'}}</h2>
-                <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{videoSrc ? '重新上传' : '上传视频'}}</Button>
-            </div>
-        </div>
-        <div class="button-area" @mouseenter="initControl(true)" @mouseleave="initControl(false)" v-if="videoSrc">
-            <section class="control-bar" v-if="showControl">
-                <div class="progress">
-                    <Slider class="bar" v-model="currentTimeProgress" @on-change="progressChange" @click="progressChange"></Slider>
-                    <!-- <span class="time">{{returnTime()}}</span> -->
-                </div>
-                <div class="btn">
-                    <div class="loop-item">
-                        <label>{{'循环：'}}</label>
-                        <SwitchTab v-model="loop">
-                            <span slot="open">{{'开'}}</span>
-                            <span slot="close">{{'关'}}</span>
-                        </SwitchTab>
-                    </div>
-                    <Button class="icon-correct" type="primary" shape="circle" :icon="'ios-square'" @click="stop"></Button>
-                    <Button class="icon-correct" shape="circle" :icon="'ios-rewind'" @click="changeTime('back')"></Button>
-                    <Button type="primary" shape="circle" :class="playing ? 'icon-correct' : ''" :icon="playing ? 'ios-pause' : 'ios-play'" @click="play"></Button>
-                    <Button shape="circle" :icon="'ios-fastforward'" @click="changeTime('forward')"></Button>
-                    <div style="width: 100px;margin-left: 10px">
-                        <Slider v-model="slider" @on-input="volumeChange"></Slider>
-                    </div>
-                    <Button class="baberrage-btn" type="primary" @click="addToList">{{'测试弹幕'}}</Button>
-                    <Button class="full-screen icon-correct" type="primary" @click="full" shape="circle" :icon="!fullScreen ? 'md-expand' : 'md-contract'"></Button>
-                    <Button class="menu-btn icon-correct" type="primary" shape="circle" icon="md-list" @click="drawer = !drawer"></Button>
-                </div>
+            </Drawer>
+            <!-- <div class="play-area" v-if="videoSrc">
+                <video ref="videoAll" class="play-area-video" :src="videoSrc"  @timeupdate="commonVideoUpdata()" :loop="loop"></video>
+                <vue-baberrage
+                    :isShow="barrageIsShow"
+                    :barrageList="barrageList"
+                    :loop ="barrageLoop"
+                    class="barrage"
+                    >
+                </vue-baberrage>
+            </div> -->
+            <section class="top-btn">
+                <Button class="baberrage-btn" type="primary" @click="addToList">{{'测试弹幕'}}</Button>
+                <Button class="menu-btn icon-correct" type="primary" icon="md-list" @click="drawer = !drawer"></Button>
             </section>
-            <!-- <section>
-                <Button v-if="videoSrc" type="primary" @click="addToList">{{'测试弹幕'}}</Button>
-            </section> -->
+            <div id="vs"></div>
+            <div class="play-area"  v-if="!videoSrc">
+                <div class="play-area-video-null">
+                    <h2>{{'视频区域'}}</h2>
+                    <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{videoSrc ? '重新上传' : '上传视频'}}</Button>
+                </div>
+            </div>
+            <!-- <div class="button-area" @mouseenter="initControl(true)" @mouseleave="initControl(false)" v-if="videoSrc">
+                <section class="control-bar" v-if="showControl">
+                    <div class="progress">
+                        <Slider class="bar" v-model="currentTimeProgress" @on-change="progressChange" @click="progressChange"></Slider>
+                        <span class="time">{{returnTime()}}</span>
+                    </div>
+                    <div class="btn">
+                        <div class="loop-item">
+                            <label>{{'循环：'}}</label>
+                            <SwitchTab v-model="loop">
+                                <span slot="open">{{'开'}}</span>
+                                <span slot="close">{{'关'}}</span>
+                            </SwitchTab>
+                        </div>
+                        <Button class="icon-correct" type="primary" shape="circle" :icon="'ios-square'" @click="stop"></Button>
+                        <Button class="icon-correct" shape="circle" :icon="'ios-rewind'" @click="changeTime('back')"></Button>
+                        <Button type="primary" shape="circle" :class="playing ? 'icon-correct' : ''" :icon="playing ? 'ios-pause' : 'ios-play'" @click="play"></Button>
+                        <Button shape="circle" :icon="'ios-fastforward'" @click="changeTime('forward')"></Button>
+                        <div style="width: 100px;margin-left: 10px">
+                            <Slider v-model="slider" @on-input="volumeChange"></Slider>
+                        </div>
+                        <Button class="baberrage-btn" type="primary" @click="addToList">{{'测试弹幕'}}</Button>
+                        <Button class="full-screen icon-correct" type="primary" @click="full" shape="circle" :icon="!fullScreen ? 'md-expand' : 'md-contract'"></Button>
+                        <Button class="menu-btn icon-correct" type="primary" shape="circle" icon="md-list" @click="drawer = !drawer"></Button>
+                    </div>
+                </section>
+            </div> -->
+            <input ref="upload" id="upload" type="file" hidden @change="getfile"/>
         </div>
-        <input ref="upload" id="upload" type="file" hidden @change="getfile"/>
-    </div>
 </template>
 <script>
+import Player from 'xgplayer';
 import { MESSAGE_TYPE } from 'vue-baberrage'
 import logo from '../../../assets/logo.png';
 import { setInterval, clearInterval } from 'timers';
 export default {
     name: 'baberrage',
+    // components: {
+    //     Xgplayer 
+    // },
     data() {
         return {
             videoSrc:'',
@@ -84,11 +90,19 @@ export default {
             playList: [],
             timer: null,
             inControl: false,
+            player: null,
+            danmuFirst: false,
+            DOMel: `<div class='danmu'>123</div>`
         }
     },
     computed: {
         fullScreen() {
             return this.$store.state.fullScreen;
+        },
+        xgPlayList() {
+            return this.playList.map(item => {
+                return item.url;
+            })
         }
     },
     watch: {
@@ -142,13 +156,42 @@ export default {
             return `${hours_1}:${minutes_1}:${seconds_1}/${hours_2}:${minutes_2}:${seconds_2}`;
         },
         addToList (){
-            this.barrageList.push({
-                id: ++this.currentId,
-                avatar: logo,
-                msg: this.msg,
-                time: 5,
-                type: MESSAGE_TYPE.NORMAL
-            });
+            // this.barrageList.push({
+            //     id: ++this.currentId,
+            //     avatar: logo,
+            //     msg: this.msg,
+            //     time: 5,
+            //     type: MESSAGE_TYPE.NORMAL
+            // });
+            if (!this.danmuFirst) {
+                this.player.danmu.start();
+                this.danmuFirst = true;
+            }
+            const danmu = () => {
+                console.log(this.player)
+                this.player.danmu.sendComment({
+                    duration: 15000, //弹幕持续显示时间,毫秒(最低为5000毫秒)
+                    id: `bili_${Math.random(0,1) * 10 + 1}`, //弹幕id，需唯一
+                    // start: 1000, //弹幕出现时间，毫秒
+                    // prior: true, //该条弹幕优先显示，默认false
+                    color: true, //该条弹幕为彩色弹幕，默认false
+                    txt: '长弹幕长弹幕长弹幕长弹幕长弹幕长弹幕长弹幕长弹幕长弹幕长弹幕' + Math.random(0,1) * 10 + 1, //弹幕文字内容
+                    style: {  //弹幕自定义样式
+                        color: '#ff9500',
+                        fontSize: '20px',
+                        border: 'solid 1px #ff9500',
+                        borderRadius: '50px',
+                        padding: '5px 11px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    // mode: 'top' //显示模式，top顶部居中，bottom底部居中，scroll滚动，默认为scroll
+                    // el: this.DOMel //直接传入一个自定义的DOM元素作为弹幕，使用该项的话会忽略所提供的txt和style
+                });
+                this.player.danmu.play();
+            };
+            // setInterval(() => {
+                danmu();
+            // }, 1000);
         },
         uploadFile() {
             this.$refs.upload.click();
@@ -158,7 +201,35 @@ export default {
             let file = target.files[0];
             this.videoSrc = this.getObjectURL(file);
             this.playList.push({ name: file.name, url: this.videoSrc});
-            this.showControl = true;
+            if (this.playList.length > 1) {
+                this.player.src = this.videoSrc;
+                this.player.pause();
+            } else {
+                this.player = new Player({
+                    id: 'vs',
+                    url: this.videoSrc,
+                    height: '95%',
+                    width: '100%',
+                    pip: true,
+                    // playNext: {
+                    //     urlList: this.xgPlayList
+                    // },
+                    danmu: {
+                        comments: [],
+                        area: {  //弹幕显示区域
+                            start: 0, //区域顶部到播放器顶部所占播放器高度的比例
+                            end: 1 //区域底部到播放器顶部所占播放器高度的比例
+                        },
+                        // closeDefaultBtn: true, //开启此项后不使用默认提供的弹幕开关，默认使用西瓜播放器提供的开关
+                        // defaultOff: true //开启此项后弹幕不会初始化，默认初始化弹幕
+                    },
+                    // defaultOff: true,
+                    closeDefaultBtn: true
+                });
+                this.player.src = this.videoSrc;
+                this.player.start(this.videoSrc)
+                this.showControl = true;
+            }
         },
         getObjectURL (file) {
             let url = null ;
@@ -180,53 +251,54 @@ export default {
         initControl(bol) {
             this.inControl = bol;
         },
-        play(val) {
-            if (this.playing) {
-                this.$refs.videoAll.pause();
-                this.pause = true;
-                this.showControl = true;
-            } else {
-                this.$refs.videoAll.play();
-                this.pause = false;
-            }
-            this.playing = !this.playing;
-            // this.showControl = false;
-        },
-         // 停止播放,显示图片清零进度条
-        stop(val) {
-            this.$refs.videoAll.currentTime = 0;
-            this.$refs.videoAll.pause();
-            this.playing = false;
-        },
-        volumeChange() {
-            this.$refs.videoAll.volume = Number(this.slider) / 100;
-        },
-        full() {
-            let bol = this.fullScreen ? false : true;
-            if (!this.fullScreen) this.$Message.info({content: '按Esc键退出全屏视频', closable: true});
-            this.$store.commit('FULL_VEDIO', {status: bol});
-        },
-        changeTime(val) {
-            // if (this.$refs.videoAll.currentTime <= 0 || this.$refs.videoAll.currentTime >= this.$refs.videoAll.duration) return;
-            if (val === 'forward') {
-                this.$refs.videoAll.currentTime += this.$refs.videoAll.currentTime < this.$refs.videoAll.duration ? 2 : 0;
-            } else {
-                this.$refs.videoAll.currentTime -= this.$refs.videoAll.currentTime > 0 ? 2 : 0;
-            }
-        },
-        commonVideoUpdata(id) {
-            let videoObj = this.$refs.videoAll
-            let currTime = videoObj.currentTime //当前时间
-            let duration = videoObj.duration //总时间
-            let pre = currTime / duration
-            this.currentTimeProgress = pre * 100;
-        },
-        progressChange(e) {
-            this.$refs.videoAll.currentTime = this.currentTimeProgress / 100 * this.$refs.videoAll.duration;
-        },
+        // play(val) {
+        //     if (this.playing) {
+        //         this.$refs.videoAll.pause();
+        //         this.pause = true;
+        //         this.showControl = true;
+        //     } else {
+        //         this.$refs.videoAll.play();
+        //         this.pause = false;
+        //     }
+        //     this.playing = !this.playing;
+        //     // this.showControl = false;
+        // },
+        //  // 停止播放,显示图片清零进度条
+        // stop(val) {
+        //     this.$refs.videoAll.currentTime = 0;
+        //     this.$refs.videoAll.pause();
+        //     this.playing = false;
+        // },
+        // volumeChange() {
+        //     this.$refs.videoAll.volume = Number(this.slider) / 100;
+        // },
+        // full() {
+        //     let bol = this.fullScreen ? false : true;
+        //     if (!this.fullScreen) this.$Message.info({content: '按Esc键退出全屏视频', closable: true});
+        //     this.$store.commit('FULL_VEDIO', {status: bol});
+        // },
+        // changeTime(val) {
+        //     // if (this.$refs.videoAll.currentTime <= 0 || this.$refs.videoAll.currentTime >= this.$refs.videoAll.duration) return;
+        //     if (val === 'forward') {
+        //         this.$refs.videoAll.currentTime += this.$refs.videoAll.currentTime < this.$refs.videoAll.duration ? 2 : 0;
+        //     } else {
+        //         this.$refs.videoAll.currentTime -= this.$refs.videoAll.currentTime > 0 ? 2 : 0;
+        //     }
+        // },
+        // commonVideoUpdata(id) {
+        //     let videoObj = this.$refs.videoAll
+        //     let currTime = videoObj.currentTime //当前时间
+        //     let duration = videoObj.duration //总时间
+        //     let pre = currTime / duration
+        //     this.currentTimeProgress = pre * 100;
+        // },
+        // progressChange(e) {
+        //     this.$refs.videoAll.currentTime = this.currentTimeProgress / 100 * this.$refs.videoAll.duration;
+        // },
         changeList(item, playing = false) {
             if (this.videoSrc === item.url) return;
             this.videoSrc = item.url;
+            this.player.src = this.videoSrc
             this.playing = playing;
         },
         deleteList(item) {
@@ -243,18 +315,18 @@ export default {
     },
     mounted() {
         //监听键盘按键事件
-        let self = this;
-        this.$nextTick(() => {
-            document.addEventListener('keyup', (e) => {
-            //此处填写你的业务逻辑即可
-                if (e.keyCode == 27 && this.fullScreen) {
-                    self.full();
-                }
-            })
-        })
+        // let self = this;
+        // this.$nextTick(() => {
+        //     document.addEventListener('keyup', (e) => {
+        //     //此处填写你的业务逻辑即可
+        //         if (e.keyCode == 27 && this.fullScreen) {
+        //             self.full();
+        //         }
+        //     })
+        // })
     },
     beforeMounted() {
-        this.addToList();
+        // this.addToList();
     }
 }
 </script>
@@ -263,9 +335,17 @@ export default {
     position: relative;
     padding: 10px;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    & .top-btn {
+        padding: 5px 0;
+        display: flex;
+        justify-content: space-between;
+    }
     & .play-area {
         position: relative;
-        height: 100%;
+        // height: 100%;
+        flex: 1;
         width: 100%;
         &-video {
             width: 100%;
