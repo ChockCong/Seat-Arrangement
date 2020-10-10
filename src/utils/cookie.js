@@ -13,7 +13,6 @@ export const isTokenEnable = () => {
     let expires = store.state.adminInfo.token_overtime * 1000;
     if (store.state.adminInfo && currentTime - loginTime > expires) {
         Vue.prototype.errorPopHandler('用户信息已过期，请重新登陆');
-        store.commit('REMOVE_ADMIN_INFO');
         removeCookie();
         router.push({ path: '/admin/login' });
     }
@@ -31,6 +30,7 @@ export const setCookie = (params) => {
 };
 
 export const removeCookie = () => {
+    store.commit('REMOVE_ADMIN_INFO');
     localStorage.removeItem('loginTime');
     Cookie.remove('loginInfo');
     window.sessionStorage.clear();

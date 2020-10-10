@@ -144,6 +144,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { removeCookie } from '@/utils/cookie';
 export default {
     name: 'Management',
     // components: { Baberrage },
@@ -414,7 +415,8 @@ export default {
                     this.gotoPage('userinfo')
                     break
                 case '3':
-                    this.$router.replace({ name: 'login' })
+                    removeCookie();
+                    this.$router.replace({ name: 'login' });
                     break
             }
         },

@@ -14,7 +14,7 @@ const mutations = {
         state.adminInfo.token_overtime = params.tokenOverTime;
         // state.adminInfo = params
     },
-    [REMOVE_ADMIN_INFO](state, params) {
+    [REMOVE_ADMIN_INFO](state) {
         state.adminInfo = {}
     },
     [SET_USER_INFO](state, params) {
