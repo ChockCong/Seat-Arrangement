@@ -1,5 +1,6 @@
 <template>
-        <div class="index-vue-video-main" @mousemove="hoverControl">
+ <!-- @mousemove="hoverControl" -->
+        <div class="index-vue-video-main">
             <Drawer title="播放列表" class-name="menu-popup" width="300" :closable="true" :transfer="false" :inner="true"  v-model="drawer">
                 <Button icon="ios-cloud-upload-outline" @click="uploadFile">{{'上传视频'}}</Button>
                 <div class="play-list">
@@ -25,7 +26,7 @@
                 <Button class="baberrage-btn" type="primary" @click="addToList">{{'测试弹幕'}}</Button>
                 <Button class="menu-btn icon-correct" type="primary" icon="md-list" @click="drawer = !drawer"></Button>
             </section>
-            <div id="vs"></div>
+            <div id="vs" v-show="videoSrc"></div>
             <div class="play-area"  v-if="!videoSrc">
                 <div class="play-area-video-null">
                     <h2>{{'视频区域'}}</h2>
@@ -106,34 +107,34 @@ export default {
         }
     },
     watch: {
-        currentTimeProgress(value) {
-            let index = this.playList.findIndex(val => { return val.url === this.videoSrc });
-            if (value === 100) {
-                if (index < this.playList.length - 1) {
-                    this.changeList(this.playList[index + 1], true);
-                } else {
-                    this.changeList(this.playList[0], true);
-                }
-            }
-        },
-        showControl(value) {
-            if (value) {
-                if (this.timer) clearTimeout(this.timer);
-                let timeout = setTimeout(() => {
-                    this.showControl = false;
-                }, 8000);
-                this.timer = timeout;
-            }
-        },
-        inControl(value) {
-            if (this.timer) clearTimeout(this.timer);
-            if (!value) {
-                let timeout = setTimeout(() => {
-                    this.showControl = false;
-                }, 8000);
-                this.timer = timeout;
-            }
-        }
+        // currentTimeProgress(value) {
+        //     let index = this.playList.findIndex(val => { return val.url === this.videoSrc });
+        //     if (value === 100) {
+        //         if (index < this.playList.length - 1) {
+        //             this.changeList(this.playList[index + 1], true);
+        //         } else {
+        //             this.changeList(this.playList[0], true);
+        //         }
+        //     }
+        // },
+        // showControl(value) {
+        //     if (value) {
+        //         if (this.timer) clearTimeout(this.timer);
+        //         let timeout = setTimeout(() => {
+        //             this.showControl = false;
+        //         }, 8000);
+        //         this.timer = timeout;
+        //     }
+        // },
+        // inControl(value) {
+        //     if (this.timer) clearTimeout(this.timer);
+        //     if (!value) {
+        //         let timeout = setTimeout(() => {
+        //             this.showControl = false;
+        //         }, 8000);
+        //         this.timer = timeout;
+        //     }
+        // }
     },
     methods: {
         returnTime() {
@@ -203,6 +204,7 @@ export default {
             this.playList.push({ name: file.name, url: this.videoSrc});
             if (this.playList.length > 1) {
                 this.player.src = this.videoSrc;
+                this.player.replay();
                 this.player.pause();
             } else {
                 this.player = new Player({
@@ -227,8 +229,8 @@ export default {
                     closeDefaultBtn: true
                 });
                 this.player.src = this.videoSrc;
-                this.player.start(this.videoSrc)
-                this.showControl = true;
+                this.player.start(this.videoSrc);
+                // this.showControl = true;
             }
         },
         getObjectURL (file) {
@@ -242,15 +244,15 @@ export default {
             }
             return url ;
         },
-        hoverControl() {
-            if(!this.playing) {
-                return this.showControl = true;
-            }
-            this.showControl = true;
-        },
-        initControl(bol) {
-            this.inControl = bol;
-        },
+        // hoverControl() {
+        //     if(!this.playing) {
+        //         return this.showControl = true;
+        //     }
+        //     this.showControl = true;
+        // },
+        // initControl(bol) {
+        //     this.inControl = bol;
+        // },
         // play(val) {
         //     if (this.playing) {
         //         this.$refs.videoAll.pause();
@@ -298,7 +300,9 @@ export default {
         changeList(item, playing = false) {
             if (this.videoSrc === item.url) return;
             this.videoSrc = item.url;
-            this.player.src = this.videoSrc
+            this.player.src = this.videoSrc;
+            this.player.replay();
+            this.player.pause();
             this.playing = playing;
         },
         deleteList(item) {
@@ -307,9 +311,17 @@ export default {
             if (index > 0) {
                 this.videoSrc = this.playList[index - 1].url;
             } else {
-                this.videoSrc = this.playList.length ? this.playList[index + 1].url : ''
+                this.videoSrc = this.playList.length > 1 ? this.playList[index + 1].url : ''
             }
+            this.player.src = this.videoSrc;
             this.playList.splice(index, 1);
+            if (!this.playList.length && this.player) {
+                this.player.destroy();
+                this.drawer = false;
+            } else {
+                this.player.replay();
+                this.player.pause();
+            }
             // this.$forceUpdate();
         }
     },
