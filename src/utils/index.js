@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import router from '../router/router'
 const vm = new Vue();
-export function globalFunc(err) {
+export function globalFunc() {
     console.log('-----这里是码雷实验室-----')
 }
 

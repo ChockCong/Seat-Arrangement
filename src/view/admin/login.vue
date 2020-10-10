@@ -93,42 +93,43 @@
 </template>
 
 <script>
-import { adminLogin } from '../../api/api';
+import { adminLogin, adminRegister } from '../../api/api';
+import { setCookie } from '../../utils/cookie';
 export default {
     name: 'loginPage',
     data() {
         const validatePassWord = (rule, value, callback) => {
             let reg = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
             if (value === '') {
-                callback(new Error('请输入密码'));
+               return callback(new Error('请输入密码'));
             } else if (!reg.test(value)) {
-                callback(new Error('密码必须包含英文和数字'));
+               return callback(new Error('密码必须包含英文和数字'));
             } else if (this.registForm.comfirmPassword && value !== this.registForm.comfirmPassword) {
-                callback(new Error('两次密码输入不一致请重新输入'));
+               return callback(new Error('两次密码输入不一致请重新输入'));
             } else {
-                callback();
+               return callback();
             }
         };
         const validatePassCheck = (rule, value, callback) => {
             if (value === '') {
-                callback(new Error('请二次输入确认密码'));
+               return callback(new Error('请二次输入确认密码'));
             } else if (this.registForm.stPassword && value !== this.registForm.stPassword) {
-                callback(new Error('两次密码输入不一致请重新输入'));
+               return callback(new Error('两次密码输入不一致请重新输入'));
             } else {
-                callback();
+               return callback();
             }
         };
         const validatePhoneCheck = (rule, value, callback) => {
             let reg = new RegExp(/\d$/);
             console.log(value.lenght);
             if (value === '') {
-                callback(new Error('请输入手机号码'));
+               return callback(new Error('请输入手机号码'));
             } else if (!reg.test(value)) {
-                callback(new Error('请输入正确的手机号码'));
+               return callback(new Error('请输入正确的手机号码'));
             } else if (value.length < 11) {
-                callback(new Error('请输入至少11位手机号码'));
+               return callback(new Error('请输入至少11位手机号码'));
             } else {
-                callback();
+               return callback();
             }
         };
         return {
@@ -139,10 +140,10 @@ export default {
             },
             loginRuleValidate: {
                 account: [
-                    { required: true, message: '请输入登录名', trigger: ['blur','change'] }
+                    { required: true, message: '请输入登录名', trigger: 'blur' }
                 ],
                 pwd: [
-                    { required: true, message: '请输入登录密码', trigger: ['blur','change'] }
+                    { required: true, message: '请输入登录密码', trigger: 'blur' }
                 ]
             },
             accountError: '',
@@ -159,17 +160,17 @@ export default {
             },
             registRuleValidate: {
                 stName: [
-                    { required: true, message: '请输入用户名', trigger: ['blur','change'] }
+                    { required: true, message: '请输入用户名', trigger: 'blur' }
                 ],
                 stLoginName: [
-                    { required: true, message: '请输入登录名', trigger: ['blur','change'] }
+                    { required: true, message: '请输入登录名', trigger: 'blur' }
                 ],
                 stPhoneNum: [
                     { required: true, validator: validatePhoneCheck, trigger: ['blur','change'] }
                 ],
                 stEmail: [
                     { required: true, message: '请输入邮箱', trigger: ['blur','change'] },
-                    { type: 'email', message: '请输入正确邮箱', trigger: 'blur' }
+                    { required: true, type: 'email', message: '请输入正确邮箱', trigger: 'blur' }
                 ],
                 stPassword: [
                     { required: true, validator: validatePassWord, trigger: ['blur','change'] }
@@ -230,9 +231,10 @@ export default {
                     // console.log(res, !_.isEmpty(res))
                     if (res && !_.isEmpty(res)) {
                         let data = res.data;
-                        console.log(res.data);
                         this.$store.commit('SET_ADMIN_INFO', data);
+                        setCookie(data);
                         if (this.$store.getters.getAdminToken) {
+                            this.$Message.success('登录成功');
                             this.$router.push({ path: 'management' });
                         }
                     }
@@ -244,21 +246,35 @@ export default {
                     tag = true;
                     gotoSuccess(tag);
                 } else {
-                    this.$Message.error('请填写正确登录名和密码!');
+                    this.$Message.error('请输入正确登录名和密码!');
                 }
             });
         },
         async register() {
             let tag = false;
-            const gotoSuccess = (tag) => {
-
+            const gotoSuccess = async (tag) => {
+                let isEmpty = false;
+                for(let k in this.registForm) {
+                    if (!this.registForm[k]) { isEmpty = true; break; }
+                }
+                if (!isEmpty && tag) {
+                    let params = {
+                        ctName: this.registForm.stName,
+                        ctLoginName: this.registForm.stLoginName,
+                        ctPassword: this.registForm.stPassword
+                    };
+                    const res = await adminRegister(params);
+                    console.log(res);
+                } else {
+                    this.$Message.error('请输入正确注册信息');
+                }
             }
             this.$refs.registF.validate((valid) => {
                 if (valid) {
                     tag = true;
                     gotoSuccess(tag);
                 } else {
-                    this.$Message.error('请填写正确信息');
+                    this.$Message.error('请输入正确注册信息');
                 }
             });
         }

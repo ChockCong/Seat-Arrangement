@@ -66,15 +66,20 @@ export const reqJsonData = async ({
 			Axios
 				.then(res => {
 					// console.log(res.data.errorCode);
-					// if (res.data.errorCode !== 200) {
-					// 	Vue.prototype.errorPopHandler('登陆失败，请重试'); //TODO
-					// 	router.push({ path: '/admin/login' });
-					// 	return resolve();
-					// }
+					if (['401', '401.1'].includes(res.data.status)) {
+						Vue.prototype.errorPopHandler(res.data.status === '401' ? '未登陆失败，请先进行登录' : '登陆失败，请重试');
+						router.push({ path: '/admin/login' });
+						return resolve();
+					}
+					if (res.data.status === '500') {
+						Vue.prototype.errorPopHandler('操作失败，请重试或刷新页面');
+						return resolve();
+					}
 					resolve(res.data || {});
 				})
 				.catch(err => {
-					if (err.response && err.response.status === 401) {
+					console.log(err);
+					if (err.response && err.response.status === '401.1') {
 						// removeLoginInfo();
 						router.push({ path: '/admin/login' });
 						resolve();

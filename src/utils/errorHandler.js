@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import router from '../router/router'
 const vm = new Vue();
 
 export function errorPopHandler(str) {

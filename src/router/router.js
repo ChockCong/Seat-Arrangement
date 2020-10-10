@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from '@/store/index';
-// import Login from '../view/admin/login';
-import { adminLogin } from '@/api/api'
+import { getCookie, isTokenEnable } from '@/utils/cookie';
+// import { adminLogin } from '@/api/api'
 
 //TODO: 禁止全局路由错误处理打印，这个也是vue-router开发者给出的解决方案
 const originalPush = VueRouter.prototype.push
@@ -135,13 +135,25 @@ const router = new VueRouter({
 
 
 router.beforeEach(async (to, from, next) => {
-    console.log(to, from)
-    if (to.matched.some(route => route.meta && route.meta.requiresAuth) && !store.state.adminInfo.admin_token) {
+    // console.log(to, from)
+    const tokenEnable = isTokenEnable();
+    if (to.matched.some(route => route.meta && route.meta.requiresAuth) && store.state.adminInfo.admin_token) {
         //TODO: token过期后应刷新保持登录，反之退出登录
-        const res = await adminLogin({ token: 'token' });
-        if (res && !_.isEmpty(res)) {
-            let data = res.data;
-            store.commit('SET_ADMIN_INFO', data);
+        // console.log(store.state.adminInfo, isTokenEnable());
+        if (tokenEnable) {
+            return to.name === 'login' ? next() : next({ path: '/admin/login' });
+        }
+    } else {
+        if (tokenEnable) {
+            return to.name === 'login' ? next() : next({ path: '/admin/login' });
+        } else {
+            const userStorage = getCookie('loginInfo');
+            let user = userStorage ? JSON.parse(userStorage) : undefined;
+            console.log(user);
+            if (user) store.commit('SET_ADMIN_INFO', user);
+            else {
+                return to.name === 'login' ? next() : next({ path: '/admin/login' });
+            }
         }
     }
     return next();
