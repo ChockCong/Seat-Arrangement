@@ -88,7 +88,15 @@ export const reqJsonData = async ({
 				});
 		} catch (error) {
 			resolve();
-			// Vue.config.errorHandler(error, Vue);
+			Vue.config.errorHandler(error);
 		}
 	});
 }
+axios.interceptors.request.use(config => {
+	const token = store.state.admin_token;
+	if (token) {
+		let getToken = `Bearer ${token}`;
+		config.headers.common['Authorization'] = getToken;
+	}
+	return config;
+});
