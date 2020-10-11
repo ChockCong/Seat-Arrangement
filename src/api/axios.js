@@ -11,6 +11,16 @@ import router from '../router/router';
  * @param {boolean} [isformData=false] 参数是否附带文件
  */
 
+axios.interceptors.request.use(config => {
+	const token = store.state.adminInfo.admin_token;
+	if (token) {
+		// let getToken = `Bearer ${token}`;
+		// config.headers.common['Authorization'] = getToken;
+		config.headers.common['token'] = token;
+	}
+	return config;
+});
+
 const base_url = process.env.VUE_APP_API;
 if (process.env.NODE_ENV === 'production') axios.defaults.baseURL = base_url;
 export const reqJsonData = async ({
@@ -92,11 +102,3 @@ export const reqJsonData = async ({
 		}
 	});
 }
-axios.interceptors.request.use(config => {
-	const token = store.state.admin_token;
-	if (token) {
-		let getToken = `Bearer ${token}`;
-		config.headers.common['Authorization'] = getToken;
-	}
-	return config;
-});

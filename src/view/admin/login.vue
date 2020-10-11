@@ -21,7 +21,9 @@
                                 <Input size="large" type="text" prefix="ios-contact" v-model.trim="loginForm.account" :placeholder="'用户名'" clearable/>
                             </FormItem>
                             <FormItem label="密码" prop="pwd">
-                                <Input size="large" type="password" v-model.trim="loginForm.pwd" prefix="md-lock" placeholder="密码" clearable/>
+                                <Input size="large" :type="seeLoginPwd ? 'text' : 'password'" v-model.trim="loginForm.pwd" prefix="md-lock" placeholder="密码">
+                                    <Icon class="eye" style="cursor: pointer;" @click="seeLoginPwd = !seeLoginPwd" :type="seeLoginPwd ? 'ios-eye' : 'ios-eye-off'" slot="suffix" />
+                                </Input>
                             </FormItem>
                             <!-- <div class="input-c">
                                 <Input size="large" prefix="ios-contact" v-model="account" :placeholder="'用户名'" clearable @on-change="verifyAccount"/>
@@ -44,13 +46,17 @@
                                 <ICol span="24">
                                     <FormItem label="登录名" prop="stLoginName">
                                         <Input type="text" prefix="md-contact" v-model="registForm.stLoginName" placeholder="登录名" clearable />
+                                            <!-- <Icon v-if="hasNameTag" type="ios-loading" size=18 class="demo-spin-icon-load" slot="suffix"></Icon> -->
+                                        <!-- </Input> -->
                                     </FormItem>
                                 </ICol>
                             </Row>
                             <Row class="row">
                                 <ICol span="24">
                                     <FormItem label="用户名" prop="stName">
-                                        <Input prefix="md-happy" v-model="registForm.stName" placeholder="用户名" clearable />
+                                        <Input prefix="md-happy" v-model="registForm.stName" placeholder="用户名" clearable>
+                                            <Icon v-if="hasNameTag" type="ios-loading" size=18 class="demo-spin-icon-load" slot="suffix"></Icon>
+                                        </Input>
                                     </FormItem>
                                 </ICol>
                             </Row>
@@ -71,14 +77,18 @@
                             <Row class="row">
                                 <ICol span="24">
                                     <FormItem label="登录密码" prop="stPassword">
-                                        <Input type="password" prefix="ios-lock" v-model.trim="registForm.stPassword" placeholder="登录密码" clearable />
+                                        <Input :type="seePwd ? 'text' : 'password'" prefix="ios-lock" v-model.trim="registForm.stPassword" placeholder="登录密码">
+                                            <Icon class="eye" style="cursor: pointer;" @click="seePwd = !seePwd" :type="seePwd ? 'ios-eye' : 'ios-eye-off'" slot="suffix" />
+                                        </Input>
                                     </FormItem>
                                 </ICol>
                             </Row>
                             <Row class="row">
                                 <ICol span="24">
                                     <FormItem label="确认密码" prop="comfirmPassword">
-                                        <Input type="password" prefix="ios-lock-outline" v-model.trim="registForm.comfirmPassword" placeholder="确认密码" clearable />
+                                        <Input :type="seeSubPwd ? 'text' : 'password'" prefix="ios-lock-outline" v-model.trim="registForm.comfirmPassword" placeholder="确认密码">
+                                            <Icon class="eye" style="cursor: pointer;" @click="seeSubPwd = !seeSubPwd" :type="seeSubPwd ? 'ios-eye' : 'ios-eye-off'" slot="suffix" />
+                                        </Input>
                                     </FormItem>
                                 </ICol>
                             </Row>
@@ -93,8 +103,8 @@
 </template>
 
 <script>
-import { adminLogin, adminRegister } from '../../api/api';
-import { setCookie } from '../../utils/cookie';
+import { adminLogin, adminRegister, validateLoginName } from '@/api/api';
+import { setCookie } from '@/utils/cookie';
 export default {
     name: 'loginPage',
     data() {
@@ -121,7 +131,6 @@ export default {
         };
         const validatePhoneCheck = (rule, value, callback) => {
             let reg = new RegExp(/\d$/);
-            console.log(value.lenght);
             if (value === '') {
                return callback(new Error('请输入手机号码'));
             } else if (!reg.test(value)) {
@@ -132,8 +141,21 @@ export default {
                return callback();
             }
         };
+        const validateName = async (rule, value, callback) => {
+            if (value === '') {
+               return callback(new Error('请输入用户名'));
+            } else if (this.registForm.stName && this.registForm.stLoginName) {
+                const res = await this.checkNameFun();
+                console.log(res);
+                return res ? callback() : callback(new Error('用户名已存在'));
+            } else {
+               return callback();
+            }
+        };
         return {
             tab: true,
+            hasNameTag: false,
+            checkNameFun: null,
             loginForm: {
                 account: '',
                 pwd: '',
@@ -146,6 +168,9 @@ export default {
                     { required: true, message: '请输入登录密码', trigger: 'blur' }
                 ]
             },
+            seeLoginPwd: false,
+            seePwd: false,
+            seeSubPwd: false,
             accountError: '',
             pwdError: '',
             isShowLoading: false,
@@ -159,11 +184,12 @@ export default {
                 comfirmPassword: ''
             },
             registRuleValidate: {
-                stName: [
-                    { required: true, message: '请输入用户名', trigger: 'blur' }
-                ],
                 stLoginName: [
                     { required: true, message: '请输入登录名', trigger: 'blur' }
+                ],
+                stName: [
+                    { required: true, message: '请输入用户名', trigger: 'blur' },
+                    { require: true, validator: validateName, trigger: 'blur' }
                 ],
                 stPhoneNum: [
                     { required: true, validator: validatePhoneCheck, trigger: ['blur','change'] }
@@ -181,8 +207,10 @@ export default {
     },
     created() {
         // this.bg.backgroundImage = 'url(' + require('../assets/imgs/bg0' + new Date().getDay() + '.jpg') + ')'
-        this.bg.backgroundImage = `url(${require('../../assets/bg03.jpg')})`;
-        this.bg.backgroundImage = `url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1591357660532&di=28d8e7bd58201a4e00260116a0f098bc&imgtype=0&src=http%3A%2F%2Fattachments.gfan.net.cn%2Fforum%2F201504%2F14%2F075409wgwijxiax3i4wihw.jpg)`
+        // this.bg.backgroundImage = `url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1591357660532&di=28d8e7bd58201a4e00260116a0f098bc&imgtype=0&src=http%3A%2F%2Fattachments.gfan.net.cn%2Fforum%2F201504%2F14%2F075409wgwijxiax3i4wihw.jpg)`
+        this.bg['backgroundImage'] = `url(${require('../../assets/bg01.jpg')})`;
+        this.bg['background-position'] = 'center';
+        this.checkNameFun = _.debounce(this.debounceCheckName, 500);
     },
     watch: {
         $route: {
@@ -215,6 +243,18 @@ export default {
         //         this.pwdError = ''
         //     }
         // },
+        async debounceCheckName() {
+            if (!this.registForm.stName || !this.registForm.stLoginName) return true;
+            let params = {
+                ctId: this.registForm.stName,
+                ctLoginName: this.registForm.stLoginName
+            }
+            this.hasNameTag = true;
+            const res = await validateLoginName(params);
+            this.hasNameTag = false;
+            console.log(!!(res && res.data));
+            return !!(res && res.data);
+        },
         forgetPwd() {
             this.$router.push('/unlogin')
         },
@@ -229,7 +269,7 @@ export default {
                     });
                     this.isShowLoading = false;
                     // console.log(res, !_.isEmpty(res))
-                    if (res && !_.isEmpty(res)) {
+                    if (res && !_.isEmpty(res) && res.data) {
                         let data = res.data;
                         this.$store.commit('SET_ADMIN_INFO', data);
                         setCookie(data);
@@ -237,6 +277,8 @@ export default {
                             this.$Message.success('登录成功');
                             this.$router.push({ path: 'management' });
                         }
+                    } else {
+                        this.$Message.success('登录失败，请重试');
                     }
                     // this.$router.push({ path: 'management' })
                 }
@@ -246,7 +288,7 @@ export default {
                     tag = true;
                     gotoSuccess(tag);
                 } else {
-                    this.$Message.error('请输入正确登录名和密码!');
+                    this.$Message.error('请输入正确登录名和密码');
                 }
             });
         },
@@ -270,6 +312,7 @@ export default {
                 }
             }
             this.$refs.registF.validate((valid) => {
+                console.log(valid)
                 if (valid) {
                     tag = true;
                     gotoSuccess(tag);
@@ -278,11 +321,15 @@ export default {
                 }
             });
         }
-    },
+    }
 }
 </script>
 
 <style lang="scss" scoped>
+.demo-spin-icon-load{
+    animation: ani-demo-spin 1s linear infinite;
+    color: black !important;
+}
 .login-enter-active {
     transition: all .8s ease;
 }
@@ -306,28 +353,29 @@ export default {
 .login-vue {
     height: 100vh;
     display: flex;
-    justify-content: center;
+    // justify-content: center;
     align-items: center;
     color: #fff;
     background-size: cover;
+    background-repeat: no-repeat;
     & .container {
         background: rgba(0, 0, 0, .7);
-        width: 540px;
-        // height: 475px;
-        // text-align: center;
+        width: 375px;
+        margin-left: 200px;
         border-radius: 10px;
-        padding: 0 20px;
+        padding: 0 10px;
         display: flex;
         align-items: center;
         position: relative;
         transition: height ease-out 0.3s;
-        height: 475px;
+        height: 400px;
         &.registH {
             transition: height ease-in 0.3s;
             height: 715px 
         }
         & .flex-container {
             width: 100%;
+            margin-top: 35px;
         }
         & .logo-section {
             width: 30px;
@@ -372,6 +420,9 @@ export default {
                 font-size: 14px;
             }
         }
+        & .eye {
+            color: black;
+        }
     }
     ::v-deep .registForm {
         & .ivu-form-item {
@@ -379,6 +430,9 @@ export default {
                 color: white;
                 font-size: 14px;
             }
+        }
+        & .eye {
+            color: black;
         }
     }
     & .ivu-input {

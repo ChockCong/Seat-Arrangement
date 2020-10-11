@@ -13,21 +13,21 @@
             <Table stripe v-if="!edit" width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
                 <template slot-scope="{ row, index }" slot="content">
                     <div class="content-box">
-                        <Tag :color="index === 1 ? 'green' : 'blue'">{{index === 1 ? level(row.content) : row.content}}</Tag>
+                        <Tag :color="index === 1 ? 'red' : 'blue'">{{index === 1 ? level(row.content) : row.content}}</Tag>
                     </div>
                 </template>
             </Table>
             <Table :key="'tableEdit'" v-else  width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
                 <template slot-scope="{ row, index }" slot="content">
                     <div class="content-box">
-                        <Tag v-if="index === 1" color="blue">{{level(row.content)}}</Tag>
-                        <Tag v-if="index === 1" color="primary">修改</Tag>
-                        <Input v-if="index !== 1" type="text" v-model="row.content" />
+                        <Tag v-if="index === 1" color="red">{{level(row.content)}}</Tag>
+                        <Button v-if="index === 1" type="primary" size="small" @click="changeRule">修改</Button>
+                        <Input v-if="index !== 1" type="text" v-model="row.content" @on-change="datasChange(row.content, row.title)" />
                     </div>
                 </template>
             </Table>
             <div class="button-box">
-                <Button class="button" type="default" v-if="edit" @click="editInfo">{{ '取消' }}</Button>
+                <Button class="button" type="default" v-if="edit" @click="edit = !edit">{{ '取消' }}</Button>
                 <Button class="button" type="primary" @click="editInfo">{{ edit ? '确认修改' : '编辑信息' }}</Button>
                 <Button class="button" type="primary" v-if="!edit" @click="pwdModel = true">{{ '修改密码' }}</Button>
             </div>
@@ -65,6 +65,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import FunctionList from '../../common/FunctionList';
+import { getUserInfo, updateUserInfo } from '@/api/api';
 export default {
     name: 'Info',
     components: {FunctionList},
@@ -107,6 +108,7 @@ export default {
                     width: 400
                 }],
             datas: [],
+            originDatas: [],
             pwdModel: false,
             seePwd: false,
             seeSubPwd: false,
@@ -125,14 +127,38 @@ export default {
     computed: {
         ...mapGetters({
 			adminInfo: 'getAdminInfo'
-        })
+        }),
+        isSave() {
+            let tag = true;
+            this.datas.forEach(item => {
+                if (!item.content && !['邮箱地址','电话号码'].includes(item.title)) tag = false;
+            });
+            return tag && !_.isEqual(this.datas, this.originDatas);
+        }
     },
     methods: {
         goToBuy() {
             this.$router.push('buy');
         },
-        editInfo() {
-            this.edit = !this.edit;
+        changeRule() {
+            return this.$Message.info('暂时不能修改权限，如需修改请联系管理员');
+        },
+        async editInfo() {
+            if (this.edit && this.isSave) {
+                let params = {
+                    ctId: this.adminInfo.ctId,
+                    ctName: this.datas[0].content
+                }
+                const res = await updateUserInfo(params);
+                if (res && res.data) {
+                    this.$Message.success('修改成功');
+                    this.edit = !this.edit;
+                } else {
+                    this.$Message.error('修改失败，请重试');
+                }
+            } else {
+                this.edit = !this.edit;
+            }
             this.$forceUpdate();
         },
         confirmFunction(selection) {
@@ -150,37 +176,31 @@ export default {
             if (!bol) return;
             this.$refs.subForm.resetFields();
             this.pwdModel = false;
+        },
+        datasChange(e, title) {
+            let data = this.datas.find(item => {
+                return item.title === title;
+            })
+            if (data) data.content = e;
         }
     },
-    beforeMount() {
+    async beforeMount() {
         this.datas = [{
             title: '用户名',
             content: this.adminInfo.ctName,
-            cellClassName: {
+            // cellClassName: {
                 // title: 'title-cell',
                 // content: 'info-cell',
-            }
+            // }
         },{
             title: '会员权限',
             content: this.adminInfo.ctType,
-            cellClassName: {
-                // title: 'title-cell',
-                // content: 'info-cell',
-            }
         },{
             title: '邮箱地址',
             content: this.adminInfo.ctEmail,
-            cellClassName: {
-                // title: 'title-cell',
-                // content: 'info-cell',
-            }
         },{
             title: '电话号码',
             content: this.adminInfo.ctPhone,
-            cellClassName: {
-                // title: 'title-cell',
-                // content: 'info-cell',
-            }
         },
         // {
         //     title: '公司名称',
@@ -198,6 +218,8 @@ export default {
         //     }
         // }
         ];
+        const res = await getUserInfo({ ctId: this.adminInfo.ctId });
+        this.originDatas = _.cloneDeep(this.datas);
     }
 }
 </script>

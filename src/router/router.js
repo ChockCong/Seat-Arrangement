@@ -11,7 +11,6 @@ VueRouter.prototype.push = function push(location, onResolve, onReject) {
   return originalPush.call(this, location).catch(err => err)
 }
 
-
 Vue.use(VueRouter);
 
 const router = new VueRouter({
@@ -133,7 +132,6 @@ const router = new VueRouter({
 	]
 });
 
-
 router.beforeEach(async (to, from, next) => {
     // console.log(to, from)
     const tokenEnable = isTokenEnable();
@@ -158,4 +156,5 @@ router.beforeEach(async (to, from, next) => {
     }
     return next();
 });
+
 export default router;

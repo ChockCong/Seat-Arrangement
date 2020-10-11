@@ -72,8 +72,9 @@
     </div>
 </template>
 <script>
-import { confirmModal } from '../../../utils/index'
-import FunctionList from '../../common/FunctionList'
+import { confirmModal } from '@/utils/index'
+import FunctionList from '@/components/common/FunctionList'
+import { getChildrenList, addChild, disableChild } from '@/api/api';
 export default {
     name: 'SubAccounts',
     components: {FunctionList},
@@ -81,35 +82,34 @@ export default {
         const validatePassWord = (rule, value, callback) => {
             let reg = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
             if (value === '') {
-                callback(new Error('请输入密码'));
+                return callback(new Error('请输入密码'));
             } else if (!reg.test(value)) {
-                callback(new Error('密码必须包含英文和数字'));
+                return callback(new Error('密码必须包含英文和数字'));
             } else if (this.subForm.comfirmPassword && value !== this.subForm.comfirmPassword) {
-                callback(new Error('两次密码输入不一致请重新输入'));
+                return callback(new Error('两次密码输入不一致请重新输入'));
             } else {
-                callback();
+                return callback();
             }
         };
         const validatePassCheck = (rule, value, callback) => {
             if (value === '') {
-                callback(new Error('请二次输入确认密码'));
+                return callback(new Error('请二次输入确认密码'));
             } else if (this.subForm.stPassword && value !== this.subForm.stPassword) {
-                callback(new Error('两次密码输入不一致请重新输入'));
+                return callback(new Error('两次密码输入不一致请重新输入'));
             } else {
-                callback();
+                return callback();
             }
         };
         const validatePhoneCheck = (rule, value, callback) => {
             let reg = new RegExp(/\d$/);
-            console.log(value.lenght);
             if (value === '') {
-                callback(new Error('请输入手机号码'));
+                return callback(new Error('请输入手机号码'));
             } else if (!reg.test(value)) {
-                callback(new Error('请输入正确的手机号码'));
+                return callback(new Error('请输入正确的手机号码'));
             } else if (value.length < 11) {
-                callback(new Error('请输入至少11位手机号码'));
+                return callback(new Error('请输入至少11位手机号码'));
             } else {
-                callback();
+                return callback();
             }
         };
         return {
@@ -167,18 +167,11 @@ export default {
             datas: [
                 {
                     id: 111,
-                    user: '子用户1',
+                    user: '子用户test',
                     created_at: '2016-10-01 00:00:00',
                     updated_at: '2016-10-01 00:00:00',
-                    disabled: true,
-                    level: 2
-                },{
-                    id: 222,
-                    user: '子用户2',
-                    created_at: '2016-10-02 00:00:00',
-                    updated_at: '2016-10-02 00:00:00',
                     disabled: false,
-                    level: 2
+                    level: 1
                 }
             ],
             copyDatas: [],
@@ -197,17 +190,17 @@ export default {
             },
             subFormRules: {
                 stName: [
-                    { required: true, message: '请输入用户名', trigger: ['blur','change'] }
+                    { required: true, message: '请输入用户名', trigger: 'blur' }
                 ],
                 stLoginName: [
-                    { required: true, message: '请输入登录名', trigger: ['blur','change'] }
+                    { required: true, message: '请输入登录名', trigger: 'blur' }
                 ],
                 stPhoneNum: [
                     { required: true, validator: validatePhoneCheck, trigger: ['blur','change'] }
                 ],
                 stEmail: [
                     { required: true, message: '请输入邮箱', trigger: ['blur','change'] },
-                    { type: 'email', message: '请输入正确邮箱', trigger: 'blur' }
+                    { required: true, type: 'email', message: '请输入正确邮箱', trigger: 'blur' }
                 ],
                 stPassword: [
                     { required: true, validator: validatePassWord, trigger: ['blur','change'] }
@@ -217,6 +210,14 @@ export default {
         }
     },
     methods: {
+        cancelLoading(time) {
+            setTimeout(() => {
+                this.modalLoading = false;
+                this.$nextTick(() => {
+                    this.modalLoading = true;
+                });
+            }, time);
+        },
         debounceSearch() {
             if (this.searchInput) {
                 let reg = new RegExp(this.searchInput, "i");
@@ -266,23 +267,60 @@ export default {
             }
         },
         async sureOK() {
-            const fun = () => {
-                let newItem = {
-                    user: this.subForm.stName,
-                    created_at: '2016-10-03 00:00:00',
-                    updated_at: '2016-10-03 00:00:00',
-                    level: 2
+            const fun = async (params) => {
+                const res = await addChild(params);
+                if (res && res.data) {
+                    let newItem = {
+                        user: this.res.data.stName,
+                        created_at: '2016-10-03 00:00:00',
+                        updated_at: '2016-10-03 00:00:00',
+                        level: 2
+                    }
+                    newItem = Object.assign({}, newItem, this.subForm);
+                    this.datas.push(newItem);
+                    return true;
+                } else {
+                    return false;
                 }
-                newItem = Object.assign({}, newItem, this.subForm);
-                this.datas.push(newItem);
             }
             this.selection = [];
-            setTimeout(() => {
-                if (this.modalType === 'add') fun();
-                else this.sureUpdate();
+            if (this.modalType === 'add') {
+                this.$refs['subForm'].validate(async (valid) => {
+                    console.log(valid);
+                    if (valid) {
+                        let isEmpty = false;
+                        for(let k in this.subForm) {
+                            if (!this.subForm[k]) { isEmpty = true; break; }
+                        }
+                        if (!isEmpty && valid) {
+                            let params = {
+                                ctLoginName: this.subForm.stLoginName,
+                                ctName: this.subForm.stName,
+                                ctPassword: this.subForm.stPassword
+                            }
+                            const res = await fun(params);
+                            this.cancelLoading(2000);
+                            if (res && res.data) {
+                                this.$refs.subForm.resetFields();
+                                this.modal = false;
+                            } else {
+                                this.$Message.error('添加子账号失败，请重试');
+                            }
+                        } else {
+                            console.log(222);
+                            this.cancelLoading(500);
+                            return this.$Message.error('添加子账号失败，请重试');
+                        }
+                    } else {
+                        this.cancelLoading(500);
+                        this.$Message.error('请输入正确的子账号信息');
+                    }
+                });
+            } else {
+                this.sureUpdate();
                 this.$refs.subForm.resetFields();
                 this.modal = false;
-            }, 2000);
+            }
         },
         async sureDelete() {
             const fun = () => {
@@ -314,12 +352,20 @@ export default {
         confirmFunction(selection) {
             let select = selection;
             console.log(select);
+        },
+        async getChilds() {
+            const res = await getChildrenList();
+            console.log(res);
+            if (res && res.data) {
+                this.datas = res.data;
+            }
         }
     },
     created() {
         this.searchFun = _.debounce(this.debounceSearch, 1000);
     },
-    beforeMount() {
+    async beforeMount() {
+        await this.getChilds();
         this.copyDatas = _.cloneDeep(this.datas);
     },
     mounted() {
