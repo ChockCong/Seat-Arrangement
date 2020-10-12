@@ -141,14 +141,14 @@ router.beforeEach(async (to, from, next) => {
     if (to.matched.some(route => route.meta && route.meta.requiresAuth) && store.state.adminInfo.admin_token) {
         //TODO: token过期后应刷新保持登录，反之退出登录
         // console.log(store.state.adminInfo, isTokenEnable());
-        if (tokenEnable) {
+        if (!tokenEnable) {
             return to.name === 'login' ? next() : next({ path: '/admin/login' });
         }
     } else {
         if (to.matched.some(route => route.meta && route.meta.tag && route.meta.tag === 'unlogin')) {
             return next();
         }
-        if (tokenEnable) {
+        if (!tokenEnable) {
             return to.name === 'login' ? next() : next({ path: '/admin/login' });
         } else {
             const userStorage = getCookie('loginInfo');

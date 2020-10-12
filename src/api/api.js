@@ -25,6 +25,10 @@ export const updateUserInfo = (params) => {
     return reqJsonData({url: `/api/main`, params, method: 'put'})
 }
 
+export const getOwnAllAuth = (params) => {
+    return reqJsonData({url: '/api/main/getOwnAllAuth', params, method: 'post'})
+}
+
 /**
      * @module SubAccounts.vue
      * @desc 子账号操作

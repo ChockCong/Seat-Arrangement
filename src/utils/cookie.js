@@ -16,7 +16,7 @@ export const isTokenEnable = () => {
         removeCookie();
         router.push({ path: '/admin/login' });
     }
-    return store.state.adminInfo && (currentTime - loginTime > expires);
+    return !(store.state.adminInfo && (currentTime - loginTime > expires));
 };
 
 export const getCookie = (name) => {
