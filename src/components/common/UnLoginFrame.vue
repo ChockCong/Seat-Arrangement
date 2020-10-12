@@ -38,7 +38,7 @@ export default {
         }
     },
     beforeMount() {
-        console.log(111, this.$route.params.page)
+        console.log(this.$route.params.page)
         if (this.$route.params.page) {
             if (this.$route.params.page === 'index') {
                 this.iscomponent = 'Index';

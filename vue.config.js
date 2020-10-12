@@ -1,10 +1,13 @@
 const path = require('path');
-const webpack = require('webpack');
+// const webpack = require('webpack');
 const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
+const TerserPlugin = require("terser-webpack-plugin");
 const ComPressionPlugin = require('compression-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 const PcPages = ['login-vue', 'index-vue', 'preview-wrap', '.ivu-'];
+const smp = new SpeedMeasurePlugin();
 module.exports = {
 	publicPath: '',
 	assetsDir: 'static',
@@ -20,8 +23,8 @@ module.exports = {
 					autoprefixer(),
 					pxtorem({
 						rootValue: 28,
-                        propList: ['*'],
-                        selectorBlackList: PcPages,
+						propList: ['*'],
+						selectorBlackList: PcPages,
 						minPixelValue: 2 // 1px的转换在安卓有问题，所以小于2px不转换
 					})
 				]
@@ -36,6 +39,14 @@ module.exports = {
 	// 	}
 	// },
 	configureWebpack: config => {
+		let module = {
+            rules: [
+                {
+                    test: /\.js$/,
+                    use: ['thread-loader']
+                }
+            ]
+        }
 		let plugins = [
 			new ComPressionPlugin({
 				test: /\.js$|\.html$|\.css/,
@@ -64,14 +75,22 @@ module.exports = {
 				)
 			)
 		}
-		return {
-			plugins: plugins,
+		config.optimization.minimizer = [
+			new TerserPlugin({
+				parallel: 4
+			})
+		];
+		const newconfig = {
+			module,
+			plugins,
 			performance: false,
 			output: {
 				filename: '[name].[hash].js',
 				chunkFilename: '[name].[hash].js'
 			}
-		}
+		};
+		// return smp.wrap(newconfig);
+		return process.env.NODE_ENV === 'development' ? newconfig : smp.wrap(newconfig);
 	},
 	chainWebpack: config => {
 		// config.module
@@ -113,14 +132,14 @@ module.exports = {
 	},
 	devServer: {
 		proxy: {
-		  "/api": {
-			target: process.env.VUE_APP_API,   // 要请求的后台地址
-			ws: true,    // 启用websockets
-			changeOrigin: true,    // 是否跨域
-			pathRewrite: {   
-			  "^/api": "/"          // 这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替
+			"/api": {
+				target: process.env.VUE_APP_API,   // 要请求的后台地址
+				ws: true,    // 启用websockets
+				changeOrigin: true,    // 是否跨域
+				pathRewrite: {
+					"^/api": "/"          // 这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替
+				}
 			}
-		  }
 		}
-	  }
-}
+	}
+};

@@ -22,8 +22,11 @@ const router = new VueRouter({
         },
         {
             path: '/:page',
-            // name: 'unLogin',
+            name: 'unLogin',
             component: () => import('../components/common/UnLoginFrame.vue'),
+            meta: {
+                tag: 'unlogin'
+            }
         },
         {
             path: '/admin',
@@ -142,6 +145,9 @@ router.beforeEach(async (to, from, next) => {
             return to.name === 'login' ? next() : next({ path: '/admin/login' });
         }
     } else {
+        if (to.matched.some(route => route.meta && route.meta.tag && route.meta.tag === 'unlogin')) {
+            return next();
+        }
         if (tokenEnable) {
             return to.name === 'login' ? next() : next({ path: '/admin/login' });
         } else {

@@ -20,7 +20,7 @@
                 </ICol>
             </Row>
             <div class="buton-box">
-                <Button size="large" type="" @click="back">{{ '返回' }}</Button>
+                <Button size="large" type="default" @click="back">{{ '返回' }}</Button>
                 <Button size="large" class="submit" type="primary" @click="send">{{ inputButton }}</Button>
             </div>
         </Form>
