@@ -2,7 +2,7 @@ const path = require('path');
 // const webpack = require('webpack');
 const autoprefixer = require('autoprefixer');
 const pxtorem = require('postcss-pxtorem');
-const TerserPlugin = require("terser-webpack-plugin");
+// const TerserPlugin = require("terser-webpack-plugin");
 const ComPressionPlugin = require('compression-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
@@ -39,14 +39,14 @@ module.exports = {
 	// 	}
 	// },
 	configureWebpack: config => {
-		let module = {
-            rules: [
-                {
-                    test: /\.js$/,
-                    use: ['thread-loader']
-                }
-            ]
-        }
+		// let module = {
+        //     rules: [
+        //         {
+        //             test: /\.js$/,
+        //             use: ['thread-loader']
+        //         }
+        //     ]
+        // }
 		let plugins = [
 			new ComPressionPlugin({
 				test: /\.js$|\.html$|\.css/,
@@ -81,7 +81,7 @@ module.exports = {
 		// 	})
 		// ];
 		const newconfig = {
-			module,
+			// module,
 			plugins,
 			performance: false,
 			output: {
