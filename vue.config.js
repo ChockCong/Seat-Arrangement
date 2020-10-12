@@ -75,11 +75,11 @@ module.exports = {
 				)
 			)
 		}
-		config.optimization.minimizer = [
-			new TerserPlugin({
-				parallel: 4
-			})
-		];
+		// config.optimization.minimizer = [
+		// 	new TerserPlugin({
+		// 		parallel: 4
+		// 	})
+		// ];
 		const newconfig = {
 			module,
 			plugins,
