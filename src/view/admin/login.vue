@@ -145,8 +145,9 @@ export default {
             if (value === '') {
                return callback(new Error('请输入用户名'));
             } else if (this.registForm.stName && this.registForm.stLoginName) {
-                const res = await this.checkNameFun();
-                console.log(res);
+                const res = true;
+                // const res = await this.checkNameFun();
+                // console.log(res);
                 return res ? callback() : callback(new Error('用户名已存在'));
             } else {
                return callback();
@@ -277,9 +278,10 @@ export default {
                             this.$Message.success('登录成功');
                             this.$router.push({ path: 'management' });
                         }
-                    } else {
-                        this.$Message.success('登录失败，请重试');
                     }
+                    //  else {
+                    //     this.$Message.success('登录失败，请重试');
+                    // }
                     // this.$router.push({ path: 'management' })
                 }
             }
@@ -291,6 +293,15 @@ export default {
                     this.$Message.error('请输入正确登录名和密码');
                 }
             });
+        },
+        afterLogin(res) {
+            let data = res.data;
+            this.$store.commit('SET_ADMIN_INFO', data);
+            setCookie(data);
+            if (this.$store.getters.getAdminToken) {
+                this.$Message.success('登录成功');
+                this.$router.push({ path: 'management' });
+            }
         },
         async register() {
             let tag = false;
@@ -306,7 +317,16 @@ export default {
                         ctPassword: this.registForm.stPassword
                     };
                     const res = await adminRegister(params);
-                    console.log(res);
+                    if (res && !_.isEmpty(res) && res.data) {
+                        setTimeout(() => {
+                            this.afterLogin(res)
+                        }, 2000);
+                        this.$Message.loading({
+                            content: '注册成功，即将为您登录'
+                        });
+                    } else {
+                        this.$Message.success('登录失败，请重试');
+                    }
                 } else {
                     this.$Message.error('请输入正确注册信息');
                 }

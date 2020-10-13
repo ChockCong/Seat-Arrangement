@@ -21,6 +21,8 @@ axios.interceptors.request.use(config => {
 	return config;
 });
 
+
+const errorStatus = ['401', '401.1'];
 const base_url = process.env.VUE_APP_API;
 if (process.env.NODE_ENV === 'production') axios.defaults.baseURL = base_url;
 export const reqJsonData = async ({
@@ -70,13 +72,13 @@ export const reqJsonData = async ({
 			}
 		}
     }
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
 		try {
 			const Axios = !isformData ? axios(config) : axios.post(config.url, transformRequest, config);
 			Axios
 				.then(res => {
 					// console.log(res.data.errorCode);
-					if (['401', '401.1'].includes(res.data.status)) {
+					if (errorStatus.includes(res.data.status)) {
 						Vue.prototype.errorPopHandler(res.data.status === '401' ? '未登陆失败，请先进行登录' : '登陆失败，请重试');
 						router.push({ path: '/admin/login' });
 						return resolve();
@@ -97,8 +99,8 @@ export const reqJsonData = async ({
 					}
 				});
 		} catch (error) {
-			resolve();
 			Vue.config.errorHandler(error);
+			resolve();
 		}
 	});
 }

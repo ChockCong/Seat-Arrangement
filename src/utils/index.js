@@ -73,9 +73,9 @@ export function confirmModal(type, titleStr = '', contentStr = '', handler = und
 
 export function level(level) {
     let role = ''
-    switch(level) {
+    switch(Number(level)) {
         case 1 : role = '普通用户'; break;
-        case 2 : role = '普通会员'; break;
+        case 2 : role = '子用户'; break;
         case 3 : role = 'VIP会员'; break;
         default : role = '管理员';
     }

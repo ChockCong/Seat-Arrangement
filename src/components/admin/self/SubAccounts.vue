@@ -8,12 +8,12 @@
             </Select>
             <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入用户名搜索"  @input="searchFun" />
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight" :width="963" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight" :width="1153" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row }" slot="level">
                 <Tag color="green">{{level(row.level)}}</Tag>
             </template>
-            <template slot-scope="{ row }" slot="disabled">
-                <SwitchTab v-model="row.disabled" size="small" />
+            <template slot-scope="{ row, index }" slot="disabled">
+                <SwitchTab v-model="row.disabled" size="small" @on-change="changeEffective(index, row)" />
             </template>
             <template slot-scope="{ row }" slot="action">
                 <div class="button-area">
@@ -128,14 +128,28 @@ export default {
                     align: 'center'
                 },
                 {
-                    title: '子用户ID',
+                    title: '权限',
+                    slot: 'level',
+                    key: 'level',
+                    width: 110
+                },
+                {
+                    title: '用户ID',
                     key: 'id',
+                    tooltip:true,
                     width: 100
                 },
                 {
-                    title: '子用户名',
+                    title: '用登录户名',
+                    key: 'login',
+                    tooltip:true,
+                    width: 180
+                },
+                {
+                    title: '用户名',
                     key: 'user',
-                    width: 200
+                    tooltip:true,
+                    width: 100
                 },
                 {
                     title: '创建时间',
@@ -218,6 +232,11 @@ export default {
                 });
             }, time);
         },
+        updateTable(datas) {
+            this.datas = [];
+            let copyDatas = datas;
+            this.datas = _.cloneDeep(copyDatas);
+        },
         debounceSearch() {
             if (this.searchInput) {
                 let reg = new RegExp(this.searchInput, "i");
@@ -251,6 +270,20 @@ export default {
             })
             confirmModal('confirm', '提示', `<p>是否确认删除这些账户？</p><br />${str}`, this.sureDelete);
         },
+        async changeEffective(index, row) {
+            let params = { ctId: row.id };
+            let status = this.datas[index].disabled;
+            const res = await disableChild(params);
+            if (res) {
+                this.$Message.success('停用账号成功');
+            } else {
+                this.$Message.error('停用账号失败，请重试');
+                this.datas[index].disabled = status;
+                setTimeout(() => {
+                    this.updateTable(this.datas);
+                }, 300);
+            }
+        },
         async updateItem(id) {
             let item = this.datas.find(val => {
                 return val.user === id;
@@ -269,14 +302,16 @@ export default {
         async sureOK() {
             const fun = async (params) => {
                 const res = await addChild(params);
-                if (res && res.data) {
+                if (res) {
                     let newItem = {
-                        user: this.res.data.stName,
-                        created_at: '2016-10-03 00:00:00',
-                        updated_at: '2016-10-03 00:00:00',
-                        level: 2
+                        id: res.data.ctId,
+                        login: res.data.ctLoginName,
+                        user: res.data.ctName,
+                        created_at: res.data.ctCreateTime,
+                        updated_at: res.data.ctLastLoginTime,
+                        disabled: !res.data.ctIsEffective,
+                        level: res.data.ctType
                     }
-                    newItem = Object.assign({}, newItem, this.subForm);
                     this.datas.push(newItem);
                     return true;
                 } else {
@@ -304,12 +339,11 @@ export default {
                                 this.$refs.subForm.resetFields();
                                 this.modal = false;
                             } else {
-                                this.$Message.error('添加子账号失败，请重试');
+                                this.$Message.error('新增子账号失败，请重试');
                             }
                         } else {
-                            console.log(222);
                             this.cancelLoading(500);
-                            return this.$Message.error('添加子账号失败，请重试');
+                            return this.$Message.error('新增子账号失败，请重试');
                         }
                     } else {
                         this.cancelLoading(500);
@@ -336,7 +370,7 @@ export default {
                 });
                 this.selection = [];
             }
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 setTimeout(() => {
                     fun();
                     resolve(true);
@@ -357,7 +391,18 @@ export default {
             const res = await getChildrenList();
             console.log(res);
             if (res && res.data) {
-                this.datas = res.data;
+                this.datas = res.data.map(item => {
+                    let newItem = {
+                        id: item.ctId,
+                        login: item.ctLoginName,
+                        user: item.ctName,
+                        created_at: item.ctCreateTime,
+                        updated_at: item.ctLastLoginTime,
+                        disabled: !item.ctIsEffective,
+                        level: item.ctType
+                    };
+                    return newItem;
+                });
             }
         }
     },

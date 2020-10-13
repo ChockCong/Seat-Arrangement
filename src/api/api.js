@@ -34,7 +34,7 @@ export const getOwnAllAuth = (params) => {
      * @desc 子账号操作
 **/
 export const getChildrenList = (params) => {
-    return reqJsonData({url: '/api/main/getChildrenList', params, method: 'get'})
+    return reqJsonData({url: '/api/main/getChildrenList', params, method: 'post'})
 }
 
 export const addChild = (params) => {
