@@ -25,6 +25,14 @@ export const updateUserInfo = (params) => {
     return reqJsonData({url: `/api/main`, params, method: 'put'})
 }
 
+export const updatePhone = (params) => {
+    return reqJsonData({url: '/api/main/updatePhone', params, method: 'post'})
+}
+
+export const updateEmail = (params) => {
+    return reqJsonData({url: '/api/main/updateEmail', params, method: 'post'})
+}
+
 export const getOwnAllAuth = (params) => {
     return reqJsonData({url: '/api/main/getOwnAllAuth', params, method: 'post'})
 }

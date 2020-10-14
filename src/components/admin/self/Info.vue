@@ -65,7 +65,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import FunctionList from '../../common/FunctionList';
-import { getUserInfo, updateUserInfo } from '@/api/api';
+import { getUserInfo, updateUserInfo, updatePhone, updateEmail } from '@/api/api';
 export default {
     name: 'Info',
     components: {FunctionList},
@@ -143,13 +143,38 @@ export default {
         changeRule() {
             return this.$Message.info('暂时不能修改权限，如需修改请联系管理员');
         },
+        async allRequest() {
+            let reqs = [];
+            reqs[0] = await updateUserInfo({
+                ctId: this.adminInfo.ctId,
+                ctName: this.datas[0].content
+            });
+            reqs[1] = await updatePhone({
+                ctId: this.adminInfo.ctId,
+                tag: true,
+                ctEmail: this.datas[2].content
+            });
+            reqs[2] = await updateEmail({
+                ctId: this.adminInfo.ctId,
+                tag: true,
+                ctPhone: this.datas[3].content
+
+            });
+            let responses = new Promise();
+            responses(resolve => {
+                Promise.all(reqs).then(result => {
+                    console.log(result);
+                    resolve(true);
+                }).catch(error => {
+                    console.log(error);
+                    resolve(false);
+                });
+            })
+        },
         async editInfo() {
             if (this.edit && this.isSave) {
-                let params = {
-                    ctId: this.adminInfo.ctId,
-                    ctName: this.datas[0].content
-                }
-                const res = await updateUserInfo(params);
+                const res = await this.allRequest();
+                console.log(res);
                 if (res && res.data) {
                     this.$Message.success('修改成功');
                     this.edit = !this.edit;
