@@ -8,7 +8,7 @@
             </Select>
             <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入用户名搜索"  @input="searchFun" />
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight" :width="1153" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight" :width="1153" :loading="loading" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row }" slot="level">
                 <Tag color="green">{{level(row.level)}}</Tag>
             </template>
@@ -17,7 +17,7 @@
             </template>
             <template slot-scope="{ row }" slot="action">
                 <div class="button-area">
-                    <Button type="primary" size="small" @click="alertModal('edit', row.user)">编辑</Button>
+                    <Button type="primary" size="small" @click="alertModal('edit', row.id)">编辑</Button>
                     <Button type="primary" size="small" @click="alertFunctionModel(row.user)">功能权限</Button>
                 </div>
             </template>
@@ -27,7 +27,7 @@
             :title="modalType === 'add' ? '新增子账户' : '编辑账户信息'"
             :loading="modalLoading"
             @on-ok="sureOK"
-            @on-cancel="() => { this.modalType = ''; this.modal = false }">
+            @on-cancel="() => { this.modalType = ''; this.setSubForm(); this.modal = false }">
             <Form ref="subForm" :model="subForm" :rules="subFormRules" class="subForm">
                 <FormItem label="" prop="stLoginName">
                     <Input type="text" prefix="md-contact" v-model="subForm.stLoginName" placeholder="登录名" clearable />
@@ -140,7 +140,7 @@ export default {
                     width: 100
                 },
                 {
-                    title: '用登录户名',
+                    title: '用户登录名',
                     key: 'login',
                     tooltip:true,
                     width: 180
@@ -284,19 +284,38 @@ export default {
                 }, 300);
             }
         },
+        setSubForm(item = null) {
+            if (item) {
+                this.subForm = {
+                    stName: item.user,
+                    stLoginName: item.login,
+                    stPassword: item.password,
+                    stPhoneNum: item.phone,
+                    stEmail: item.email,
+                    comfirmPassword: '',
+                    functions: []
+                };
+            } else {
+                this.subForm = {
+                    stName: '',
+                    stLoginName: '',
+                    stPassword: '',
+                    stPhoneNum: '',
+                    stEmail: '',
+                    comfirmPassword: '',
+                    functions: []
+                };
+            }
+        },
         async updateItem(id) {
             let item = this.datas.find(val => {
-                return val.user === id;
+                return val.id === id;
             });
             if (!_.isEmpty(item)) {
-                this.subForm = _.cloneDeep(item);
-                delete this.subForm['user'];
-                delete this.subForm['created_at'];
-                delete this.subForm['level'];
-                delete this.subForm['updated_at'];
-                delete this.subForm['disabled'];
+                this.setSubForm(item)
             } else {
                 this.modal = false;
+                this.setSubForm();
             }
         },
         async sureOK() {
@@ -310,7 +329,10 @@ export default {
                         created_at: res.data.ctCreateTime,
                         updated_at: res.data.ctLastLoginTime,
                         disabled: !res.data.ctIsEffective,
-                        level: res.data.ctType
+                        level: res.data.ctType,
+                        phone: res.data.ctPhone,
+                        email: res.data.ctEmail,
+                        password: res.data.ctPassword
                     }
                     this.datas.push(newItem);
                     return true;
@@ -320,19 +342,24 @@ export default {
             }
             this.selection = [];
             if (this.modalType === 'add') {
-                this.$refs['subForm'].validate(async (valid) => {
+                this.$refs.subForm.validate(async (valid) => {
                     console.log(valid);
                     if (valid) {
                         let isEmpty = false;
                         for(let k in this.subForm) {
                             if (!this.subForm[k]) { isEmpty = true; break; }
                         }
+                        console.log(isEmpty);
                         if (!isEmpty && valid) {
                             let params = {
                                 ctLoginName: this.subForm.stLoginName,
                                 ctName: this.subForm.stName,
-                                ctPassword: this.subForm.stPassword
+                                ctPhone: this.subForm.stPhoneNum,
+                                ctEmail: this.subForm.stEmail,
+                                ctPassword: this.subForm.stPassword,
+                                ctCreateTime: new Date()
                             }
+                            console.log(params);
                             const res = await fun(params);
                             this.cancelLoading(2000);
                             if (res && res.data) {
@@ -388,7 +415,9 @@ export default {
             console.log(select);
         },
         async getChilds() {
+            this.loading = true;
             const res = await getChildrenList();
+            this.loading = false;
             console.log(res);
             if (res && res.data) {
                 this.datas = res.data.map(item => {
@@ -399,7 +428,10 @@ export default {
                         created_at: item.ctCreateTime,
                         updated_at: item.ctLastLoginTime,
                         disabled: !item.ctIsEffective,
-                        level: item.ctType
+                        level: item.ctType,
+                        phone: res.data.ctPhone,
+                        email: res.data.ctEmail,
+                        password: res.data.ctPassword
                     };
                     return newItem;
                 });

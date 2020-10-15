@@ -8,7 +8,7 @@
             </Select>
             <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入功能名搜索"  @input="searchFun" />
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight" :width="1092" :loading="false" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight"  :width="1092" :loading="loading" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row }" slot="disabled">
                 <SwitchTab v-model="row.disabled" :disabled="!row.active" size="small" />
             </template>
@@ -29,7 +29,8 @@
     </div>
 </template>
 <script>
-import { confirmModal } from '../../../utils/index'
+import { confirmModal } from '@/utils/index'
+import { getFunctionList, addFunction, validateFunctionName, updateFunction, disableFunction } from '../../../api/api'
 export default {
     name: 'FunctionSetting',
     data () {
@@ -145,12 +146,21 @@ export default {
         },
         async sureUpdate() {
             // TODO: 根据ID更新列表
+        },
+        async getFunctions() {
+            this.loading = true;
+            const res = await getFunctionList();
+            this.loading = false;
+            if (res && res.data) {
+                this.datas = res.data.content;
+            }
         }
     },
     created() {
         this.searchFun = _.debounce(this.debounceSearch, 1000);
     },
-    beforeMount() {
+    async beforeMount() {
+        await this.getFunctions();
         this.copyDatas = _.cloneDeep(this.datas);
     },
     mounted() {
