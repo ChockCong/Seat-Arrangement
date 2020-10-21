@@ -107,7 +107,7 @@ module.exports = {
 		config
 			.plugin('html')
 			.tap(args => {
-				args[0].title = 'Hotel Assist System';
+				args[0].title = '码雷';
 				return args;
 			}),
 		config.optimization.runtimeChunk({

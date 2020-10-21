@@ -145,9 +145,9 @@ export default {
             if (value === '') {
                return callback(new Error('请输入用户名'));
             } else if (this.registForm.stName && this.registForm.stLoginName) {
-                const res = true;
-                // const res = await this.checkNameFun();
-                // console.log(res);
+                // const res = true;
+                const res = await this.checkNameFun();
+                console.log(res);
                 return res ? callback() : callback(new Error('用户名已存在'));
             } else {
                return callback();

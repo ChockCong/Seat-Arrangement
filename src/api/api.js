@@ -70,7 +70,7 @@ export const getFunction = (props, params) => {
     return reqJsonData({url: `/api/app/main/super/${props.functionId}`, params, method: 'get'})
 }
 
-export const validateFunctionName = (params) => {
+export const validateFunctionMap = (params) => {
     return reqJsonData({url: '/api/app/main/super/validateMapping', params, method: 'post'})
 }
 
