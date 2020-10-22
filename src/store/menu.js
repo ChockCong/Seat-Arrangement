@@ -19,7 +19,7 @@ const menuItems = [
                 text: '会场模板',
             },
             {
-                type: 'md-wine',
+                type: 'md-map',
                 size: 18, // icon大小
                 name: 'Setting',
                 text: '会场定义',
@@ -33,7 +33,7 @@ const menuItems = [
         category: 'all',
         children: [
             {
-                type: 'md-folder',
+                type: 'md-desktop',
                 size: 18, // icon大小
                 name: 'baberrage',
                 text: '互动视频',
@@ -44,12 +44,12 @@ const menuItems = [
     },
     {
         text: '账号中心',
-        type: 'md-person',
+        type: 'logo-android',
         size: 18, // icon大小
         category: 'admin',
         children: [
             {
-                type: 'md-person',
+                type: 'md-body',
                 size: 18, // icon大小
                 text: '账号管理',
                 children: [
@@ -60,7 +60,7 @@ const menuItems = [
                         text: '主账号管理',
                     },
                     {
-                        type: 'md-person',
+                        type: 'md-people',
                         size: 18, // icon大小
                         name: 'sub-account',
                         text: '子账号管理',
@@ -68,21 +68,21 @@ const menuItems = [
                 ]
             },
             {
-                type: 'md-person',
+                type: 'logo-buffer',
                 size: 18, // icon大小
                 text: '增值服务',
                 children: [
                     {
-                        type: 'md-person',
+                        type: 'md-cloud-download',
                         size: 18, // icon大小
                         name: 'package-buy',
-                        text: '尊享套餐',
+                        text: '功能订购',
                     },
                     {
-                        type: 'md-person',
+                        type: 'md-pricetag',
                         size: 18, // icon大小
-                        name: 'free-buy',
-                        text: '个性定制',
+                        name: '',
+                        text: '我的订购',
                     } 
                 ]
             }
@@ -95,21 +95,21 @@ const menuItems = [
         category: 'god',
         children: [
             {
-                type: 'md-bookmarks',
+                type: 'md-construct',
                 category: 'god',
                 size: 18, // icon大小
                 name: 'function-setting',
                 text: '功能管理',
             },
             {
-                type: 'md-bookmarks',
+                type: 'md-paper-plane',
                 category: 'god',
                 size: 18, // icon大小
                 name: 'logs',
                 text: '操作日志',
             },
             {
-                type: 'md-bookmarks',
+                type: 'logo-codepen',
                 category: 'god',
                 size: 18, // icon大小
                 name: '',

@@ -54,8 +54,16 @@ export const disableChild = (params) => {
     return reqJsonData({url: '/api/org/main/changeEffective', params, method: 'post'})
 }
 
+export const getSubAuth = (params) => {
+    return reqJsonData({url: '/api/org/app/getAllChildAuth', params, method: 'post'})
+}
+
+export const changeSubAuth = (params) => {
+    return reqJsonData({url: '/api/org/app/auth/changeEffective', params, method: 'post'})
+}
+
 /**
-     * @module SubAccounts.vue
+     * @module FunctionSetting.vue
      * @desc 应用操作
 **/
 //God
@@ -89,4 +97,27 @@ export const getUserFunctionList = (params) => {
 
 export const getUserFunction = (params) => {
     return reqJsonData({ url: '/api/app/main/view', params, method: 'post'})
+}
+
+/**
+     * @module Orders.vue
+     * @desc 订单模块
+**/
+export const createOrder = (params) => {
+    return reqJsonData({ url: '/api/app/order', params, method: 'post'})
+}
+export const getOrderList = (params) => {
+    return reqJsonData({ url: '/api/app/order/page', params, method: 'post'})
+}
+export const getOrder = (params) => {
+    return reqJsonData({ url: '/api/app/order/view', params, method: 'get'})
+}
+export const deleteOrder = (params) => {
+    return reqJsonData({ url: '/api/app/order', params, method: 'delete'})
+}
+export const updateOrder = (params) => {
+    return reqJsonData({ url: '/api/app/order/updateDetail', params, method: 'post'})
+}
+export const payOrder = (params) => {
+    return reqJsonData({ url: '/api/app/order/pay', params, method: 'post'})
 }

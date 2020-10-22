@@ -18,7 +18,7 @@
             <template slot-scope="{ row }" slot="action">
                 <div class="button-area">
                     <Button type="primary" size="small" @click="alertModal('edit', row.id)">编辑</Button>
-                    <Button type="primary" size="small" @click="alertFunctionModel(row.user)">功能权限</Button>
+                    <Button type="primary" size="small" @click="alertFunctionModel(row)">功能权限</Button>
                 </div>
             </template>
         </Table>
@@ -65,7 +65,7 @@
             :width="700"
             @on-ok="sureFunction"
             @on-cancel="() => { this.functionModel = false }">
-            <FunctionList @confirm="confirmFunction"></FunctionList>
+            <FunctionList :user="currentUser" :originFunctions="FunctionList" @confirm="confirmFunction"></FunctionList>
             <!-- <Input style="width: 200px; margin-bottom: 10px" v-model="searchFunctionInput" placeholder="输入功能名或模块名搜索"  @input="searchFunctionFun" />
             <Table ref="table" border stripe :height="functionTableHeight" :width="668" :loading="false" :columns="functionColumns" :data="functionList"  @on-selection-change="onFunctionSelectChange"></Table> -->
         </Modal>
@@ -74,7 +74,7 @@
 <script>
 import { confirmModal } from '@/utils/index'
 import FunctionList from '@/components/common/FunctionList'
-import { getChildrenList, addChild, disableChild } from '@/api/api';
+import { getChildrenList, addChild, disableChild, getSubAuth } from '@/api/api';
 export default {
     name: 'SubAccounts',
     components: {FunctionList},
@@ -113,6 +113,7 @@ export default {
             }
         };
         return {
+            currentUser: {},
             searchSelect: 'user',
             searchInput: '',
             searchFun: null,
@@ -220,7 +221,8 @@ export default {
                     { required: true, validator: validatePassWord, trigger: ['blur','change'] }
                 ],
                 comfirmPassword: { required: true, validator: validatePassCheck, trigger: ['blur','change'] }
-            }
+            },
+            FunctionList: []
         }
     },
     methods: {
@@ -257,7 +259,31 @@ export default {
             if (this.modalType !== 'add' && id) this.updateItem(id);
             this.modal = true;
         },
-        alertFunctionModel() {
+        async alertFunctionModel(row) {
+            this.currentUser = row;
+            // const res = await getSubAuth();
+            // console.log(res);
+            this.FunctionList = [{
+                id: 1,
+                name: '模板选择',
+                module: '会场设置',
+                details: '介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍',
+                price: 300.00,
+                roles: [
+                    { action: { role: [] } },
+                    { action: { role: [] } }
+                ]
+            },{
+                id: 2,
+                name: '模板定义',
+                module: '会场设置',
+                details: '介绍介绍介绍介绍介绍介绍',
+                price: 200.00,
+                roles: [
+                    { action: { role: [] } },
+                    { action: { role: [] } }
+                ]
+            }]
             this.functionModel = true;
         },
         deletes() {

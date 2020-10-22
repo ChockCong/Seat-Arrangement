@@ -2,12 +2,12 @@
     <div class="index-vue-func-expand">
         <div class="expand-row" v-for="(item, index) in row.roles" :key="index">
             <label>子功能{{index + 1}}</label>
-            <CheckboxGroup class="group" v-model="item.role">
-                <Checkbox label="管理员"></Checkbox>
-                <Checkbox label="角色1"></Checkbox>
-                <Checkbox label="角色2"></Checkbox>
-                <Checkbox label="角色3"></Checkbox>
-                <Checkbox label="角色4"></Checkbox>
+            <CheckboxGroup class="group" :key="`rolegroup${index}`" v-model="item.action.role">
+                <Checkbox :key="`role${index}1`" label="管理员" che></Checkbox>
+                <Checkbox :key="`role${index}2`" label="角色1"></Checkbox>
+                <Checkbox :key="`role${index}3`" label="角色2"></Checkbox>
+                <Checkbox :key="`role${index}4`" label="角色3"></Checkbox>
+                <Checkbox :key="`role${index}5`" label="角色4"></Checkbox>
             </CheckboxGroup>
         </div>
         <Button class="btn" type="primary" size="small" @click="updateRole">{{'确定'}}</Button>
@@ -26,6 +26,11 @@ export default {
     },
     methods: {
         updateRole() {
+            let openTag = false;
+            this.row.roles.forEach(fun => {
+                if (fun.action.role && fun.action.role.length) openTag = true;
+            })
+            this.row.isOpen = openTag;
             this.$emit('updateRole', this.row, 'roles');
         }
     },
