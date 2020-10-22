@@ -91,12 +91,8 @@ export const reqJsonData = async ({
 				})
 				.catch(err => {
 					console.log(err);
-					if (err.response && err.response.status === '401.1') {
-						// removeLoginInfo();
-						router.push({ path: '/admin/login' });
-						resolve();
-						return;
-					}
+					Vue.prototype.errorPopHandler(err);
+					resolve();
 				});
 		} catch (error) {
 			Vue.config.errorHandler(error);

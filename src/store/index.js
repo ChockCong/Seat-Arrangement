@@ -17,6 +17,9 @@ const store = new Vuex.Store({
         },
         getAdminInfo: state => {
             return state.adminInfo;
+        },
+        getRole: state => {
+            return state.adminInfo.ctType;
         }
     }
 })

@@ -71,7 +71,8 @@ export function confirmModal(type, titleStr = '', contentStr = '', handler = und
     }
 }
 
-export function level(level) {
+export function level(level, isGod = false) {
+    if (isGod) return Number(level) === 0;
     let role = ''
     switch(Number(level)) {
         case 1 : role = '普通用户'; break;

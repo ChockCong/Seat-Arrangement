@@ -8,9 +8,27 @@
             </Select>
             <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入功能名搜索"  @input="searchFun" />
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight"  :width="1242" :loading="loading" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight"  :width="1262" :loading="loading" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row, index }" slot="disabled">
                 <SwitchTab v-model="datas[index].disabled" :disabled="!datas[index].active" size="small" @on-change="switchs(index)" />
+            </template>
+            <template slot-scope="{ row, index  }" slot="name">
+                <span v-if="!row.active">{{ row.name }}</span>
+                <template v-else>
+                    <Input type="text" v-model="datas[index].name" />
+                </template>
+            </template>
+            <template slot-scope="{ row, index  }" slot="order">
+                <span v-if="!row.active">{{ Number(row.order) }}</span>
+                <template v-else>
+                    <Input v-model="datas[index].order" @on-blur="datas[index].order = datas[index].order.replace(/[^0-9]/g, '')" />
+                </template>
+            </template>
+            <template slot-scope="{ row, index  }" slot="detail">
+                <span v-if="!row.active">{{ row.detail }}</span>
+                <template v-else>
+                    <Input type="text" v-model="datas[index].detail" />
+                </template>
             </template>
             <template slot-scope="{ row }" slot="price">
                 <span v-if="!row.active">￥{{ row.price | FormatNum }}</span>
@@ -54,8 +72,9 @@
 </template>
 <script>
 // import { confirmModal } from '@/utils/index'
-import { FormatNum } from '@/utils/index';
-import { getFunctionList, addFunction, validateFunctionMap, updateFunction, disableFunction } from '../../../api/api'
+import { mapGetters } from 'vuex';
+import { FormatNum, level } from '@/utils/index';
+import { getFunctionList, addFunction, validateFunctionMap, updateFunction, disableFunction, getUserFunctionList } from '../../../api/api'
 export default {
     name: 'FunctionSetting',
     data () {
@@ -81,12 +100,26 @@ export default {
             columns: [
                 {
                     type: 'selection',
-                    width: 60,
+                    width: 50,
                     align: 'center'
+                },
+                {
+                    title: '功能ID',
+                    key: 'id',
+                    width: 100,
+                    tooltip: true
+                },
+                {
+                    title: '序号',
+                    key: 'order',
+                    align: 'center',
+                    slot: 'order',
+                    width: 100,
                 },
                 {
                     title: '功能名',
                     key: 'name',
+                    slot: 'name',
                     width: 100,
                 },
                 {
@@ -95,15 +128,16 @@ export default {
                     width: 150,
                     tooltip: true
                 },
-                {
-                    title: '所属模块',
-                    key: 'module',
-                    width: 100
-                },
+                // {
+                //     title: '所属模块',
+                //     key: 'module',
+                //     width: 100
+                // },
                 {
                     title: '功能详情',
                     key: 'detail',
-                    width: 200,
+                    slot: 'detail',
+                    minWidth: 150,
                     tooltip: true
                 },
                 {
@@ -125,33 +159,9 @@ export default {
                     slot: 'price',
                     align: 'center',
                     minWidth: 100
-                },
-                {
-                    title: '是否停用',
-                    key: 'disabled',
-                    slot: 'disabled',
-                    align: 'center',
-                    width: 100
-                },
-                {
-                    title: '操作',
-                    key: 'action',
-                    slot: 'action',
-                    align: 'center',
-                    width: 100
                 }
             ],
-            datas: [{
-                name: '模板选择',
-                module: '会场设置',
-                created_at: '2016-10-01 00:00:00',
-                updated_at: '2016-10-01 00:00:00',
-                detail: '介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍介绍',
-                disabled: true,
-                price: 300.00,
-                level: 2,
-                active: false
-            }],
+            datas: [],
             copyDatas: [],
             selection: [],
             subForm: {
@@ -177,6 +187,11 @@ export default {
                 ]
             }
         }
+    },
+    computed: {
+        ...mapGetters({
+            role: 'getRole'
+        })
     },
     methods: {
         alertModal(type) {
@@ -306,6 +321,7 @@ export default {
                     ctDescription: this.datas[index].detail,
                     ctPrice: Number(this.datas[index].price)
                 }
+                console.log(params);
                 const res = await updateFunction(params);
                 if (res) {
                     this.$Message.success('更新功能成功');
@@ -328,7 +344,7 @@ export default {
         },
         async getFunctions() {
             this.loading = true;
-            const res = await getFunctionList();
+            const res = level(this.role, true) ? await getFunctionList() : await getUserFunctionList();
             this.loading = false;
             if (res && res.data) {
                 this.datas = res.data.content.map(item => {
@@ -353,6 +369,24 @@ export default {
     },
     created() {
         this.searchFun = _.debounce(this.debounceSearch, 1000);
+        if (level(this.role, true)) {
+            this.columns = this.columns.concat([
+                {
+                    title: '是否停用',
+                    key: 'disabled',
+                    slot: 'disabled',
+                    align: 'center',
+                    width: 100
+                },
+                {
+                    title: '操作',
+                    key: 'action',
+                    slot: 'action',
+                    align: 'center',
+                    width: 100
+                }
+            ])
+        }
     },
     async beforeMount() {
         await this.getFunctions();

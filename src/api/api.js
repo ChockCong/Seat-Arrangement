@@ -58,6 +58,7 @@ export const disableChild = (params) => {
      * @module SubAccounts.vue
      * @desc 应用操作
 **/
+//God
 export const getFunctionList = (params) => {
     return reqJsonData({ url: '/api/app/main/super/page', params, method: 'post'})
 }
@@ -80,4 +81,12 @@ export const updateFunction = (params) => {
 
 export const disableFunction = (params) => {
     return reqJsonData({url: '/api/app/main/super/changeEffective', params, method: 'post'})
+}
+//User
+export const getUserFunctionList = (params) => {
+    return reqJsonData({ url: '/api/app/main/page', params, method: 'post'})
+}
+
+export const getUserFunction = (params) => {
+    return reqJsonData({ url: '/api/app/main/view', params, method: 'post'})
 }
