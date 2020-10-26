@@ -1,7 +1,7 @@
 <template>
     <div class="index-vue-function-setting">
         <div class="button-area top">
-            <Button type="primary" icon="md-add" @click="alertModal(true)">新增功能模块</Button>
+            <Button v-if="level(this.role, true)" type="primary" icon="md-add" @click="alertModal(true)">新增功能模块</Button>
             <!-- <Button type="primary" icon="md-trash" @click="deletes">删除功能模块</Button> -->
             <Select style="width: 100px" v-model="searchSelect">
                 <Option value="user" label="功能名"></Option>

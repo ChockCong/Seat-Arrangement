@@ -261,8 +261,8 @@ export default {
         },
         async alertFunctionModel(row) {
             this.currentUser = row;
-            // const res = await getSubAuth();
-            // console.log(res);
+            const res = await getSubAuth();
+            console.log(res);
             this.FunctionList = [{
                 id: 1,
                 name: '模板选择',
