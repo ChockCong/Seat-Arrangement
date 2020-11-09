@@ -13,6 +13,10 @@ export const adminLogin = (params) => {
     return reqJsonData({url: '/api/org/main/login', params, method: 'post'})
 }
 
+export const adminLogout = (params) => {
+    return reqJsonData({url: '/api/org/main/logout', params, method: 'post'})
+}
+
 /**
      * @module Info.vue
      * @desc 查看个人信息

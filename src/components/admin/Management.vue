@@ -145,6 +145,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { removeCookie } from '@/utils/cookie';
+import { adminLogout } from '@/api/api'
 export default {
     name: 'Management',
     // components: { Baberrage },
@@ -404,7 +405,7 @@ export default {
             }, 200)
         },
         // 用户操作
-        userOperate(name) {
+        async userOperate(name) {
             switch (name) {
                 case '1':
                     // 修改密码
@@ -415,6 +416,7 @@ export default {
                     this.gotoPage('userinfo')
                     break
                 case '3':
+                    await adminLogout();
                     removeCookie();
                     this.$router.replace({ name: 'login' });
                     break
