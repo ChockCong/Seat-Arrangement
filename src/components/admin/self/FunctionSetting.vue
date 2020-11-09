@@ -228,20 +228,21 @@ export default {
             const fun = async (params) => {
                 const res = await addFunction(params);
                 if (res) {
-                    let newItem = {
-                        name: res.data.content.ct_name,
-                        module: '',
-                        created_at: res.data.content.ct_create_time,
-                        updated_at: '',
-                        detail: res.data.content.ct_description,
-                        price: this.changePrice(null, {}, res.data.content.ct_price),
-                        disabled: res.data.content.ct_is_effective,
-                        active: false,
-                        mapping: res.data.content.ct_mapping,
-                        id: res.data.content.ct_id,
-                        order: Number(res.data.content.ct_order)
-                    }
-                    this.datas.push(newItem);
+                    // let newItem = {
+                    //     name: res.data.content.ct_name,
+                    //     module: '',
+                    //     created_at: res.data.content.ct_create_time,
+                    //     updated_at: '',
+                    //     detail: res.data.content.ct_description,
+                    //     price: this.changePrice(null, {}, res.data.content.ct_price),
+                    //     disabled: res.data.content.ct_is_effective,
+                    //     active: false,
+                    //     mapping: res.data.content.ct_mapping,
+                    //     id: res.data.content.ct_id,
+                    //     order: Number(res.data.content.ct_order)
+                    // }
+                    // this.datas.push(newItem);
+                    await this.getFunctions();
                     return true;
                 } else {
                     return false;
@@ -258,7 +259,8 @@ export default {
                     if (!isEmpty && valid) {
                         const res = await fun(this.subForm);
                         this.cancelLoading(2000);
-                        if (res && res.data) {
+                        if (res) {
+                            this.$Message.success('新增功能成功');
                             this.$refs.subForm.resetFields();
                             this.modal = false;
                         } else {

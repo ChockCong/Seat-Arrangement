@@ -297,8 +297,9 @@ export default {
             confirmModal('confirm', '提示', `<p>是否确认删除这些账户？</p><br />${str}`, this.sureDelete);
         },
         async changeEffective(index, row) {
-            let params = { ctId: row.id };
-            let status = this.datas[index].disabled;
+            let params = { ctId: Number(row.id), ctIsEffective: !row.disabled  };
+            let status = !row.disabled;
+            console.log(typeof params.ctId)
             const res = await disableChild(params);
             if (res) {
                 this.$Message.success('停用账号成功');
@@ -315,9 +316,9 @@ export default {
                 this.subForm = {
                     stName: item.user,
                     stLoginName: item.login,
-                    stPassword: item.password,
                     stPhoneNum: item.phone,
                     stEmail: item.email,
+                    stPassword: '',
                     comfirmPassword: '',
                     functions: []
                 };
@@ -348,19 +349,20 @@ export default {
             const fun = async (params) => {
                 const res = await addChild(params);
                 if (res) {
-                    let newItem = {
-                        id: res.data.ctId,
-                        login: res.data.ctLoginName,
-                        user: res.data.ctName,
-                        created_at: res.data.ctCreateTime,
-                        updated_at: res.data.ctLastLoginTime,
-                        disabled: !res.data.ctIsEffective,
-                        level: res.data.ctType,
-                        phone: res.data.ctPhone,
-                        email: res.data.ctEmail,
-                        password: res.data.ctPassword
-                    }
-                    this.datas.push(newItem);
+                    // let newItem = {
+                    //     id: res.data.ctId,
+                    //     login: res.data.ctLoginName,
+                    //     user: res.data.ctName,
+                    //     created_at: res.data.ctCreateTime,
+                    //     updated_at: res.data.ctLastLoginTime,
+                    //     disabled: !res.data.ctIsEffective,
+                    //     level: res.data.ctType,
+                    //     phone: res.data.ctPhone,
+                    //     email: res.data.ctEmail,
+                    //     password: res.data.ctPassword
+                    // }
+                    // this.datas.push(newItem);
+                    await this.getChilds();
                     return true;
                 } else {
                     return false;
@@ -368,46 +370,48 @@ export default {
             }
             this.selection = [];
             if (this.modalType === 'add') {
-                this.$refs.subForm.validate(async (valid) => {
-                    console.log(valid);
-                    if (valid) {
-                        let isEmpty = false;
-                        for(let k in this.subForm) {
-                            if (!this.subForm[k]) { isEmpty = true; break; }
+                this.sureAdd(fun);
+            } else {
+                this.sureUpdate();
+            }
+        },
+        async sureAdd(fun = null) {
+            this.$refs.subForm.validate(async (valid) => {
+                console.log(valid);
+                if (valid) {
+                    let isEmpty = false;
+                    for(let k in this.subForm) {
+                        if (!this.subForm[k]) { isEmpty = true; break; }
+                    }
+                    console.log(isEmpty);
+                    if (!isEmpty && valid) {
+                        let params = {
+                            ctLoginName: this.subForm.stLoginName,
+                            ctName: this.subForm.stName,
+                            ctPhone: this.subForm.stPhoneNum,
+                            ctEmail: this.subForm.stEmail,
+                            ctPassword: this.subForm.stPassword,
+                            ctCreateTime: new Date()
                         }
-                        console.log(isEmpty);
-                        if (!isEmpty && valid) {
-                            let params = {
-                                ctLoginName: this.subForm.stLoginName,
-                                ctName: this.subForm.stName,
-                                ctPhone: this.subForm.stPhoneNum,
-                                ctEmail: this.subForm.stEmail,
-                                ctPassword: this.subForm.stPassword,
-                                ctCreateTime: new Date()
-                            }
-                            console.log(params);
-                            const res = await fun(params);
-                            this.cancelLoading(2000);
-                            if (res && res.data) {
-                                this.$refs.subForm.resetFields();
-                                this.modal = false;
-                            } else {
-                                this.$Message.error('新增子账号失败，请重试');
-                            }
+                        console.log(params);
+                        const res = await fun(params);
+                        this.cancelLoading(2000);
+                        if (res) {
+                            this.$Message.success('新增子账号成功');
+                            this.$refs.subForm.resetFields();
+                            this.modal = false;
                         } else {
-                            this.cancelLoading(500);
-                            return this.$Message.error('新增子账号失败，请重试');
+                            this.$Message.error('新增子账号失败，请重试');
                         }
                     } else {
                         this.cancelLoading(500);
-                        this.$Message.error('请输入正确的子账号信息');
+                        return this.$Message.error('新增子账号失败，请重试');
                     }
-                });
-            } else {
-                this.sureUpdate();
-                this.$refs.subForm.resetFields();
-                this.modal = false;
-            }
+                } else {
+                    this.cancelLoading(500);
+                    this.$Message.error('请输入正确的子账号信息');
+                }
+            });
         },
         async sureDelete() {
             const fun = () => {
@@ -432,6 +436,8 @@ export default {
         },
         async sureUpdate() {
             // TODO: 根据ID更新列表
+            this.modal = false;
+            return this.$Message.info('该功正在开发中');
         },
         sureFunction() {
             this.functionModel = false;
@@ -444,7 +450,7 @@ export default {
             this.loading = true;
             const res = await getChildrenList();
             this.loading = false;
-            console.log(res);
+            // console.log(res);
             if (res && res.data) {
                 this.datas = res.data.map(item => {
                     let newItem = {
@@ -455,9 +461,8 @@ export default {
                         updated_at: item.ctLastLoginTime,
                         disabled: !item.ctIsEffective,
                         level: item.ctType,
-                        phone: res.data.ctPhone,
-                        email: res.data.ctEmail,
-                        password: res.data.ctPassword
+                        phone: item.ctPhone,
+                        email: item.ctEmail
                     };
                     return newItem;
                 });

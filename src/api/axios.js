@@ -49,7 +49,7 @@ export const reqJsonData = async ({
 		};
 	} else {
         // config.data = params
-		config.data = qs.parse(qs.stringify(params));
+		config.data = qs.parse(params);
     }
 	// 带有表单数据并且有文件时的请求格式
 	const transformRequest = new FormData();
@@ -72,7 +72,7 @@ export const reqJsonData = async ({
 			}
 		}
     }
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
 		try {
 			const Axios = !isformData ? axios(config) : axios.post(config.url, transformRequest, config);
 			Axios
@@ -83,9 +83,13 @@ export const reqJsonData = async ({
 						router.push({ path: '/admin/login' });
 						return resolve();
 					}
+					if (res.data.status === '403') {
+						Vue.prototype.errorPopHandler('该账号没有权限操作');
+						return reject();
+					}
 					if (res.data.status === '500') {
 						Vue.prototype.errorPopHandler('操作失败，请重试或刷新页面');
-						return resolve();
+						return reject();
 					}
 					resolve(res.data || {});
 				})
