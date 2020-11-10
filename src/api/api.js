@@ -59,7 +59,7 @@ export const disableChild = (params) => {
 }
 
 export const getSubAuth = (params) => {
-    return reqJsonData({url: '/api/org/app/getAllChildAuth', params, method: 'post'})
+    return reqJsonData({url: '/api/org/app/auth/getAllChildAuth', params, method: 'post'})
 }
 
 export const changeSubAuth = (params) => {

@@ -85,11 +85,11 @@ export const reqJsonData = async ({
 					}
 					if (res.data.status === '403') {
 						Vue.prototype.errorPopHandler('该账号没有权限操作');
-						return reject();
+						return resolve();
 					}
 					if (res.data.status === '500') {
 						Vue.prototype.errorPopHandler('操作失败，请重试或刷新页面');
-						return reject();
+						return resolve();
 					}
 					resolve(res.data || {});
 				})

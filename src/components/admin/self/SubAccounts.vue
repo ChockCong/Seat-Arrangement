@@ -436,8 +436,9 @@ export default {
         },
         async sureUpdate() {
             // TODO: 根据ID更新列表
+            this.$Message.info('该功正在开发中');
+            this.$refs.subForm.resetFields();
             this.modal = false;
-            return this.$Message.info('该功正在开发中');
         },
         sureFunction() {
             this.functionModel = false;
@@ -466,6 +467,7 @@ export default {
                     };
                     return newItem;
                 });
+                this.copyDatas = _.cloneDeep(this.datas);
             }
         }
     },
@@ -474,7 +476,7 @@ export default {
     },
     async beforeMount() {
         await this.getChilds();
-        this.copyDatas = _.cloneDeep(this.datas);
+        
     },
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 250;

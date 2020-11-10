@@ -366,6 +366,7 @@ export default {
                     };
                     return newItem;
                 });
+                this.copyDatas = _.cloneDeep(this.datas);
             }
         }
     },
@@ -392,7 +393,6 @@ export default {
     },
     async beforeMount() {
         await this.getFunctions();
-        this.copyDatas = _.cloneDeep(this.datas);
     },
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 250;
