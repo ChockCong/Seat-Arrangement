@@ -143,9 +143,10 @@ export default {
         };
         const validateName = async (rule, value, callback) => {
             if (value === '') {
-               return callback(new Error('请输入用户名'));
+               return callback(new Error('请输入登录名和用户名'));
             } else if (this.registForm.stName && this.registForm.stLoginName) {
                 //TODO: 这里检查用户名唯一性，接口待联调
+                this.$Message.info('提醒：不要使用已有的用户名')
                 const res = true;
                 // const res = await this.checkNameFun();
                 // console.log(res);
@@ -187,7 +188,8 @@ export default {
             },
             registRuleValidate: {
                 stLoginName: [
-                    { required: true, message: '请输入登录名', trigger: 'blur' }
+                    { required: true, message: '请输入登录名', trigger: 'blur' },
+                    { require: true, validator: validateName, trigger: 'blur' }
                 ],
                 stName: [
                     { required: true, message: '请输入用户名', trigger: 'blur' },

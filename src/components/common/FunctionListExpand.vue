@@ -31,7 +31,8 @@ export default {
                 if (fun.action.role && fun.action.role.length) openTag = true;
             })
             this.row.isOpen = openTag;
-            this.$emit('updateRole', this.row, 'roles');
+            const res = true;
+            this.$emit('updateRole', this.row, 'roles', res);
         }
     },
     beforeMount() {

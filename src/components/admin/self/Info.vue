@@ -179,7 +179,7 @@ export default {
                     this.$Message.success('修改成功');
                     this.edit = !this.edit;
                 } else {
-                    this.$Message.error('修改失败，请重试');
+                    // this.$Message.error('修改失败，请重试');
                 }
             } else {
                 this.edit = !this.edit;

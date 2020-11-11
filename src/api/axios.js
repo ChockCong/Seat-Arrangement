@@ -21,8 +21,9 @@ axios.interceptors.request.use(config => {
 	return config;
 });
 
-
-const errorStatus = ['401', '401.1'];
+const loginStatus = ['401', '401.1'];
+const errorStatus = ['400', '403'];
+const serverStatus = ['404', '500'];
 const base_url = process.env.VUE_APP_API;
 if (process.env.NODE_ENV === 'production') axios.defaults.baseURL = base_url;
 export const reqJsonData = async ({
@@ -78,17 +79,17 @@ export const reqJsonData = async ({
 			Axios
 				.then(res => {
 					// console.log(res.data.errorCode);
-					if (errorStatus.includes(res.data.status)) {
+					if (loginStatus.includes(res.data.status)) {
 						Vue.prototype.errorPopHandler(res.data.status === '401' ? '未登陆失败，请先进行登录' : '登陆失败，请重试');
 						router.push({ path: '/admin/login' });
 						return resolve();
 					}
-					if (res.data.status === '403') {
-						Vue.prototype.errorPopHandler('该账号没有权限操作');
+					if (errorStatus.includes(res.data.status)) {
+						Vue.prototype.errorPopHandler(res.data.error.message);
 						return resolve();
 					}
-					if (res.data.status === '500') {
-						Vue.prototype.errorPopHandler('操作失败，请重试或刷新页面');
+					if (serverStatus.includes(res.data.status)) {
+						Vue.prototype.errorPopHandler('服务器错误，请联系管理员');
 						return resolve();
 					}
 					resolve(res.data || {});

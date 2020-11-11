@@ -109,17 +109,18 @@ export default {
             this.functionSelection = _.cloneDeep(selection);
             this.$emit('confirm', this.functionSelection);
         },
-        updateRole(item, key) {
+        updateRole(item, key, response = false) {
             this.copyFunctionList.forEach(element => {
                 if (element.id === item.id) {
                     if(key === 'roles') {
-                        element[key] = _.cloneDeep(item[key]);
-                        element['isOpen'] = item['isOpen']
-                    }
-                    else element[key] = item[key];
+                        if (response) {
+                            element[key] = _.cloneDeep(item[key]);
+                            element['isOpen'] = item['isOpen'];
+                        } else {}
+                    } else element[key] = item[key];
                 }
             });
-            if(key === 'roles') this.$Message.success({content: '设置功能权限成功', closable: true});
+            if(key === 'roles' && response) this.$Message.success({content: '设置功能权限成功', closable: true});
             this.debounceSearchFunction();
             // this.$forceUpdate();
         },
@@ -129,15 +130,16 @@ export default {
                 ctOrgId: this.user.id,
                 ctIsEffective: !this.copyFunctionList[index].isOpen
             })
-            console.log(res);
             if (res && res.data) {
                 this.copyFunctionList[index].isOpen = !this.copyFunctionList[index].isOpen;
                 this.copyFunctionList[index].roles.forEach(fun => {
                     fun.action.role = this.copyFunctionList[index].isOpen ? ['管理员'] : [];
                 });
                 this.copyFunctionList[index]._expanded = false;
+                this.updateRole(this.copyFunctionList[index], 'roles', true);
+            } else {
+                this.updateRole(this.copyFunctionList[index], 'roles', false);
             }
-            this.updateRole(this.copyFunctionList[index], 'roles');
             this.$forceUpdate();
             
         }

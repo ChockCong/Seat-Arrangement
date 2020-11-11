@@ -264,7 +264,7 @@ export default {
                             this.$refs.subForm.resetFields();
                             this.modal = false;
                         } else {
-                            this.$Message.error('新增功能失败，请重试');
+                            // this.$Message.error('新增功能失败，请重试');
                         }
                     } else {
                         this.cancelLoading(500);
@@ -328,7 +328,7 @@ export default {
                 if (res) {
                     this.$Message.success('更新功能成功');
                 } else {
-                    this.$Message.error('更新功能失败，请重试');
+                    // this.$Message.error('更新功能失败，请重试');
                 }
             }
             this.datas[index].active = !this.datas[index].active
@@ -340,6 +340,11 @@ export default {
                 ctIsEffective: this.datas[index].disabled
             });
             console.log(res);
+            if (res) {
+                this.$Message.success('停用功能成功');
+            } else {
+                // this.$Message.error('更新功能失败，请重试');
+            }
         },
         async sureUpdate() {
             // TODO: 根据ID更新列表
