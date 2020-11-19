@@ -61,8 +61,12 @@
                                 <template v-if="!row.edit">{{ row.seat_no }}</template>
                                 <Input v-else v-model="row.seat_no" />
                             </template>
-                            <template slot-scope="{ row }" slot="action">
-                                <Button type="primary" size="small" @click="row.edit = !row.edit">{{ row.edit ? '保存' : '编辑' }}</Button>
+                            <template slot-scope="{ row }" slot="des">
+                                <template v-if="!row.edit">{{ row.des }}</template>
+                                <Input v-else v-model="row.des" />
+                            </template>
+                            <template slot-scope="{ row, index }" slot="action">
+                                <Button type="primary" size="small" @click="changePeoples(row, index)">{{ row.edit ? '保存' : '编辑' }}</Button>
                             </template>
                         </Table>
                     </template>
@@ -245,7 +249,7 @@ export default {
                     key: 'client_name',
                     slot: 'client_name',
                     // align: 'center',
-                    minWidth: 200,
+                    width: 120,
                     tooltip: true
                 },
                 {
@@ -257,27 +261,50 @@ export default {
                     sortable: true
                 },
                 {
+                    title: '备注',
+                    key: 'des',
+                    slot: 'des',
+                    // align: 'center',
+                    minWidth: 100,
+                    tooltip: true
+                },
+                {
                     title: '操作',
                     key: 'action',
                     slot: 'action',
                     align: 'center',
-                    width: 100
+                    width: 80
                 }
             ],
             excelDatas: [
                 {
                     client_name: '测试宾客1',
                     seat_no:1,
+                    des: '',
                     edit: false,
                 },
                 {
                     client_name: '测试宾客2',
                     seat_no:1,
+                    des: '',
                     edit: false
                 },
                 {
-                    client_name: '迈克尔.乔丹',
+                    client_name: '张三',
                     seat_no:2,
+                    des: '小学同学',
+                    edit: false
+                },
+                {
+                    client_name: '李四',
+                    seat_no:3,
+                    des: '',
+                    edit: false
+                },
+                {
+                    client_name: '张三',
+                    seat_no:5,
+                    des: '初中同学',
                     edit: false
                 }
             ],
@@ -319,6 +346,14 @@ export default {
         }
     },
     methods: {
+        changePeoples(row, index) {
+          if (!row.edit) return this.excelDatas[index].edit = !row.edit;
+          let { client_name, seat_no, des } = row;
+          this.excelDatas[index].client_name = client_name;
+          this.excelDatas[index].seat_no = seat_no;
+          this.excelDatas[index].des = des;
+          this.excelDatas[index].edit = !row.edit;
+        },
         addNew() {
             this.$router.push('seat-setting');
         },
