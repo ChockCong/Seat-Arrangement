@@ -109,6 +109,14 @@ const router = new VueRouter({
                             }
                         },
                         {
+                            path: 'seat-list',
+                            name: 'List',
+                            component: () => import('../components/admin/main/List.vue'),
+                            meta: {
+                                //keepAlive: true // 需要被缓存
+                            }
+                        },
+                        {
                             path: 'baberrage-show',
                             name: 'baberrage',
                             component: () => import('../components/admin/others/Baberrage.vue'),

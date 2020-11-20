@@ -47,7 +47,8 @@
                                 <Checkbox :disabled="row.disabled" v-model="row.chceked" @on-change="onSelectChange(row)"></Checkbox>
                             </template>
                             <template slot-scope="{ row }" slot="action">
-                                <Button type="primary" size="small" @click="preViewImage(row)">{{ '预览' }}</Button>
+                                <Button type="primary" size="small">{{ '编辑' }}</Button>
+                                <Button style="margin-left: 10px" type="primary" size="small" @click="preViewImage(row)">{{ '预览' }}</Button>
                             </template>
                         </Table>
                     </template>
@@ -101,7 +102,7 @@
     </div>
 </template>
 <script>
-import { confirmModal } from '../../../utils/index'
+import { confirmModal } from '@/utils/index'
 export default {
     name: 'Using',
     data() {
@@ -328,6 +329,9 @@ export default {
             }
         }
     },
+    props: {
+        editData: Object
+    },
     computed: {
         showSelected() {
             return !_.isEmpty(this.selectedModule);
@@ -343,6 +347,17 @@ export default {
         searchClientSelect() {
             this.searchClientInput = '';
             this.debounceClientsSearch();
+        },
+        editData: {
+            deep:true,
+            immediate: true,
+            handler:function(v) {
+                if (!v) return this.selectedModule = [];
+                this.$nextTick(() => {
+                    //TODO: 编辑
+                    this.selectedModule = [this.seatDatas[0]];
+                });
+            }
         }
     },
     methods: {

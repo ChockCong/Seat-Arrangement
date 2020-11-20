@@ -13,16 +13,22 @@ const menuItems = [
         category: 'all',
         children: [
             {
+                type: 'md-flag',
+                size: 18, // icon大小
+                name: 'List',
+                text: '会场记录',
+            },
+            {
                 type: 'md-wine',
                 size: 18, // icon大小
                 name: 'Using',
-                text: '会场模板',
+                text: '新增会场',
             },
             {
                 type: 'md-map',
                 size: 18, // icon大小
                 name: 'Setting',
-                text: '会场定义',
+                text: '新增模板',
             }
         ]
     },
