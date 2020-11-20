@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import {
     Menu, Submenu, MenuItem, Button, Input, Select, CheckboxGroup, Checkbox, Option, Form, FormItem, Dropdown, DropdownMenu, DropdownItem, Drawer, Tag, Table, Poptip,
-    Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, RadioGroup, Radio, Row, Col, Layout, Header, Content, Footer, Upload, Slider,
+    Spin, Modal, Alert, Message, Notice, LoadingBar, Icon, Steps, Step, Switch, RadioGroup, Radio, Row, Col, Layout, Header, Content, Footer, Upload, Slider, DatePicker,
     Carousel, CarouselItem
 } from 'iview';
 Vue.component('Layout', Layout);
@@ -24,6 +24,7 @@ Vue.component('MenuItem', MenuItem);
 Vue.component('Dropdown', Dropdown);
 Vue.component('DropdownMenu', DropdownMenu);
 Vue.component('DropdownItem', DropdownItem);
+Vue.component('DatePicker', DatePicker);
 Vue.component('Spin', Spin);
 Vue.component('Modal', Modal);
 Vue.component('Alert', Alert);

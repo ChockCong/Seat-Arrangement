@@ -76,6 +76,20 @@
                             </template>
                         </Table>
                     </template>
+                    <template v-if="step === 3">
+                        <div style="padding: 10px 0">
+                            <p style="text-align: left; margin: 0px 0 5px 0; font-size: 14px">举办时间</p>
+                            <div>
+                                <DatePicker type="datetime" v-model="times.start" format="yyyy-MM-dd HH:mm:ss" placeholder="输入开始时间"></DatePicker>
+                                <span style="margin: 0 10px; font-size: 14px">至</span>
+                                <DatePicker type="datetime" v-model="times.end" format="yyyy-MM-dd HH:mm:ss" placeholder="输入结束时间"></DatePicker>
+                            </div>
+                            <p style="text-align: left; margin: 20px 0 5px 0; font-size: 14px">可扫码入场时间</p>
+                            <div style="text-align: left;">
+                                <DatePicker type="datetime" v-model="times.qrcode" format="yyyy-MM-dd HH:mm:ss" placeholder="输入扫码开始时间"></DatePicker>
+                            </div>
+                        </div>
+                    </template>
                     <section  class="button-area-item">
                         <Button type="primary" v-if="[2,3].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
                         <Button type="primary" v-if="step < 3" @click="changeStep('next')">{{ '下一步' }}</Button>
@@ -332,7 +346,12 @@ export default {
                     { required: true, message: '请输入台号', trigger: ['blur','change'] },
                 ]
             },
-            editType: false
+            editType: false,
+            times: {
+                start: '',
+                end:'',
+                qrcode: ''
+            }
         }
     },
     props: {
