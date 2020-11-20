@@ -1,6 +1,11 @@
 <template>
     <div class="index-vue-seatusing">
         <div class="right-side">
+            <div class="edit-area" v-if="editType">
+                <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场记录</Button>
+                <span style="margin-left: 10px">{{'当前会场：'}}</span>
+                <Tag size="large" color="success">{{ editData.name }}</Tag>
+            </div>
             <div class="title-area">
                 <Steps :current="step - 1" size="small" class="step-bar">
                     <Step :title="`选择会场模板`" content=""></Step>
@@ -326,7 +331,8 @@ export default {
                 seat_no: [
                     { required: true, message: '请输入台号', trigger: ['blur','change'] },
                 ]
-            }
+            },
+            editType: false
         }
     },
     props: {
@@ -352,11 +358,30 @@ export default {
             deep:true,
             immediate: true,
             handler:function(v) {
-                if (!v) return this.selectedModule = [];
-                this.$nextTick(() => {
-                    //TODO: 编辑
-                    this.selectedModule = [this.seatDatas[0]];
-                });
+                console.log(v);
+                if (!v) {
+                    this.editType = false;
+                    this.selectedModule = [];
+                    this.$nextTick(() => {
+                        this.seatDatas.forEach(item => {
+                            item.disabled = false;
+                            item.chceked = false;
+                        });
+                    });
+                } else {
+                    this.editType = true;
+                    this.$nextTick(() => {
+                        //TODO: 编辑
+                        this.selectedModule = _.cloneDeep(this.seatDatas[v.id - 1]);
+                        this.seatDatas.forEach(item => {
+                            if (item.moduleName !== this.selectedModule.moduleName) {
+                                item.disabled = true;
+                            } else {
+                                item.chceked = true;
+                            }
+                        });
+                    });
+                }
             }
         }
     },
@@ -531,6 +556,11 @@ export default {
             &.red {
                 color:tomato;
             }
+        }
+        & .edit-area {
+            text-align: left;
+            padding: 0 0 10px 0;
+            border-bottom: 2px dashed #e8eaec;
         }
         & .title-area {
             display: flex;

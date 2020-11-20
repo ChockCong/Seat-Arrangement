@@ -60,7 +60,7 @@
                 </div>
             </Modal>
         </div>
-        <Using v-show="editType" :editData="editData"></Using>
+        <Using v-show="editType" :editData="editData" @back="editRow"></Using>
     </div>
 </template>
 <script>
@@ -215,7 +215,7 @@ export default {
             searchClientSelect: 'clientName',
             searchClientInput: '',
             editType: false,
-            editData: {}
+            editData: undefined
         }
     },
     components: {Using},
@@ -248,7 +248,7 @@ export default {
         editRow(row, index) {
             if (this.editType) {
                 this.editType = false;
-                this.editData = {};
+                this.editData = undefined;
                 return;
             }
             this.editData = _.cloneDeep(row);
