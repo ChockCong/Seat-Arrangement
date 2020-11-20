@@ -60,7 +60,7 @@
                 </div>
             </Modal>
         </div>
-        <Using v-show="editType" :editData="editData" @back="editRow"></Using>
+        <Using v-if="editType" :editData="editData" @back="editRow"></Using>
     </div>
 </template>
 <script>
