@@ -7,18 +7,18 @@ export function globalFunc() {
 
 // 通用工具类
 export function openNewWindow({ url, full, query = {} }) {
-	if (!full) {
-		const pageRoute = router.resolve({
-			path: url,
-			query
-		});
-		url = pageRoute.href;
-	}
+    if (!full) {
+        const pageRoute = router.resolve({
+            path: url,
+            query
+        });
+        url = pageRoute.href;
+    }
     const newLink = document.createElement('a');
     newLink.target = '_blank';
-	newLink.rel = 'noreferrer noopener';
-	newLink.href = url;
-	newLink.click();
+    newLink.rel = 'noreferrer noopener';
+    newLink.href = url;
+    newLink.click();
 }
 
 export function FormatNum(number, type = 2, space = false) {
@@ -27,7 +27,7 @@ export function FormatNum(number, type = 2, space = false) {
 }
 
 // 业务工具类
-export function confirmModal(type, titleStr = '', contentStr = '', handler = undefined) {
+export function confirmModal(type, titleStr = '', contentStr = '', handler = undefined, params = {}) {
     const title = titleStr;
     const content = contentStr;
     switch (type) {
@@ -61,12 +61,14 @@ export function confirmModal(type, titleStr = '', contentStr = '', handler = und
                 content: content,
                 loading: true,
                 onOk: async () => {
-                    console.log(typeof handler, handler);
-                    if (typeof handler === 'function') {
-                        await handler();
+                    console.log(handler instanceof Function, handler);
+                    if (handler instanceof Function) {
+                        if (_.isEmpty(params)) await handler();
+                        else await handler(params);
                     }
                     vm.$Modal.remove();
-                }
+                },
+                onCancel: () => { }
             })
     }
 }
@@ -74,11 +76,11 @@ export function confirmModal(type, titleStr = '', contentStr = '', handler = und
 export function level(level, isGod = false) {
     if (isGod) return Number(level) === 0;
     let role = ''
-    switch(Number(level)) {
-        case 1 : role = '普通用户'; break;
-        case 2 : role = '子用户'; break;
-        case 3 : role = 'VIP会员'; break;
-        default : role = '管理员';
+    switch (Number(level)) {
+        case 1: role = '普通用户'; break;
+        case 2: role = '子用户'; break;
+        case 3: role = 'VIP会员'; break;
+        default: role = '管理员';
     }
     return role;
 }

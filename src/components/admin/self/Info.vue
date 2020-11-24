@@ -258,7 +258,7 @@ export default {
 }
 .index-vue-info {
     height: 100%;
-    padding: 20px;
+    padding: 10px;
     & .img-line {
         position: relative;
         display: flex;

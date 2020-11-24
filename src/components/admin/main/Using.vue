@@ -10,7 +10,7 @@
                 <Steps :current="step - 1" size="small" class="step-bar">
                     <Step :title="`选择会场模板`" content=""></Step>
                     <Step :title="`上传宾客名单`" content=""></Step>
-                    <Step :title="`生成预览`" content=""></Step>
+                    <Step :title="`预览会场`" content=""></Step>
                     <!-- <Step :title="`第4步：确定座位编号`" content=""></Step> -->
                 </Steps>
                 <!-- <section  class="button-area-item" v-if="step === 4">
@@ -77,23 +77,58 @@
                         </Table>
                     </template>
                     <template v-if="step === 3">
-                        <div style="padding: 10px 0">
-                            <p style="text-align: left; margin: 0px 0 5px 0; font-size: 14px">举办时间</p>
-                            <div>
-                                <DatePicker type="datetime" v-model="times.start" format="yyyy-MM-dd HH:mm:ss" placeholder="输入开始时间"></DatePicker>
-                                <span style="margin: 0 10px; font-size: 14px">至</span>
-                                <DatePicker type="datetime" v-model="times.end" format="yyyy-MM-dd HH:mm:ss" placeholder="输入结束时间"></DatePicker>
+                        <div class="preview">
+                            <div class="preview-img">
+                                <div class="image">会场图</div>
                             </div>
-                            <p style="text-align: left; margin: 20px 0 5px 0; font-size: 14px">可扫码入场时间</p>
-                            <div style="text-align: left;">
-                                <DatePicker type="datetime" v-model="times.qrcode" format="yyyy-MM-dd HH:mm:ss" placeholder="输入扫码开始时间"></DatePicker>
+                            <div class="info">
+                                <div class="info-item">
+                                    <p>会场名</p>
+                                    <div>
+                                        <Input v-model="names" placeholder="输入会场名" />
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <p>会场详情</p>
+                                    <div>
+                                        <Input v-model="details" placeholder="输入会场详情" />
+                                    </div>
+                                </div>
+                                <div class="info-item flex">
+                                    <div class="item-flex">
+                                        <p>会场人数</p>
+                                        <div>
+                                            <Input v-model="numbers" type="number" placeholder="输入参与会场人数" />
+                                        </div>
+                                    </div>
+                                    <div class="item-flex">
+                                        <p>主办人</p>
+                                        <div>
+                                            <Input v-model="holders" placeholder="输入主办人名" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <p>举办时间</p>
+                                    <div>
+                                        <DatePicker type="datetime" v-model="times.start" format="yyyy-MM-dd HH:mm:ss" placeholder="输入开始时间"></DatePicker>
+                                        <span style="margin: 0 10px; font-size: 14px">至</span>
+                                        <DatePicker type="datetime" v-model="times.end" format="yyyy-MM-dd HH:mm:ss" placeholder="输入结束时间"></DatePicker>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <p>可扫码入场时间</p>
+                                    <div style="text-align: left;">
+                                        <DatePicker type="datetime" v-model="times.qrcode" format="yyyy-MM-dd HH:mm:ss" placeholder="输入扫码开始时间"></DatePicker>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </template>
                     <section  class="button-area-item">
                         <Button type="primary" v-if="[2,3].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
                         <Button type="primary" v-if="step < 3" @click="changeStep('next')">{{ '下一步' }}</Button>
-                        <Button type="primary" v-if="step === 3">{{ '确认生成' }}</Button>
+                        <Button type="primary" v-if="step === 3">{{ editType ? '完成编辑' : '确认生成' }}</Button>
                     </section>
                 </div>
             </div>
@@ -113,7 +148,7 @@
             </Modal>
             <Modal v-model="nModel" :title="'模板预览'">
                 <div class="modal-form">
-                    <img :src="'../../../assets/logo.png'" />
+                    <img :src="'@/assets/logo.png'" />
                 </div>
             </Modal>
         </div>
@@ -347,6 +382,10 @@ export default {
                 ]
             },
             editType: false,
+            holders: '',
+            names: '',
+            details: '',
+            numbers: 0,
             times: {
                 start: '',
                 end:'',
@@ -513,17 +552,17 @@ export default {
             }
             this.$forceUpdate();
         },
+        stepfun(type) {
+            this.step = type === 'next' ? this.step + 1 : this.step - 1;
+        },
         changeStep(type) {
-            const fun = (type) => {
-                this.step = type === 'next' ? this.step + 1 : this.step - 1;
-            }
             if (this.step === 1) {
                 if (!this.showSelected) return this.$Message.warning({content: '请先选择一个模板', closable: true});
             }
             if (this.step === 2 && type === 'next') {
-                return confirmModal('confirm', '提示', `<p>是否确认宾客名单无误？</p>`, fun(type));
+                return confirmModal('confirm', '提示', `<p>是否确认宾客名单无误？</p>`, this.stepfun, type);
             }
-            fun(type);
+            this.stepfun(type);
         },
         onSelectClientChange(selection) {
             this.selectedClients = selection;
@@ -651,7 +690,38 @@ export default {
             & button {
                 margin-right: 10px;
             }
-    }
+        }
+        & .preview {
+            display: flex;
+            &-img {
+                box-sizing: border-box;
+                width: 500px;
+                padding: 10px;
+                & .image {
+                    border: 1px solid black;
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
+        & .info {
+            &-item {
+                padding: 10px 0;
+                text-align: left;
+                & p {
+                    font-size: 14px;
+                }
+                &.flex {
+                    display: flex;
+                }
+                & .item-flex {
+                    flex: 1;
+                    &:first-child {
+                        margin-right: 34px;
+                    }
+                }
+            }
+        }
     }
 }
 .modal-form {
