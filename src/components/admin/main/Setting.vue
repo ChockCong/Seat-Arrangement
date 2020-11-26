@@ -153,6 +153,7 @@
 </template>
 <script>
 import Loading from '@/components/common/loading.vue';
+import { dataURLtoFile } from '@/utils/index'
 // import { setInterval, setTimeout, clearInterval } from 'timers';
 export default {
     name: 'Setting',
@@ -688,6 +689,8 @@ export default {
                 console.log(canvas)
                 // 转成图片，生成图片地址
                 this.imgUrl = canvas.toDataURL("image/png");
+                let file = dataURLtoFile(this.imgUrl,'image/jpeg');
+                console.log(file);
                 if (this.imgUrl) {
                     this.$Loading.finish();
                     this.loading = false;
