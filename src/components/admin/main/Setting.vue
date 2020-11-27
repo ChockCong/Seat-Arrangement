@@ -145,7 +145,7 @@
             </div>
             <div slot="footer" style="text-align: right">
                 <Button type="default" size="large" @click="modal = false">{{'取消'}}</Button>
-                <Button type="primary" size="large" @click="modal = false">{{'确定'}}</Button>
+                <Button type="primary" size="large" :loading="saveLoading" @click="saveImage">{{ oss_url ? '确定' : '保存会场'}}</Button>
             </div>
         </Modal>
         <Loading v-if="loading"></Loading>
@@ -193,7 +193,9 @@ export default {
             timeReplace: [], //用于恢复时消失背景色
             posMutipliSelect: [],
             originPosMutipliSelect: [],
-            loading: false
+            loading: false,
+            oss_url: '',
+            saveLoading: false
         }
     },
     computed: {
@@ -307,6 +309,7 @@ export default {
             this.imgUrl = null;
             this.copySeatList = [];
             this.editTag = true;
+            this.previewTag = false;
             this.showStart(true);
         },
         nextStep() {
@@ -687,7 +690,7 @@ export default {
             let time = new Date();
             let str = String(time.getFullYear()) + String(time.getMonth() + 1) + String(time.getDate()) + String(time.getHours()) + String(time.getMinutes()) + String(time.getSeconds());
             let rand = Math.floor(Math.random() * 10)
-            return `seat${str}${rand}`;
+            return `images/seat${str}${rand}.jpg`;
         },
         async buildImage() {
             this.$Loading.start();
@@ -696,10 +699,6 @@ export default {
                 console.log(canvas)
                 // 转成图片，生成图片地址
                 this.imgUrl = canvas.toDataURL("image/png");
-                let file = dataURLtoFile(this.imgUrl,'image/jpeg');
-                console.log(file);
-                const res = await client().put(this.renameFile(), file);
-                console.log(res);
                 if (this.imgUrl) {
                     this.$Loading.finish();
                     this.loading = false;
@@ -709,6 +708,23 @@ export default {
                     this.loading = false;
                 }
             });
+        },
+        async saveImage() {
+            if (this.oss_url) return this.modal = false;
+            this.saveLoading = true;
+            let file = dataURLtoFile(this.imgUrl,'image/jpeg');
+            console.log(file);
+            const res = await client().put(this.renameFile(), file);
+            console.log(res);
+            this.saveLoading = false;
+            if (res.res.status === 200) {
+                this.oss_url = res.url;
+                this.$Message.success('保存会场成功');
+                this.modal = false;
+                this.clearSeat();
+            } else {
+                this.$Message.success('保存会场失败，请重试');
+            }
         }
     },
     mounted() {
