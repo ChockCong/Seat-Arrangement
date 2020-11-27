@@ -12,6 +12,7 @@
     "analyz": "NODE_ENV=development npm_config_report=true npm run build"
   },
   "dependencies": {
+    "ali-oss": "^6.11.2",
     "autoprefixer": "^9.7.6",
     "axios": "^0.19.2",
     "babel-plugin-transform-remove-console": "^6.9.4",

@@ -154,6 +154,7 @@
 <script>
 import Loading from '@/components/common/loading.vue';
 import { dataURLtoFile } from '@/utils/index'
+import { client } from '@/utils/oss'
 // import { setInterval, setTimeout, clearInterval } from 'timers';
 export default {
     name: 'Setting',
@@ -682,15 +683,23 @@ export default {
             });
             if (isLoad) this.$forceUpdate();
         },
-        buildImage() {
+        renameFile() {
+            let time = new Date();
+            let str = String(time.getFullYear()) + String(time.getMonth() + 1) + String(time.getDate()) + String(time.getHours()) + String(time.getMinutes()) + String(time.getSeconds());
+            let rand = Math.floor(Math.random() * 10)
+            return `seat${str}${rand}`;
+        },
+        async buildImage() {
             this.$Loading.start();
             this.loading = true;
-            this.html2canvas(this.$refs.imageDom, this.opts).then(canvas => {
+            this.html2canvas(this.$refs.imageDom, this.opts).then(async canvas => {
                 console.log(canvas)
                 // 转成图片，生成图片地址
                 this.imgUrl = canvas.toDataURL("image/png");
                 let file = dataURLtoFile(this.imgUrl,'image/jpeg');
                 console.log(file);
+                const res = await client().put(this.renameFile(), file);
+                console.log(res);
                 if (this.imgUrl) {
                     this.$Loading.finish();
                     this.loading = false;

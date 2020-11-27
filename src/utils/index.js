@@ -94,8 +94,7 @@ export function dataURLtoFile(dataURI, type) {
     let BlobObj = new Blob([new Uint8Array(array)], { type: type });
     let time = new Date();
     let str = String(time.getFullYear()) + String(time.getMonth() + 1) + String(time.getDate()) + String(time.getHours()) + String(time.getMinutes()) + String(time.getSeconds());
-    let rand = Math.floor(Math.random() * 10)
-    return new File([BlobObj], `seat${str}${rand}.jpg`); // 重命名了
+    return new File([BlobObj], `seat${str}.jpg`); // 重命名了
 }
 
 
