@@ -1,5 +1,5 @@
 <template>
-<div>
+<div style="height: 100%">
     <div v-if="editList.length" class="index-vue-settingedit-title">
         <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场模板</Button>
         <span style="margin-left: 10px">当前会场模板：</span>

@@ -359,7 +359,7 @@ export default {
     display: flex;
     & .right-side {
         flex: 1;
-        padding: 20px;
+        padding: 10px;
         display: flex;
         flex-direction: column;
         // min-width: 1000px;
