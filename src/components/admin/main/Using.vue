@@ -53,7 +53,7 @@
                                 <Checkbox :disabled="row.disabled" v-model="row.chceked" @on-change="onSelectChange(row)"></Checkbox>
                             </template>
                             <template slot-scope="{ row }" slot="action">
-                                <Button type="primary" size="small" @click="editModel(row)">{{ '编辑' }}</Button>
+                                <Button v-if="!editType" type="primary" size="small" @click="editModel(row)">{{ '编辑' }}</Button>
                                 <Button style="margin-left: 10px" type="primary" size="small" @click="preViewImage(row)">{{ '预览' }}</Button>
                             </template>
                         </Table>
