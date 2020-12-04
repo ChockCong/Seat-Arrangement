@@ -145,7 +145,9 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
     // console.log(to, from)
-    const tokenEnable = isTokenEnable();
+    // const tokenEnable = isTokenEnable();
+    //2020-12-04 改为后端去管理token时间，由401控制登录重定向，只要cookie存在，就证明登录状态在延续
+    const tokenEnable = getCookie('loginInfo');
     if (to.matched.some(route => route.meta && route.meta.requiresAuth) && store.state.adminInfo.admin_token) {
         //TODO: token过期后应刷新保持登录，反之退出登录
         // console.log(store.state.adminInfo, isTokenEnable());

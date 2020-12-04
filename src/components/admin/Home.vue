@@ -1,7 +1,7 @@
 <template>
     <div class="index-vue-home">
         <img alt="Vue logo" src="../../assets/logo.png">
-        <h1>{{ 'Welcome To Admin !' }}</h1>
+        <h1>{{ '欢迎使用码雷管理平台' }}</h1>
     </div>
 </template>
 <script>
@@ -20,7 +20,7 @@ export default {
         height: 300px;
     }
     & h1 {
-        font-size: 68px;
+        font-size: 48px;
     }
 }
 </style>

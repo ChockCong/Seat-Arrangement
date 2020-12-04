@@ -9,7 +9,7 @@ export const isTokenEnable = () => {
 	// const currentTime = new Date().getTime();
     // if (currentTime - refreshTokenTime > 1000 * 60 * 60 * 24)
     const currentTime = String(new Date().getTime());
-    const loginTime = localStorage.getItem('loginTime');
+    const loginTime = new Date(localStorage.getItem('loginTime')).getTime();
     let expires = store.state.adminInfo.token_overtime * 1000;
     if (store.state.adminInfo && currentTime - loginTime > expires) {
         Vue.prototype.errorPopHandler('用户信息已过期，请重新登陆');
@@ -24,9 +24,10 @@ export const getCookie = (name) => {
 }
 
 export const setCookie = (params) => {
-    const time = new Date().getTime();
+    let time = new Date();
     localStorage.setItem('loginTime', time);
-    Cookie.set('loginInfo', params, { expires: new Date(time + params.tokenOverTime * 1000) });
+    time.setTime(time.getTime() + (2*24*60*60*1000));
+    Cookie.set('loginInfo', params, { expires: time });
 };
 
 export const removeCookie = () => {

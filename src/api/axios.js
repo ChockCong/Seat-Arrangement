@@ -3,6 +3,7 @@ import axios from 'axios';
 import store from '../store/index';
 import qs from 'qs';
 import router from '../router/router';
+import { removeCookie } from '../utils/cookie'
 
 /**
  * @param {*} url 请求url
@@ -80,7 +81,8 @@ export const reqJsonData = async ({
 				.then(res => {
 					// console.log(res.data.errorCode);
 					if (loginStatus.includes(res.data.status)) {
-						Vue.prototype.errorPopHandler(res.data.status === '401' ? '未登陆失败，请先进行登录' : '登陆失败，请重试');
+						Vue.prototype.errorPopHandler(res.data.status === '401' ? '用户信息已过期，请重新登陆' : '登陆失败，请重试');
+						removeCookie();
 						router.push({ path: '/admin/login' });
 						return resolve();
 					}
