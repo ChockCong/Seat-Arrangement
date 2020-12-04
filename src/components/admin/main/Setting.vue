@@ -1,4 +1,10 @@
 <template>
+<div style="height: 100%">
+    <div v-if="editList.length" class="index-vue-settingedit-title">
+        <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场模板</Button>
+        <span style="margin-left: 10px">当前会场模板：</span>
+        <Tag style="margin-top: -2px;" size="large" color="success">{{ editListName }}</Tag>
+    </div>
     <div class="index-vue-seatsetting">
         <div class="transition-area" style="position: relative;">
             <transition name="draw">
@@ -150,6 +156,7 @@
         </Modal>
         <Loading v-if="loading"></Loading>
     </div>
+</div>
 </template>
 <script>
 import Loading from '@/components/common/loading.vue';
@@ -159,6 +166,15 @@ import { client } from '@/utils/oss'
 export default {
     name: 'Setting',
     components: {Loading},
+    props: {
+        editList: {
+            type: Array,
+            default: () =>{
+                return [];
+            }
+        },
+        editListName: String
+    },
     data() {
         return {
             rowNum: 0,
@@ -228,6 +244,20 @@ export default {
             //     this.timer = null;
             // }, 3000);
             // clearTimeout(timeout);
+        },
+        editList: {
+            immediate: true,
+            deep: true,
+            handler: function (value) {
+                if (this.editList.length) {
+                    this.step = 4;
+                    this.seatList = _.cloneDeep(value);
+                    this.rowNum = this.seatList.length - 2;
+                    this.colNum = this.seatList[0].length - 2;
+                    this.editTag = false;
+                    this.startModal = false;
+                }
+            }
         }
     },
     activated() {
@@ -696,7 +726,7 @@ export default {
             this.$Loading.start();
             this.loading = true;
             this.html2canvas(this.$refs.imageDom, this.opts).then(async canvas => {
-                console.log(canvas)
+                // console.log(canvas)
                 // 转成图片，生成图片地址
                 this.imgUrl = canvas.toDataURL("image/png");
                 if (this.imgUrl) {
@@ -715,8 +745,8 @@ export default {
             let file = dataURLtoFile(this.imgUrl,'image/jpeg');
             console.log(file);
             const res = await client().put(this.renameFile(), file);
-            console.log(res);
             this.saveLoading = false;
+            console.log(res);
             if (res.res.status === 200) {
                 this.oss_url = res.url;
                 this.$Message.success('保存会场成功');
@@ -743,6 +773,14 @@ export default {
     100% {
         opacity: 1; /*结尾状态 透明度为1*/
     }
+}
+.index-vue-settingedit-title {
+    text-align: left;
+    // font-size: 13px;
+    // font-weight: 700;
+    color: #666;
+    padding: 10px 5px;
+    border-bottom: 2px dashed #e8eaec;
 }
 .index-vue-seatsetting {
     min-width: 1000px;

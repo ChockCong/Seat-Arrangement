@@ -1,10 +1,11 @@
 <template>
     <div class="index-vue-seatusing">
-        <div class="right-side">
+        <Setting v-if="showEditModel" style="width: 100%;" :editListName="seatListName" :editList="seatList" @back="() => { this.showEditModel = false; }"></Setting>
+        <div v-else class="right-side">
             <div class="edit-area" v-if="editType">
                 <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场记录</Button>
                 <span style="margin-left: 10px">{{'当前会场：'}}</span>
-                <Tag size="large" color="success">{{ editData.name }}</Tag>
+                <Tag style="margin-top: -2px;" size="large" color="success">{{ editData.name }}</Tag>
             </div>
             <div class="title-area">
                 <Steps :current="step - 1" size="small" class="step-bar">
@@ -52,7 +53,7 @@
                                 <Checkbox :disabled="row.disabled" v-model="row.chceked" @on-change="onSelectChange(row)"></Checkbox>
                             </template>
                             <template slot-scope="{ row }" slot="action">
-                                <Button type="primary" size="small">{{ '编辑' }}</Button>
+                                <Button v-if="!editType" type="primary" size="small" @click="editModel(row)">{{ '编辑' }}</Button>
                                 <Button style="margin-left: 10px" type="primary" size="small" @click="preViewImage(row)">{{ '预览' }}</Button>
                             </template>
                         </Table>
@@ -157,8 +158,10 @@
 </template>
 <script>
 import { confirmModal } from '@/utils/index'
+import Setting from './Setting';
 export default {
     name: 'Using',
+    components: {Setting},
     data() {
         return {
             step: 1,
@@ -169,6 +172,9 @@ export default {
             searchFun: null,
             nModel: false,
             tableHeight: 0,
+            showEditModel: false,
+            seatListName: '',
+            seatList: [],
             seatColumns: [
                 {
                     title: '选择',
@@ -569,6 +575,11 @@ export default {
         },
         preViewImage(row) {
             this.nModel = true;
+        },
+        editModel(row) {
+            this.seatListName = row.moduleName;
+            this.seatList = [[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":1},{"value":3,"No":2},{"value":3,"No":3},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":4},{"value":3,"No":5},{"value":3,"No":6},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":7},{"value":3,"No":8},{"value":3,"No":9},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}]];
+            this.showEditModel = true;
         }
     },
     created() {
@@ -601,7 +612,7 @@ export default {
     display: flex;
     & .right-side {
         flex: 1;
-        padding: 20px;
+        padding: 10px;
         display: flex;
         flex-direction: column;
         // min-width: 1000px;

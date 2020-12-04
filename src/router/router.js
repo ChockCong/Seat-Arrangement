@@ -7,18 +7,33 @@ import { getCookie, isTokenEnable } from '@/utils/cookie';
 //TODO: 禁止全局路由错误处理打印，这个也是vue-router开发者给出的解决方案
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location, onResolve, onReject) {
-  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
-  return originalPush.call(this, location).catch(err => err)
+    if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+    return originalPush.call(this, location).catch(err => err)
 }
 
 Vue.use(VueRouter);
 
 const router = new VueRouter({
-	mode: 'hash',
-	routes: [
-		{
-			path: '/',
-			component: () => import('../components/HelloWorld.vue'),
+    mode: 'hash',
+    routes: [
+        {
+            path: '/',
+            component: () => import('../components/HelloWorld.vue'),
+        },
+        {
+            path: '/user',
+            name: 'user',
+            component: () => import('../view/user/index.vue'),
+            meta: {
+                tag: 'unlogin'
+            },
+            children: [
+                {
+                    path: 'show',
+                    name: 'show',
+                    component: () => import('../view/user/show.vue'),
+                }
+            ]
         },
         {
             path: '/:page',
@@ -127,20 +142,8 @@ const router = new VueRouter({
                     ]
                 }
             ]
-		},
-		{
-            path: '/user',
-            name: 'user',
-            component: () => import('../view/user/index.vue'),
-            children: [
-                {
-                    path: 'show',
-                    name: 'show',
-                    component: () => import('../view/user/show.vue'),
-                }
-            ]
-		}
-	]
+        }
+    ]
 });
 
 router.beforeEach(async (to, from, next) => {
