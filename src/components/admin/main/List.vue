@@ -12,10 +12,11 @@
                     <Input style="width: 200px; margin: 0 10px" v-model="searchInput" placeholder="输入用户名搜索"  @input="searchFun" />
                 </div>
                 <div style="width: fit-content">
-                    <Table ref="table" border stripe :max-height="tableHeight" :width="1050" :loading="false" :columns="seatColumns" :data="seatDatas">
+                    <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="false" :columns="seatColumns" :data="seatDatas">
                         <template slot-scope="{ row, index }" slot="action">
-                            <Button type="primary" size="small" @click="editRow(row, index)">{{ '编辑' }}</Button>
-                            <Button style="margin-left: 10px" type="primary" size="small" @click="() => { mModel = true }">{{ '重新上传名单' }}</Button>
+                            <Button type="primary" size="small" @click="seeRow(row, index)">{{ '查看' }}</Button>
+                            <Button style="margin-left: 10px" type="primary" size="small" @click="editRow(row, index)">{{ '编辑' }}</Button>
+                            <Button style="margin-left: 10px" type="primary" size="small" @click="uploadRow(row, index)">{{ '重新上传名单' }}</Button>
                         </template>
                     </Table>
                 </div>
@@ -60,12 +61,13 @@
                 </div>
             </Modal>
         </div>
-        <Using v-if="editType" :editData="editData" @back="editRow"></Using>
+        <Using v-if="editType" :editData="editData" @back="backRow"></Using>
     </div>
 </template>
 <script>
 import { confirmModal } from '@/utils/index'
 import Using from './Using';
+import { getSeats, uploadCustomers } from '@/api/seat_api';
 export default {
     name: 'List',
     data() {
@@ -112,7 +114,7 @@ export default {
                     key: 'action',
                     slot: 'action',
                     align: 'center',
-                    width: 200
+                    width: 250
                 }
             ],
             seatDatas: [
@@ -245,6 +247,22 @@ export default {
                 this.seatDatas = _.cloneDeep(this.copySeatDatas);
             }
         },
+        backRow() {
+            if (this.editType) {
+                this.editType = false;
+                this.editData = undefined;
+            }
+        },
+        seeRow(row, index) {
+            if (this.editType) {
+                this.editType = false;
+                this.editData = undefined;
+                return;
+            }
+            this.editData = _.cloneDeep(row);
+            this.editData.opType = 'see'
+            this.editType = true;
+        },
         editRow(row, index) {
             if (this.editType) {
                 this.editType = false;
@@ -252,7 +270,17 @@ export default {
                 return;
             }
             this.editData = _.cloneDeep(row);
+            this.editData.opType = 'edit'
             this.editType = true;
+        },
+        uploadRow(row, index) {
+            if (this.mModel) {
+                this.mModel = false;
+                this.editData = undefined;
+                return;
+            }
+            this.editData = _.cloneDeep(row);
+            this.mModel = true;
         },
         clickFile() {
             this.$refs.fileInput.click();
@@ -314,7 +342,14 @@ export default {
             const file = e.target.files;
             this.file = file[0];
             console.log(this.file);
-            this.$refs.fileInput.value = null;
+            const res = await uploadCustomers({ ctId: this.editData.id, file: this.file });
+            if (res) {
+                this.$Message.success('上传成功')
+                this.file = null;
+                this.$refs.fileInput.value = null;
+                this.excelDatas = res.data;
+            }
+            
         },
         sureCilents() {
             this.fileLoading = true;
@@ -340,11 +375,35 @@ export default {
           this.excelDatas[index].edit = !row.edit;
           this.$set(this.copyExcelDatas, index, this.excelDatas[index]);
         },
+        async getList() {
+            const res = await getSeats();
+            if (res && res.data) {
+                let datas = res.data.map(item => {
+                    return {
+                        id: item.ctId,
+                        name: item.ctName,
+                        detail: item.ctContent,
+                        people: item.ctCreatorName,
+                        number: item.ctNumber,
+                        start: item.ctBeginTime,
+                        end: item.ctEndTime,
+                        // ctQRCodeTime: item.ctQRCodeTime,
+                        // ctTableNumber: item.ctTableNumber,
+                        // ctStatus: item.ctStatus,
+                        // ctCreatorId: item.ctCreatorId,
+                        // ctCreateTime: item.ctCreateTime,
+                        // ctOwnerId: item.ctOwnerId
+                    }
+                })
+                this.seatDatas.concat(datas);
+            }
+        }
     },
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 80;
     },
     beforeMount() {
+        this.getList();
         this.searchClientFun = _.debounce(this.debounceClientsSearch, 1000);
         this.searchFun = _.debounce(this.debounceSearch, 1000);
         this.copyExcelDatas = _.cloneDeep(this.excelDatas);

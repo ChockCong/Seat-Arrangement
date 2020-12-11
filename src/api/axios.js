@@ -26,15 +26,21 @@ const loginStatus = ['401', '401.1'];
 const errorStatus = ['400', '403'];
 const serverStatus = ['404', '500'];
 const base_url = process.env.VUE_APP_API;
-if (process.env.NODE_ENV === 'production') axios.defaults.baseURL = base_url;
+const seat_base_url = process.env.VUE_APP_SEAT_API;
+
 export const reqJsonData = async ({
 	url,
 	params = {},
 	method = 'post',
 	isformData = false,
+	types = ''
 }) => {
 	if (process.env.NODE_ENV === 'production') {
-		url = url.split('/api')[1];
+		switch (types) {
+			case 'seat' : axios.defaults.baseURL = seat_base_url; break;
+			default: axios.defaults.baseURL = base_url;
+		}
+		url = !types ? url.split('/api')[1] : url.split('/seat')[1];
 	}
 	const config = {
 		method,
@@ -44,15 +50,17 @@ export const reqJsonData = async ({
 			'If-Modified-Since': '0' // 防止ie浏览器对ie的axios的缓存
 		}
 	};
-	if (method === 'get' || method === 'GET') {
-		config.params = params;
-		config.paramsSerializer = params => {
-			return qs.stringify(params, { arrayFormat: 'indices' });
-		};
-	} else {
-        // config.data = params
-		config.data = qs.parse(params);
-    }
+	if (!isformData) {
+		if (method === 'get' || method === 'GET') {
+			config.params = params;
+			config.paramsSerializer = params => {
+				return qs.stringify(params, { arrayFormat: 'indices' });
+			};
+		} else {
+			// config.data = params
+			config.data = qs.parse(params);
+		}
+	}
 	// 带有表单数据并且有文件时的请求格式
 	const transformRequest = new FormData();
 	if (isformData) {
@@ -73,7 +81,7 @@ export const reqJsonData = async ({
 				transformRequest.append(key, params[key]);
 			}
 		}
-    }
+	}
     return new Promise((resolve, reject) => {
 		try {
 			const Axios = !isformData ? axios(config) : axios.post(config.url, transformRequest, config);

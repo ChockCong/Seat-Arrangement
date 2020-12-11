@@ -1,6 +1,6 @@
 <template>
-<div style="height: 100%">
-    <div v-if="editList.length" class="index-vue-settingedit-title">
+<div style="height: 100%" :style="type === 'seats' ? 'border-bottom: 2px solid #e8eaec;' : ''">
+    <div v-if="editList.length && type === 'template'" class="index-vue-settingedit-title">
         <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场模板</Button>
         <span style="margin-left: 10px">当前会场模板：</span>
         <Tag style="margin-top: -2px;" size="large" color="success">{{ editListName }}</Tag>
@@ -113,8 +113,8 @@
                     <Button v-if="step === 4 && mutipliTag" size="default" type="primary" @click="toNotMutiply">
                         {{'下一步'}}
                     </Button>
-                    <Button v-if="[1,2,3].includes(step)" size="default" type="primary" @click="nextStep">{{'下一步'}}</Button>
-                    <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">{{'上一步'}}</Button>
+                    <Button v-if="[1,2,3].includes(step)" size="default" type="primary" @click="nextStep">{{!editType ? '下一步' : '会场下一步'}}</Button>
+                    <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">{{!editType ? '上一步' : '会场上一步'}}</Button>
                 </section>
             </div>
         </div>
@@ -167,6 +167,7 @@ export default {
     name: 'Setting',
     components: {Loading},
     props: {
+        type: String,
         editList: {
             type: Array,
             default: () =>{
@@ -177,6 +178,7 @@ export default {
     },
     data() {
         return {
+            editType: false,
             rowNum: 0,
             colNum: 0,
             seatList: [],
@@ -250,12 +252,15 @@ export default {
             deep: true,
             handler: function (value) {
                 if (this.editList.length) {
+                    this.editType = true
                     this.step = 4;
                     this.seatList = _.cloneDeep(value);
                     this.rowNum = this.seatList.length - 2;
                     this.colNum = this.seatList[0].length - 2;
                     this.editTag = false;
                     this.startModal = false;
+                } else {
+                    this.editType = false
                 }
             }
         }

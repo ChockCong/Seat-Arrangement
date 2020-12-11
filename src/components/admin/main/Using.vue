@@ -1,27 +1,27 @@
 <template>
-    <div class="index-vue-seatusing">
-        <Setting v-if="showEditModel" style="width: 100%;" :editListName="seatListName" :editList="seatList" @back="() => { this.showEditModel = false; }"></Setting>
+    <div class="index-vue-seatusing" :class="editType ? 'edit-style' : ''">
+        <Setting v-if="showEditModel" style="width: 100%;" :type="'template'" :editListName="seatListName" :editList="seatList" @back="() => { this.showEditModel = false; }"></Setting>
         <div v-else class="right-side">
-            <div class="edit-area" v-if="editType">
+            <div class="edit-area" v-if="seeType || editType">
                 <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场记录</Button>
                 <span style="margin-left: 10px">{{'当前会场：'}}</span>
                 <Tag style="margin-top: -2px;" size="large" color="success">{{ editData.name }}</Tag>
             </div>
             <div class="title-area">
                 <Steps :current="step - 1" size="small" class="step-bar">
-                    <Step :title="`选择会场模板`" content=""></Step>
-                    <Step :title="`上传宾客名单`" content=""></Step>
-                    <Step :title="`预览会场`" content=""></Step>
+                    <Step :title="seeType ? '会场模板' : editType ? '会场重设' : '选择会场模板'" content=""></Step>
+                    <Step :title="seeType ? '宾客名单' : '上传宾客名单'" content=""></Step>
+                    <Step :title="'会场预览'" content=""></Step>
                     <!-- <Step :title="`第4步：确定座位编号`" content=""></Step> -->
                 </Steps>
                 <!-- <section  class="button-area-item" v-if="step === 4">
                 </section> -->
             </div>
             <div class="show-area">
-                <template v-if="step === 1">
+                <template v-if="step === 1 && !editType">
                     <div class="button-area">
-                        <Button type="primary" icon="md-add" @click="addNew">新增模板</Button>
-                        <Button type="primary" icon="md-trash" @click="deleteNew">删除模板</Button>
+                        <Button v-if="!seeType" type="primary" icon="md-add" @click="addNew">新增模板</Button>
+                        <Button v-if="!seeType" type="primary" icon="md-trash" @click="deleteNew">删除模板</Button>
                         <Select style="width: 100px;" v-model="searchSelect">
                             <Option value="seatName" label="会场模板名"></Option>
                         </Select>
@@ -36,9 +36,9 @@
                 <template v-if="step === 2">
                     <div class="button-area clear-flex">
                         <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
-                        <Button icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
-                        <Button type="primary" icon="md-add" @click="mModel = true">新增宾客</Button>
-                        <Button type="primary" icon="md-trash" @click="deletes">删除宾客</Button>
+                        <Button v-if="!seeType" icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
+                        <Button v-if="!seeType" type="primary" icon="md-add" @click="mModel = true">新增宾客</Button>
+                        <Button v-if="!seeType" type="primary" icon="md-trash" @click="deletes">删除宾客</Button>
                         <Select style="width: 100px;" v-model="searchClientSelect">
                             <Option value="clientName" label="宾客名"></Option>
                             <Option value="seatNo" label="座位号"></Option>
@@ -46,17 +46,20 @@
                         <Input style="width: 200px; margin: 0 10px" v-model="searchClientInput" placeholder="输入宾客名搜索"  @input="searchClientFun" />
                     </div>
                 </template>
-                <div style="width: fit-content">
-                    <template v-if="step === 1">
+                <div class="template-box">
+                    <template v-if="step === 1 && !editType">
                         <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="false" :columns="seatColumns" :data="seatDatas"  @on-selection-change="onSelectChange">
                             <template slot-scope="{ row }" slot="select">
                                 <Checkbox :disabled="row.disabled" v-model="row.chceked" @on-change="onSelectChange(row)"></Checkbox>
                             </template>
                             <template slot-scope="{ row }" slot="action">
-                                <Button v-if="!editType" type="primary" size="small" @click="editModel(row)">{{ '编辑' }}</Button>
+                                <Button v-if="!seeType" type="primary" size="small" @click="editModel(row)">{{ '编辑' }}</Button>
                                 <Button style="margin-left: 10px" type="primary" size="small" @click="preViewImage(row)">{{ '预览' }}</Button>
                             </template>
                         </Table>
+                    </template>
+                    <template v-if="step === 1 && editType">
+                        <Setting :type="'seat'" :editListName="seatListName" :editList="seatList"></Setting>
                     </template>
                     <template v-if="step === 2">
                         <Table v-if="hasFile || hasClients" ref="table" border stripe :max-height="tableHeight" :width="650" :loading="false" :columns="excelColumns" :data="excelDatas"  @on-selection-change="onSelectClientChange">
@@ -73,7 +76,7 @@
                                 <Input v-else v-model="row.des" />
                             </template>
                             <template slot-scope="{ row, index }" slot="action">
-                                <Button type="primary" size="small" @click="changePeoples(row, index)">{{ row.edit ? '保存' : '编辑' }}</Button>
+                                <Button v-if="!seeType" type="primary" size="small" @click="changePeoples(row, index)">{{ row.edit ? '保存' : '编辑' }}</Button>
                             </template>
                         </Table>
                     </template>
@@ -86,51 +89,51 @@
                                 <div class="info-item">
                                     <p>会场名</p>
                                     <div>
-                                        <Input v-model="names" placeholder="输入会场名" />
+                                        <Input :disabled="seeType" v-model="names" placeholder="输入会场名" />
                                     </div>
                                 </div>
                                 <div class="info-item">
                                     <p>会场详情</p>
                                     <div>
-                                        <Input v-model="details" placeholder="输入会场详情" />
+                                        <Input :disabled="seeType" v-model="details" placeholder="输入会场详情" />
                                     </div>
                                 </div>
                                 <div class="info-item flex">
                                     <div class="item-flex">
                                         <p>会场人数</p>
                                         <div>
-                                            <Input v-model="numbers" type="number" placeholder="输入参与会场人数" />
+                                            <Input :disabled="seeType" v-model="numbers" type="number" placeholder="输入参与会场人数" />
                                         </div>
                                     </div>
                                     <div class="item-flex">
                                         <p>主办人</p>
                                         <div>
-                                            <Input v-model="holders" placeholder="输入主办人名" />
+                                            <Input :disabled="seeType" v-model="holders" placeholder="输入主办人名" />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="info-item">
                                     <p>举办时间</p>
                                     <div>
-                                        <DatePicker type="datetime" v-model="times.start" format="yyyy-MM-dd HH:mm:ss" placeholder="输入开始时间"></DatePicker>
+                                        <DatePicker :disabled="seeType" type="datetime" v-model="times.start" format="yyyy-MM-dd HH:mm:ss" placeholder="输入开始时间"></DatePicker>
                                         <span style="margin: 0 10px; font-size: 14px">至</span>
-                                        <DatePicker type="datetime" v-model="times.end" format="yyyy-MM-dd HH:mm:ss" placeholder="输入结束时间"></DatePicker>
+                                        <DatePicker :disabled="seeType" type="datetime" v-model="times.end" format="yyyy-MM-dd HH:mm:ss" placeholder="输入结束时间"></DatePicker>
                                     </div>
                                 </div>
                                 <div class="info-item">
                                     <p>可扫码入场时间</p>
                                     <div style="text-align: left;">
-                                        <DatePicker type="datetime" v-model="times.qrcode" format="yyyy-MM-dd HH:mm:ss" placeholder="输入扫码开始时间"></DatePicker>
+                                        <DatePicker type="datetime" :disabled="seeType" v-model="times.qrcode" format="yyyy-MM-dd HH:mm:ss" placeholder="输入扫码开始时间"></DatePicker>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </template>
-                    <section  class="button-area-item">
+                    <div class="button-area-item">
                         <Button type="primary" v-if="[2,3].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
                         <Button type="primary" v-if="step < 3" @click="changeStep('next')">{{ '下一步' }}</Button>
-                        <Button type="primary" v-if="step === 3">{{ editType ? '完成编辑' : '确认生成' }}</Button>
-                    </section>
+                        <Button type="primary" v-if="step === 3 && !seeType">{{ '确认生成' }}</Button>
+                    </div>
                 </div>
             </div>
             <Modal
@@ -159,6 +162,7 @@
 <script>
 import { confirmModal } from '@/utils/index'
 import Setting from './Setting';
+import { getTemplates, uploadCustomers } from '@/api/seat_api'
 export default {
     name: 'Using',
     components: {Setting},
@@ -387,7 +391,7 @@ export default {
                     { required: true, message: '请输入台号', trigger: ['blur','change'] },
                 ]
             },
-            editType: false,
+            seeType: false,
             holders: '',
             names: '',
             details: '',
@@ -396,7 +400,8 @@ export default {
                 start: '',
                 end:'',
                 qrcode: ''
-            }
+            },
+            editType: false
         }
     },
     props: {
@@ -424,6 +429,7 @@ export default {
             handler:function(v) {
                 console.log(v);
                 if (!v) {
+                    this.seeType = false;
                     this.editType = false;
                     this.selectedModule = [];
                     this.$nextTick(() => {
@@ -433,16 +439,21 @@ export default {
                         });
                     });
                 } else {
-                    this.editType = true;
+                    if (v.opType === 'see') this.seeType = true;
+                    else if (v.opType === 'edit') this.editType = true;
+                    if (this.editType) {
+                        // this.seatListName = v.name;
+                        this.seatList = [[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":1},{"value":3,"No":2},{"value":3,"No":3},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":4},{"value":3,"No":5},{"value":3,"No":6},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":7},{"value":3,"No":8},{"value":3,"No":9},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}]];
+                    }
                     this.$nextTick(() => {
                         //TODO: 编辑
                         this.selectedModule = _.cloneDeep(this.seatDatas[v.id - 1]);
                         this.seatDatas.forEach(item => {
-                            if (item.moduleName !== this.selectedModule.moduleName) {
-                                item.disabled = true;
-                            } else {
+                            item.disabled = true;
+                            if (item.moduleName === this.selectedModule.moduleName) {
+                                // item.disabled = true;
                                 item.chceked = true;
-                            }
+                            } 
                         });
                     });
                 }
@@ -565,7 +576,7 @@ export default {
             if (this.step === 1) {
                 if (!this.showSelected) return this.$Message.warning({content: '请先选择一个模板', closable: true});
             }
-            if (this.step === 2 && type === 'next') {
+            if (this.step === 2 && type === 'next' && !this.seeType) {
                 return confirmModal('confirm', '提示', `<p>是否确认宾客名单无误？</p>`, this.stepfun, type);
             }
             this.stepfun(type);
@@ -610,6 +621,16 @@ export default {
     min-width: 1000px;
     height: 100%;
     display: flex;
+    &.edit-style {
+        width: 100%;
+        & .show-area {
+            & .template-box {
+                width: 100% !important;
+                height: 100%;
+            }
+        }
+
+    }
     & .right-side {
         flex: 1;
         padding: 10px;
@@ -675,6 +696,9 @@ export default {
             overflow-x: auto;
             overflow-y: auto;
             // padding: 10px;
+            & .template-box {
+                width: fit-content;
+            }
             & .button-area-item {
                 padding: 10px 0;
                 text-align: right;
