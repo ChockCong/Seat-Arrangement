@@ -88,13 +88,26 @@ export function level(level, isGod = false) {
 export function dataURLtoFile(dataURI, type) {
     let binary = atob(dataURI.split(',')[1]);
     let array = [];
-    for(let i = 0; i < binary.length; i++) {
+    for (let i = 0; i < binary.length; i++) {
         array.push(binary.charCodeAt(i));
     }
     let BlobObj = new Blob([new Uint8Array(array)], { type: type });
     let time = new Date();
     let str = String(time.getFullYear()) + String(time.getMonth() + 1) + String(time.getDate()) + String(time.getHours()) + String(time.getMinutes()) + String(time.getSeconds());
     return new File([BlobObj], `seat${str}.jpg`); // 重命名了
+}
+
+export function downloadFile(data, fileName) {
+    if (!data) {
+        return
+    }
+    let url = window.URL.createObjectURL(new Blob([data]));
+    let link = document.createElement('a');
+    link.style.display = 'none';
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
 }
 
 

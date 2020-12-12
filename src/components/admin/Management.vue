@@ -129,10 +129,11 @@
             <!-- 页面主体 -->
             <div class="main-content" :class="fullScreen ? 'full' : ''">
                 <div class="view-c">
-                    <keep-alive :include="keepAliveData">
+                    <!-- <keep-alive :include="keepAliveData"> -->
                         <!-- 子页面 -->
-                        <router-view />
-                    </keep-alive>
+                        <!-- <router-view /> -->
+                    <!-- </keep-alive> -->
+                    <router-view />
                     <div class="loading-c" v-show="showLoading">
                         <Spin size="large"></Spin>
                     </div>

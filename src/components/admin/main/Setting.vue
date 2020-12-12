@@ -1,9 +1,9 @@
 <template>
 <div style="height: 100%" :style="type === 'seats' ? 'border-bottom: 2px solid #e8eaec;' : ''">
     <div v-if="editList.length && type === 'template'" class="index-vue-settingedit-title">
-        <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场模板</Button>
+        <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back', reflash) }">返回会场模板</Button>
         <span style="margin-left: 10px">当前会场模板：</span>
-        <Tag style="margin-top: -2px;" size="large" color="success">{{ editListName }}</Tag>
+        <Tag style="margin-top: -2px;" size="large" color="success">{{ editObj.moduleName }}</Tag>
     </div>
     <div class="index-vue-seatsetting">
         <div class="transition-area" style="position: relative;">
@@ -19,6 +19,25 @@
                             <section class="item">
                                 <label>列数: </label>
                                 <Input type="number" :disabled="!editTag" style="width: 70%" v-model="colNum" size="large" placeholder="输入数字" />
+                            </section>
+                            <section class="item">
+                                <label>模板名字: </label>
+                                <Input style="width: 70%" v-model="totalOthers.totalName" size="large" placeholder="输入名字"  />
+                            </section>
+                            <section class="item">
+                                <label>模板类型: </label>
+                                <Select v-model="totalOthers.totalType" style="width: 70%; margin-left: 10px;text-align: left" size="large" placeholder="输入选项">
+                                    <Option :value="'宴会型'">{{ '宴会型' }}</Option>
+                                    <Option :value="'会议型'">{{ '会议型' }}</Option>
+                                </Select>
+                            </section>
+                            <section class="item">
+                                <label>容纳人数: </label>
+                                <Input type="number" style="width: 70%" v-model="totalOthers.totalNumber" size="large" placeholder="输入数字"  />
+                            </section>
+                            <section class="item">
+                                <label>备注: </label>
+                                <Input type="textarea" style="width: 70%" v-model="totalOthers.totalContent" size="large" :autosize="{ minRows: 4, maxRows: 8 }" placeholder="输入备注"  />
                             </section>
                         </div>
                         <div class="input-area-button">
@@ -162,6 +181,7 @@
 import Loading from '@/components/common/loading.vue';
 import { dataURLtoFile } from '@/utils/index'
 import { client } from '@/utils/oss'
+import { cTemplate, uTemplate } from '@/api/seat_api'
 // import { setInterval, setTimeout, clearInterval } from 'timers';
 export default {
     name: 'Setting',
@@ -174,7 +194,7 @@ export default {
                 return [];
             }
         },
-        editListName: String
+        editObj: Object
     },
     data() {
         return {
@@ -213,7 +233,14 @@ export default {
             originPosMutipliSelect: [],
             loading: false,
             oss_url: '',
-            saveLoading: false
+            saveLoading: false,
+            totalOthers: {
+                totalName: '',
+                totalType: '',
+                totalNumber: '',
+                totalContent: ''
+            },
+            reflash: false
         }
     },
     computed: {
@@ -247,6 +274,19 @@ export default {
             // }, 3000);
             // clearTimeout(timeout);
         },
+        editObj: {
+            immediate: true,
+            deep: true,
+            handler: function (value) {
+                if (!value || _.isEmpty(value)) return;
+                this.totalOthers = {
+                    totalName: value.ct_name,
+                    totalType: value.ct_type,
+                    totalNumber: value.ct_number,
+                    totalContent: ''
+                }
+            }
+        },
         editList: {
             immediate: true,
             deep: true,
@@ -266,7 +306,7 @@ export default {
         }
     },
     activated() {
-        console.log(222);
+        // console.log(222);
     },
     methods: {
         showStart(type = null) {
@@ -316,6 +356,10 @@ export default {
             if (Number(this.rowNum) <= 0 || Number(this.colNum) <= 0) {
                 return this.$Message.warning({content: '请输入数字大于0', closable: true});
             }
+            let empty = Object.keys(this.totalOthers).some(key => { return key !== 'totalContent' && !String(this.totalOthers[key]); });
+            if (empty) {
+                return this.$Message.warning({content: '请输入所有内容，备注可选', closable: true});
+            }
             this.seatList = [];
             for(let i = 0; i < Number(this.rowNum) + 2; i++) {
                 this.seatList[i] = [];
@@ -345,6 +389,13 @@ export default {
             this.copySeatList = [];
             this.editTag = true;
             this.previewTag = false;
+            this.oss_url = '';
+            this.totalOthers = {
+                totalName: '',
+                totalType: '',
+                totalNumber: '',
+                totalContent: ''
+            }
             this.showStart(true);
         },
         nextStep() {
@@ -748,18 +799,56 @@ export default {
             if (this.oss_url) return this.modal = false;
             this.saveLoading = true;
             let file = dataURLtoFile(this.imgUrl,'image/jpeg');
-            console.log(file);
             const res = await client().put(this.renameFile(), file);
             this.saveLoading = false;
             console.log(res);
             if (res.res.status === 200) {
                 this.oss_url = res.url;
-                this.$Message.success('保存会场成功');
-                this.modal = false;
-                this.clearSeat();
+                const sres = await this.finalSave();
+                if (sres) {
+                    this.$Message.success('保存会场成功');
+                    this.reflash = true;
+                    this.modal = false;
+                    this.clearSeat();
+                }
             } else {
-                this.$Message.success('保存会场失败，请重试');
+                this.$Message.error('保存会场失败，请取消后重试或刷新');
             }
+        },
+        async finalSave() {
+            let tableContent = '';
+            let tableNumber = '';
+            this.seatList.forEach((items, i) => {
+                items.forEach((item, j) => {
+                    tableContent += item.value;
+                    tableNumber += item.No;
+                    if (j !== items.length - 1) {
+                        tableContent += ',';
+                        tableNumber += ',';
+                    }
+                })
+                if (i !== this.seatList.length - 1) {
+                    tableContent += ',';
+                    tableNumber += ',';
+                }
+            });
+            let params = {
+                ctName: this.totalOthers.totalName + '@@@@@' + this.oss_url,
+                ctRow: Number(this.rowNum),
+                ctCol: Number(this.rowNum),
+                ctContent: tableContent,
+                ctTableNumber: tableNumber,
+                ctType: this.totalOthers.totalType,
+                ctNumber: Number(this.totalOthers.totalNumber)
+            };
+            if (this.type === 'template') {
+                //编辑模板
+                params.ct_id = this.editObj.ct_id;
+                const res = await uTemplate(params);
+                return res;
+            }
+            const res = await cTemplate(params);
+            return res;
         }
     },
     mounted() {
@@ -810,7 +899,7 @@ export default {
                 & .item {
                     display: flex;
                     align-items: center;
-                    justify-content: center;
+                    justify-content: space-between;
                     margin-bottom: 10px;
                     &:first-child {
                         margin-top: 10px;

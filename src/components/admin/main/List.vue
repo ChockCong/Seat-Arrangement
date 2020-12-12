@@ -395,7 +395,7 @@ export default {
                         // ctOwnerId: item.ctOwnerId
                     }
                 })
-                this.seatDatas.concat(datas);
+                this.seatDatas = this.seatDatas.concat(datas);
             }
         }
     },

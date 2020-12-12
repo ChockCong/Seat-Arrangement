@@ -37,7 +37,7 @@ export const reqJsonData = async ({
 }) => {
 	if (process.env.NODE_ENV === 'production') {
 		switch (types) {
-			case 'seat' : axios.defaults.baseURL = seat_base_url; break;
+			case 'seat': axios.defaults.baseURL = seat_base_url; break;
 			default: axios.defaults.baseURL = base_url;
 		}
 		url = !types ? url.split('/api')[1] : url.split('/seat')[1];
@@ -82,7 +82,7 @@ export const reqJsonData = async ({
 			}
 		}
 	}
-    return new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		try {
 			const Axios = !isformData ? axios(config) : axios.post(config.url, transformRequest, config);
 			Axios

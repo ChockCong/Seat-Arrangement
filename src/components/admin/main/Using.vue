@@ -1,6 +1,6 @@
 <template>
     <div class="index-vue-seatusing" :class="editType ? 'edit-style' : ''">
-        <Setting v-if="showEditModel" style="width: 100%;" :type="'template'" :editListName="seatListName" :editList="seatList" @back="() => { this.showEditModel = false; }"></Setting>
+        <Setting v-if="showEditModel" style="width: 100%;" :type="'template'" :editObj="seatListObj" :editList="seatList" @back="backUsing"></Setting>
         <div v-else class="right-side">
             <div class="edit-area" v-if="seeType || editType">
                 <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场记录</Button>
@@ -21,7 +21,7 @@
                 <template v-if="step === 1 && !editType">
                     <div class="button-area">
                         <Button v-if="!seeType" type="primary" icon="md-add" @click="addNew">新增模板</Button>
-                        <Button v-if="!seeType" type="primary" icon="md-trash" @click="deleteNew">删除模板</Button>
+                        <!-- <Button v-if="!seeType" type="primary" icon="md-trash" @click="deleteNew">删除模板</Button> -->
                         <Select style="width: 100px;" v-model="searchSelect">
                             <Option value="seatName" label="会场模板名"></Option>
                         </Select>
@@ -36,6 +36,7 @@
                 <template v-if="step === 2">
                     <div class="button-area clear-flex">
                         <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
+                        <Button v-if="!seeType" type="primary" icon="ios-cloud-download-outline" @click="download">下载模板</Button>
                         <Button v-if="!seeType" icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
                         <Button v-if="!seeType" type="primary" icon="md-add" @click="mModel = true">新增宾客</Button>
                         <Button v-if="!seeType" type="primary" icon="md-trash" @click="deletes">删除宾客</Button>
@@ -48,18 +49,19 @@
                 </template>
                 <div class="template-box">
                     <template v-if="step === 1 && !editType">
-                        <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="false" :columns="seatColumns" :data="seatDatas"  @on-selection-change="onSelectChange">
+                        <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="tableLoading" :columns="seatColumns" :data="seatDatas"  @on-selection-change="onSelectChange">
                             <template slot-scope="{ row }" slot="select">
                                 <Checkbox :disabled="row.disabled" v-model="row.chceked" @on-change="onSelectChange(row)"></Checkbox>
                             </template>
                             <template slot-scope="{ row }" slot="action">
                                 <Button v-if="!seeType" type="primary" size="small" @click="editModel(row)">{{ '编辑' }}</Button>
+                                <Button v-if="!seeType" style="margin-left: 10px" type="primary" size="small" @click="deleteNew(row)">{{ '删除' }}</Button>
                                 <Button style="margin-left: 10px" type="primary" size="small" @click="preViewImage(row)">{{ '预览' }}</Button>
                             </template>
                         </Table>
                     </template>
                     <template v-if="step === 1 && editType">
-                        <Setting :type="'seat'" :editListName="seatListName" :editList="seatList"></Setting>
+                        <Setting :type="'seat'" :editObj="seatListObj" :editList="seatList"></Setting>
                     </template>
                     <template v-if="step === 2">
                         <Table v-if="hasFile || hasClients" ref="table" border stripe :max-height="tableHeight" :width="650" :loading="false" :columns="excelColumns" :data="excelDatas"  @on-selection-change="onSelectClientChange">
@@ -160,9 +162,9 @@
     </div>
 </template>
 <script>
-import { confirmModal } from '@/utils/index'
+import { confirmModal, downloadFile } from '@/utils/index'
 import Setting from './Setting';
-import { getTemplates, uploadCustomers } from '@/api/seat_api'
+import { getTemplates, dTemplate, uploadCustomers, exportCustomers } from '@/api/seat_api'
 export default {
     name: 'Using',
     components: {Setting},
@@ -177,7 +179,7 @@ export default {
             nModel: false,
             tableHeight: 0,
             showEditModel: false,
-            seatListName: '',
+            seatListObj: {},
             seatList: [],
             seatColumns: [
                 {
@@ -190,7 +192,7 @@ export default {
                 {
                     title: '会场模板名',
                     key: 'moduleName',
-                    width: 200
+                    width: 150
                 },
                 {
                     title: '详情',
@@ -200,7 +202,7 @@ export default {
                 {
                     title: '类型',
                     key: 'category',
-                    width: 200
+                    width: 100
                 },
                 {
                     title: '容纳人数',
@@ -208,100 +210,24 @@ export default {
                     width: 100
                 },
                 {
+                    title: '创建人',
+                    key: 'creater',
+                    width: 100
+                },
+                {
+                    title: '创建时间',
+                    key: 'created',
+                    width: 180
+                },
+                {
                     title: '操作',
                     key: 'action',
                     slot: 'action',
                     align: 'center',
-                    width: 200
+                    width: 180
                 }
             ],
-            seatDatas: [
-                {
-                    moduleName: 'xx婚宴',
-                    keyName: 'xxxx婚宴专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx会议',
-                    keyName: '会堂会议专用.......',
-                    category: '会议型',
-                    number: 200,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席1',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席2',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席3',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席4',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席5',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席6',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席7',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席8',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席9',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                },{
-                    moduleName: 'xx酒席10',
-                    keyName: 'xxxx酒席专用.....',
-                    category: '婚宴型',
-                    number: 100,
-                    chceked: false,
-                    disabled: false
-                }
-            ],
+            seatDatas: [],
             file: null,
             excelColumns: [
                 {
@@ -401,7 +327,8 @@ export default {
                 end:'',
                 qrcode: ''
             },
-            editType: false
+            editType: false,
+            tableLoading: false
         }
     },
     props: {
@@ -461,6 +388,15 @@ export default {
         }
     },
     methods: {
+        async backUsing(reflash) {
+            this.type = '';
+            this.seatList = [];
+            this.seatListObj = {};
+            this.showEditModel = false;
+            if (reflash) {
+                await this.getList();
+            }
+        },
         changePeoples(row, index) {
           if (!row.edit) return this.excelDatas[index].edit = !row.edit;
           let { client_name, seat_no, des } = row;
@@ -472,18 +408,44 @@ export default {
         addNew() {
             this.$router.push('seat-setting');
         },
-        deleteNew() {
-            if (_.isEmpty(this.selectedModule)) return this.$Message.warning({content: '请先选择模板', closable: true});
+        deleteNew(row) {
+            // if (_.isEmpty(this.selectedModule)) return this.$Message.warning({content: '请先选择模板', closable: true});
             // let str = '';
             // this.selectedModule.forEach(val => {
             //     str += `<p>${val.moduleName}</p>`;
             // })
-            confirmModal('confirm', '提示', `<p>是否确认删除这些模板？</p><br />${this.selectedModule.moduleName}`);
+            confirmModal('confirm', '提示', `<p>是否确认删除这些模板？</p><br />${row.moduleName}`, this.deleteModule, { id: row.ct_id });
+        },
+        async deleteModule(obj = {id: 0}) {
+            if (!obj.id) return this.$Message.error('删除失败请重试');
+            const res = await dTemplate({ ct_id: obj.id });
+            if (res) {
+                this.$Message.error('删除成功');
+                let copyDatas = _.cloneDeep(this.copyDatas);
+                copyDatas.forEach(item => {
+                    if (obj.id === item.ct_id) {
+                        this.copyDatas.splice(this.copyDatas.findIndex(v => { return obj.id === v.ct_id; }), 1);
+                    }
+                });
+                this.debounceSearch();
+            }
+        },
+        async download() {
+            const res = await exportCustomers();
+            // let dFile = new File(res, '1.xlsx');
+            downloadFile(res, '宾客名单模板.xlsx');
         },
         async upload(e) {
             const file = e.target.files;
             this.file = file[0];
             console.log(this.file);
+            const res = await uploadCustomers({ ctId: this.editData.id, file: this.file });
+            if (res) {
+                this.$Message.success('上传成功')
+                this.file = null;
+                this.$refs.fileInput.value = null;
+                this.excelDatas = res.data;
+            }
             this.$refs.fileInput.value = null;
         },
         clickFile() {
@@ -550,12 +512,12 @@ export default {
             }
         },
         onSelectChange(selection) {
-            let bol = selection.moduleName === this.selectedModule.moduleName;
+            let bol = selection.ct_id === this.selectedModule.ct_id;
             this.selectedModule = !bol ? _.cloneDeep(selection) : {};
             // console.log(this.selectedModule);
             if (!_.isEmpty(this.selectedModule)) {
                 this.seatDatas.forEach(item => {
-                    if (item.moduleName !== this.selectedModule.moduleName) {
+                    if (item.ct_id !== this.selectedModule.ct_id) {
                         item.disabled = true;
                     } else {
                         item.chceked = true;
@@ -588,9 +550,52 @@ export default {
             this.nModel = true;
         },
         editModel(row) {
-            this.seatListName = row.moduleName;
-            this.seatList = [[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":1},{"value":3,"No":2},{"value":3,"No":3},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":4},{"value":3,"No":5},{"value":3,"No":6},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":7},{"value":3,"No":8},{"value":3,"No":9},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}]];
+            this.seatListObj = row;
+            let values = row.ct_content.split(',');
+            let nos = row.ct_table_number.split(',');
+            if (values.length !== nos.length) this.$Message.warning('该模板数据错误不可修复，请联系管理员');
+            let firstArr = values.map((value, index) => {
+                return {
+                    value: Number(value),
+                    No: Number(nos[index])
+                }
+            })
+            let secondArr = [];
+            let sIndex = 0;
+            for(let i = 0; i < row.ct_row + 2; i++) {
+                secondArr[i] = [];
+                for (let j = 0; j < row.ct_col + 2; j++) {
+                    secondArr[i].push(firstArr[sIndex]);
+                    sIndex++;
+                }
+            }
+            this.seatList = _.cloneDeep(secondArr);
+            secondArr = [];
+            console.log(secondArr,this.seatList)
+            // this.seatList = [[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":1},{"value":3,"No":2},{"value":3,"No":3},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":4},{"value":3,"No":5},{"value":3,"No":6},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":7},{"value":3,"No":8},{"value":3,"No":9},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}]];
             this.showEditModel = true;
+        },
+        async getList() {
+            this.tableLoading = true;
+            const res = await getTemplates({ pageSize: '100', offset: 2 });
+            this.tableLoading = false;
+            if (res && res.data && res.data.content) {
+                let datas = res.data.content.map(item => {
+                    let name = item.ct_name.split('@@@@@');
+                    item.ct_name = name[0];
+                    item.moduleName = item.ct_name;
+                    item.keyName = '';
+                    item.category = item.ct_type;
+                    item.img = name[1];
+                    item.number = item.ct_number;
+                    item.creater = item.ct_creator_name;
+                    item.created = item.ct_create_time;
+                    item.chceked = false;
+                    item.disabled = false;
+                    return item;
+                })
+                this.seatDatas = _.cloneDeep(datas);
+            }
         }
     },
     created() {
@@ -600,7 +605,7 @@ export default {
     mounted() {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 80;
     },
-    beforeMount() {
+    async beforeMount() {
         // for(let i = 0; i < 200; i++) {
         //     this.seatDatas.push({
         //             moduleName: 'xx婚宴',
@@ -611,6 +616,7 @@ export default {
         //             disabled: false
         //         })
         // }
+        await this.getList();
         this.copyDatas = _.cloneDeep(this.seatDatas);
         this.copyExcelDatas = _.cloneDeep(this.excelDatas);
     }
