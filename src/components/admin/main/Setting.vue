@@ -1,7 +1,7 @@
 <template>
 <div style="height: 100%" :style="type === 'seats' ? 'border-bottom: 2px solid #e8eaec;' : ''">
     <div v-if="editList.length && type === 'template'" class="index-vue-settingedit-title">
-        <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back', reflash) }">返回会场模板</Button>
+        <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back', this.reflash) }">返回会场模板</Button>
         <span style="margin-left: 10px">当前会场模板：</span>
         <Tag style="margin-top: -2px;" size="large" color="success">{{ editObj.moduleName }}</Tag>
     </div>
@@ -299,6 +299,7 @@ export default {
                     this.colNum = this.seatList[0].length - 2;
                     this.editTag = false;
                     this.startModal = false;
+                    this.mutipliTag = false;
                 } else {
                     this.editType = false
                 }
@@ -810,6 +811,7 @@ export default {
                     this.reflash = true;
                     this.modal = false;
                     this.clearSeat();
+                    this.$emit('back', this.reflash);
                 }
             } else {
                 this.$Message.error('保存会场失败，请取消后重试或刷新');
@@ -843,7 +845,7 @@ export default {
             };
             if (this.type === 'template') {
                 //编辑模板
-                params.ct_id = this.editObj.ct_id;
+                params.ctId = this.editObj.ct_id;
                 const res = await uTemplate(params);
                 return res;
             }

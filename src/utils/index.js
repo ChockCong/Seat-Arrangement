@@ -85,6 +85,22 @@ export function level(level, isGod = false) {
     return role;
 }
 
+export function formatDateTime(dates) {
+    let date = new Date(dates);
+    let y = date.getFullYear();
+    let m = date.getMonth() + 1;
+    m = m < 10 ? ('0' + m) : m;
+    let d = date.getDate();
+    d = d < 10 ? ('0' + d) : d;
+    let h = date.getHours();
+    h = h < 10 ? ('0' + h) : h;
+    let i = date.getMinutes();
+    i = i < 10 ? ('0' + i) : i;
+    let s = date.getSeconds();
+    s = s < 10 ? ('0' + s) : s;
+    return `${y}-${m}-${d} ${h}:${i}:${s}`;
+}
+
 export function dataURLtoFile(dataURI, type) {
     let binary = atob(dataURI.split(',')[1]);
     let array = [];

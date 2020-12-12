@@ -32,6 +32,7 @@ export const reqJsonData = async ({
 	url,
 	params = {},
 	method = 'post',
+	isJson = true,
 	isformData = false,
 	types = ''
 }) => {
@@ -46,7 +47,7 @@ export const reqJsonData = async ({
 		method,
 		url,
 		headers: {
-			'Content-Type': !isformData ? 'application/json' : 'multipart/form-data', // 带有表单数据时的Content-Type
+			'Content-Type': isJson ? !isformData ? 'application/json' : 'multipart/form-data' : 'application/x-www-form-urlencoded', // 带有表单数据时的Content-Type
 			'If-Modified-Since': '0' // 防止ie浏览器对ie的axios的缓存
 		}
 	};

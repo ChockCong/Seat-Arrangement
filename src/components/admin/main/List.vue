@@ -28,10 +28,10 @@
                 :footer-hide="true">
                 <div class="file-modal">
                     <div class="button-area clear-flex">
+                        <Button type="primary" icon="ios-cloud-download-outline" @click="download">下载模板</Button>
                         <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
                         <Button icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
                         <Button type="primary" icon="md-add" @click="adds">新增宾客</Button>
-                        <Button type="primary" icon="md-trash" @click="deletes">删除宾客</Button>
                         <Select style="width: 100px;" v-model="searchClientSelect">
                             <Option value="clientName" label="宾客名"></Option>
                             <Option value="seatNo" label="座位号"></Option>
@@ -56,6 +56,7 @@
                         </template>
                     </Table>
                     <div class="button-area bottom">
+                        <Button type="error" icon="md-trash" @click="deletes">删除宾客</Button>
                         <Button type="primary" :loading="fileLoading" @click="sureCilents">{{ '确认上传' }}</Button>
                     </div>
                 </div>
@@ -65,9 +66,9 @@
     </div>
 </template>
 <script>
-import { confirmModal } from '@/utils/index'
+import { confirmModal, downloadFile } from '@/utils/index'
 import Using from './Using';
-import { getSeats, uploadCustomers } from '@/api/seat_api';
+import { getSeats, uploadCustomers, exportCustomers } from '@/api/seat_api';
 export default {
     name: 'List',
     data() {
@@ -119,7 +120,7 @@ export default {
             ],
             seatDatas: [
                 {
-                    id: 1,
+                    id: 1337604479561810000,
                     name: 'xx联姻',
                     detail: '于xxxx大酒店3楼宴会厅举办婚礼',
                     people: '欧阳查理',
@@ -128,7 +129,7 @@ export default {
                     end: 'xxxx-xx-xx 00:00:00',
                 },
                 {
-                    id: 2,
+                    id: 1337604479561810000,
                     name: 'xx宣讲会',
                     detail: '于xx集团行政楼会议厅举办会议',
                     people: '阿里嘎吧',
@@ -236,6 +237,11 @@ export default {
         }
     },
     methods: {
+        async download() {
+            const res = await exportCustomers();
+            // let dFile = new File(res, '1.xlsx');
+            downloadFile(res, '宾客名单模板.xlsx');
+        },
         debounceSearch() {
             if (this.searchInput) {
                 // let reg = new RegExp(this.searchInput, "i");
@@ -377,23 +383,16 @@ export default {
         },
         async getList() {
             const res = await getSeats();
-            if (res && res.data) {
-                let datas = res.data.map(item => {
-                    return {
-                        id: item.ctId,
-                        name: item.ctName,
-                        detail: item.ctContent,
-                        people: item.ctCreatorName,
-                        number: item.ctNumber,
-                        start: item.ctBeginTime,
-                        end: item.ctEndTime,
-                        // ctQRCodeTime: item.ctQRCodeTime,
-                        // ctTableNumber: item.ctTableNumber,
-                        // ctStatus: item.ctStatus,
-                        // ctCreatorId: item.ctCreatorId,
-                        // ctCreateTime: item.ctCreateTime,
-                        // ctOwnerId: item.ctOwnerId
-                    }
+            if (res && res.data && res.data.content) {
+                let datas = res.data.content.map(item => {
+                    item.id = item.ctId;
+                    item.name = item.ctName;
+                    item.detail = item.ctContent;
+                    item.people = item.ctCreatorName;
+                    item.number = item.ctNumber;
+                    item.start = item.ctBeginTime;
+                    item.end = item.ctEndTime;
+                    return item;
                 })
                 this.seatDatas = this.seatDatas.concat(datas);
             }
@@ -496,7 +495,7 @@ export default {
             & .ivu-btn { margin-right: 10px; }
             &.bottom {
                 padding: 10px 0;
-                justify-content: flex-end;
+                justify-content: space-between;
                 & .ivu-btn { margin-right: 0; }
             }
         }
