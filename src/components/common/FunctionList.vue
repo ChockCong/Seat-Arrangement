@@ -126,7 +126,7 @@ export default {
         },
         async changeEffective(row, index) {
             const res = await changeSubAuth({
-                ctId: 1318818705353769000,
+                ctId: String(row.ctId),
                 ctOrgId: this.user.id,
                 ctIsEffective: !this.copyFunctionList[index].isOpen
             })

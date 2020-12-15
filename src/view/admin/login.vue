@@ -16,7 +16,7 @@
                 <transition name="login">
                     <div v-if="tab" class="flex-container">
                         <!-- <p class="title">CodeThunder</p> -->
-                        <Form ref="loginF" :model="loginForm" :rules="loginRuleValidate" class="loginForm">
+                        <Form ref="loginF" :model="loginForm" :rules="loginRuleValidate" class="loginForm"  @keyup.enter.native="login">
                             <FormItem label="用户名" prop="account">
                                 <Input size="large" type="text" prefix="ios-contact" v-model.trim="loginForm.account" :placeholder="'用户名'" clearable/>
                             </FormItem>
@@ -41,7 +41,7 @@
                 <transition name="regist">
                     <div v-if="!tab"  class="flex-container">
                         <!-- <p class="title regist">注册账号</p> -->
-                        <Form ref="registF" :model="registForm" :rules="registRuleValidate" class="registForm">
+                        <Form ref="registF" :model="registForm" :rules="registRuleValidate" class="registForm"  @keyup.enter.native="register">
                             <Row class="row">
                                 <ICol span="24">
                                     <FormItem label="登录名" prop="stLoginName">
@@ -144,14 +144,14 @@ export default {
         const validateName = async (rule, value, callback) => {
             if (value === '') {
                return callback(new Error('请输入登录名和用户名'));
-            } else if (this.registForm.stName && this.registForm.stLoginName) {
+            } 
+            // else if (this.registForm.stName && this.registForm.stLoginName) {
                 //TODO: 这里检查用户名唯一性，接口待联调
-                this.$Message.info('提醒：不要使用已有的用户名')
-                const res = true;
-                // const res = await this.checkNameFun();
-                // console.log(res);
-                return res ? callback() : callback(new Error('用户名已存在'));
-            } else {
+                // this.$Message.info('提醒：不要使用已有的用户名')
+                // const res = true;
+                // return res.data && res.data.validate ? callback() : callback(new Error('用户名已存在'));
+            // }
+            else {
                return callback();
             }
         };
@@ -209,12 +209,12 @@ export default {
             }
         }
     },
-    created() {
+    async created() {
         // this.bg.backgroundImage = 'url(' + require('../assets/imgs/bg0' + new Date().getDay() + '.jpg') + ')'
         // this.bg.backgroundImage = `url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1591357660532&di=28d8e7bd58201a4e00260116a0f098bc&imgtype=0&src=http%3A%2F%2Fattachments.gfan.net.cn%2Fforum%2F201504%2F14%2F075409wgwijxiax3i4wihw.jpg)`
         this.bg['backgroundImage'] = `url(${require('../../assets/bg01.jpg')})`;
         this.bg['background-position'] = 'center';
-        this.checkNameFun = _.debounce(this.debounceCheckName, 500);
+        // this.checkNameFun = await _.debounce(this.nameExist, 500);
     },
     watch: {
         $route: {
@@ -247,17 +247,17 @@ export default {
         //         this.pwdError = ''
         //     }
         // },
-        async debounceCheckName() {
+        async nameExist() {
             if (!this.registForm.stName || !this.registForm.stLoginName) return true;
             let params = {
-                ctId: this.registForm.stName,
+                ctId: String(this.registForm.stName),
                 ctLoginName: this.registForm.stLoginName
             }
             this.hasNameTag = true;
             const res = await validateLoginName(params);
             this.hasNameTag = false;
             console.log(!!(res && res.data));
-            return !!(res && res.data);
+            return res && res.data && !res.data.validate;
         },
         forgetPwd() {
             this.$router.push('/unlogin')
@@ -319,7 +319,9 @@ export default {
                         ctLoginName: this.registForm.stLoginName,
                         ctPassword: this.registForm.stPassword
                     };
+                    this.isShowLoading = true;
                     const res = await adminRegister(params);
+                    this.isShowLoading = false;
                     if (res && !_.isEmpty(res) && res.data) {
                         setTimeout(() => {
                             this.afterLogin(res)
@@ -334,11 +336,17 @@ export default {
                     this.$Message.error('请输入正确注册信息');
                 }
             }
-            this.$refs.registF.validate((valid) => {
+            this.$refs.registF.validate(async (valid) => {
                 console.log(valid)
                 if (valid) {
-                    tag = true;
-                    gotoSuccess(tag);
+                    const res = await this.nameExist();
+                    console.log(res);
+                    if (res) {
+                        return this.$Message.warning('登录名或用户名已存在，请修改')
+                    } else {
+                        tag = true;
+                        gotoSuccess(tag);
+                    }
                 } else {
                     this.$Message.error('请输入正确注册信息');
                 }
