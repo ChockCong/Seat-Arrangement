@@ -348,7 +348,7 @@ export default {
             const file = e.target.files;
             this.file = file[0];
             console.log(this.file);
-            const res = await uploadCustomers({ ctId: this.editData.id, file: this.file });
+            const res = await uploadCustomers({ ctId: String(this.editData.id), file: this.file });
             if (res) {
                 this.$Message.success('上传成功')
                 this.file = null;

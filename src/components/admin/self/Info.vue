@@ -146,16 +146,16 @@ export default {
         async allRequest() {
             let reqs = [];
             reqs[0] = await updateUserInfo({
-                ctId: this.adminInfo.ctId,
+                ctId: String(this.adminInfo.ctId),
                 ctName: this.datas[0].content
             });
             reqs[1] = await updatePhone({
-                ctId: this.adminInfo.ctId,
+                ctId: String(this.adminInfo.ctId),
                 tag: true,
                 ctEmail: this.datas[2].content
             });
             reqs[2] = await updateEmail({
-                ctId: this.adminInfo.ctId,
+                ctId: String(this.adminInfo.ctId),
                 tag: true,
                 ctPhone: this.datas[3].content
 

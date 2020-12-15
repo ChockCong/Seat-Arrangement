@@ -297,7 +297,7 @@ export default {
             confirmModal('confirm', '提示', `<p>是否确认删除这些账户？</p><br />${str}`, this.sureDelete);
         },
         async changeEffective(index, row) {
-            let params = { ctId: Number(row.id), ctIsEffective: !row.disabled  };
+            let params = { ctId: String(row.id), ctIsEffective: !row.disabled  };
             let status = !row.disabled;
             console.log(typeof params.ctId)
             const res = await disableChild(params);

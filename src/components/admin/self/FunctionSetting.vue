@@ -316,7 +316,7 @@ export default {
         async edit(index) {
             if (this.datas[index].active) {
                 let params = {
-                    ctId: Number(this.datas[index].id),
+                    ctId: String(this.datas[index].id),
                     ct_name: this.datas[index].name,
                     ctTypeId: 1,
                     ctOrder: this.datas[index].order,
@@ -336,7 +336,7 @@ export default {
         async switchs(index) {
             console.log(this.datas[index]);
             const res = await disableFunction({
-                ctId: this.datas[index].id,
+                ctId: String(this.datas[index].id),
                 ctIsEffective: this.datas[index].disabled
             });
             console.log(res);

@@ -451,7 +451,7 @@ export default {
         },
         async deleteModule(obj = {id: 0}) {
             if (!obj.id) return this.$Message.error('删除失败请重试');
-            const res = await dTemplate({ ctId: obj.id });
+            const res = await dTemplate({ ctId: String(obj.id) });
             if (res) {
                 this.$Message.error('删除成功');
                 let copyDatas = _.cloneDeep(this.copyDatas);
@@ -472,7 +472,7 @@ export default {
             const file = e.target.files;
             this.file = file[0];
             console.log(this.file);
-            const res = await uploadCustomers({ ctId: this.selectedModule.ct_id, file: this.file });
+            const res = await uploadCustomers({ ctId: String(this.selectedModule.ct_id), file: this.file });
             if (res) {
                 this.$Message.success('上传成功')
                 this.file = null;
