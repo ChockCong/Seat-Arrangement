@@ -156,6 +156,7 @@ export default {
             }
         };
         return {
+            st: null,
             tab: true,
             hasNameTag: false,
             checkNameFun: null,
@@ -317,17 +318,20 @@ export default {
                     let params = {
                         ctName: this.registForm.stName,
                         ctLoginName: this.registForm.stLoginName,
-                        ctPassword: this.registForm.stPassword
+                        ctPassword: this.registForm.stPassword,
+                        ctEmail: this.registForm.stEmail,
+                        ctPhone: this.registForm.stPhoneNum
                     };
                     this.isShowLoading = true;
                     const res = await adminRegister(params);
                     this.isShowLoading = false;
                     if (res && !_.isEmpty(res) && res.data) {
-                        setTimeout(() => {
+                        this.st = setTimeout(() => {
                             this.afterLogin(res)
-                        }, 2000);
+                        }, 2100);
                         this.$Message.loading({
-                            content: '注册成功，即将为您登录'
+                            content: '注册成功，即将为您登录',
+                            duration: 2
                         });
                     } else {
                         this.$Message.success('登录失败，请重试');
@@ -352,6 +356,11 @@ export default {
                 }
             });
         }
+    },
+    beforeDestroy() {
+        console.log(this.st);
+        clearTimeout(this.st)
+        console.log(this.st);
     }
 }
 </script>

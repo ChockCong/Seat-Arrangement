@@ -19,11 +19,11 @@
             </div> -->
             <!-- 用户头像 -->
             <div class="user-img-c">
-                <Icon type="logo-android" />
+                <Icon type="ios-contact" />
                 <!-- <img :src="userImg"> -->
             </div>
             <!-- 下拉菜单 -->
-            <Dropdown trigger="click" @on-click="userOperate" @on-visible-change="showArrow">
+            <Dropdown trigger="click" @on-click="userOperate" @on-visible-change="showArrow" transfer-class-name="drop-class">
                 <div class="pointer">
                     <span>{{adminInfo.ctName}}</span>
                     <Icon v-show="arrowDown" type="md-arrow-dropdown"/>
@@ -128,18 +128,21 @@ export default {
         align-items: center;
     }
     .user-img-c {
-        width: 35px;
-        height: 35px;
-        background: gray;
-        border-radius: 50%;
-        margin: 0 40px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
+        // width: 35px;
+        // height: 35px;
+        // background: gray;
+        // border-radius: 50%;
+        margin: 0 10px 0 30px;
+        // overflow: hidden;
+        // display: flex;
+        // justify-content: center;
+        // align-items: center;
+        // cursor: pointer;
         & i {
-            color: #6af64a
+            border-radius: 50%;
+            color: #409eff;
+            // background:#97a8be;
+            font-size: 40px;
         }
     }
 }

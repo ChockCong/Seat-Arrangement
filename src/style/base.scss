@@ -21,3 +21,15 @@
   -webkit-box-shadow: inset 0 0 6px rgba(lightgray,.5); 
   background-color: rgba(lightgray, 0.9);
 } 
+
+.drop-class {
+  background: #20222A;
+  & .ivu-dropdown-menu {
+    & .ivu-dropdown-item{
+      color: #ffffff;
+      &:hover {
+        background: #2d8cf0
+      }
+    }
+  }
+}

@@ -13,26 +13,37 @@
             <Table stripe v-if="!edit" width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
                 <template slot-scope="{ row, index }" slot="content">
                     <div class="content-box">
-                        <Tag :color="index === 1 ? 'red' : 'blue'">{{index === 1 ? level(row.content) : row.content}}</Tag>
+                        <Tag v-if="[0,1].includes(index)" :color="index === 1 ? 'orange' : 'blue'">{{index === 1 ? level(row.content) : row.content}}</Tag>
+                        <b v-else>隐藏信息</b>
                     </div>
                 </template>
             </Table>
             <Table :key="'tableEdit'" v-else  width="502" :show-header="false" :disabled-hover="true" :columns="columns" :data="datas">
                 <template slot-scope="{ row, index }" slot="content">
                     <div class="content-box">
-                        <Tag v-if="index === 1" color="red">{{level(row.content)}}</Tag>
-                        <Button v-if="index === 1" type="primary" size="small" @click="changeRule">修改</Button>
-                        <Input v-if="index !== 1" type="text" v-model="row.content" @on-change="datasChange(row.content, row.title)" />
+                        <Tag v-if="index === 1" color="orange" size="large">{{level(row.content)}}</Tag>
+                        <Button v-if="index === 1" type="primary" @click="changeRule">修改</Button>
+                        <Input v-if="index === 0" type="text" v-model="row.content" :placeholder="'输入用户名'" />
+                        <Button v-if="index === 0" type="primary" :loading="row.loading" style="margin-left: 10px" @click="datasApi(row)">{{ '修改' }}</Button>
+                        <div class="flex-box" v-if="[2,3].includes(index)">
+                            <section>
+                                <Input type="text" v-model="row.content" :disabled="index === 3 || !row.code.trim()" :placeholder="index === 2 ? '输入邮箱' : '输入手机号'" />
+                                <Button type="primary" style="margin-left: 10px" @click="datasApi(row)" :disabled="!row.code.trim()">{{ index === 2 ? '修改邮箱' : '修改手机' }}</Button>
+                            </section>
+                            <section>
+                                <Input type="text" v-model="row.code" :disabled="index === 3" :placeholder="'输入验证码'" />
+                                <Button type="primary" style="margin-left: 10px" @click="send(index, row.content)">{{ index === 2 ? '发送邮箱验证码' : '发送手机验证码' }}</Button>
+                            </section>
+                        </div>
                     </div>
                 </template>
             </Table>
             <div class="button-box">
-                <Button class="button" type="default" v-if="edit" @click="edit = !edit">{{ '取消' }}</Button>
-                <Button class="button" type="primary" @click="editInfo">{{ edit ? '确认修改' : '编辑信息' }}</Button>
-                <Button class="button" type="primary" v-if="!edit" @click="pwdModel = true">{{ '修改密码' }}</Button>
+                <Button class="button" :type="!edit ? 'primary': 'default'" @click="edit = !edit">{{ !edit ? '编辑信息' : '取消' }}</Button>
+                <Button class="button" type="warning" @click="pwdModel = true">{{ '修改密码' }}</Button>
             </div>
         </div>
-        <Modal
+        <!-- <Modal
             v-model="functionModel"
             :title="'功能分配'"
             :loading="true"
@@ -40,7 +51,7 @@
             @on-ok="() => { this.functionModel = false }"
             @on-cancel="() => { this.functionModel = false }">
             <FunctionList :sales="true" @confirm="confirmFunction"></FunctionList>
-        </Modal>
+        </Modal> -->
         <Modal
             v-model="pwdModel"
             :title="'修改密码'"
@@ -64,11 +75,11 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import FunctionList from '../../common/FunctionList';
-import { getUserInfo, updateUserInfo, updatePhone, updateEmail } from '@/api/api';
+// import FunctionList from '../../common/FunctionList';
+import { getUserInfo, updateUserInfo, updatePhone, sendEmail, updateEmail } from '@/api/api';
 export default {
     name: 'Info',
-    components: {FunctionList},
+    // components: {FunctionList},
     data() {
         const validatePassWord = (rule, value, callback) => {
             let reg = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
@@ -121,7 +132,7 @@ export default {
                     { required: true, validator: validatePassWord, trigger: ['blur','change'] }
                 ],
                 comfirmPassword: { required: true, validator: validatePassCheck, trigger: ['blur','change'] }
-            }
+            },
         }
     },
     computed: {
@@ -143,22 +154,55 @@ export default {
         changeRule() {
             return this.$Message.info('暂时不能修改权限，如需修改请联系管理员');
         },
+        async send(index, data) {
+            if (index === 3) return this.$Message.info('暂时不能修改手机，如需修改请联系管理员');
+            const res = await sendEmail();
+            if (res) {
+                return this.$Message.success('发送验证码成功，请前往邮箱查看');
+            }
+        },
+        datasChange(e, title) {
+            console.log(e, title)
+            let data = this.datas.find(item => {
+                return item.title === title;
+            })
+            if (data) {
+                data.content = e.content;
+                data.code = e.code
+            }
+        },
+        async datasApi(row) {
+            if (row.title === '用户名') {
+                this.datas[0].loading = true;
+                const res = await updateUserInfo({
+                    ctId: String(this.adminInfo.ctId),
+                    ctName: row.content
+                });
+                if (res) {
+                    setTimeout(() => {
+                        this.datas[0].loading = false;
+                        this.datasChange(row, row.title);
+                        return this.$Message.success('修改成功');
+                    }, 1000);
+                }
+            }
+        },
         async allRequest() {
             let reqs = [];
             reqs[0] = await updateUserInfo({
                 ctId: String(this.adminInfo.ctId),
                 ctName: this.datas[0].content
             });
-            reqs[1] = await updatePhone({
+            reqs[1] = await updateEmail({
                 ctId: String(this.adminInfo.ctId),
                 tag: true,
-                ctEmail: this.datas[2].content
-            });
-            reqs[2] = await updateEmail({
-                ctId: String(this.adminInfo.ctId),
-                tag: true,
-                ctPhone: this.datas[3].content
+                ctPhone: this.datas[2].content
 
+            });
+            reqs[2] = await updatePhone({
+                ctId: String(this.adminInfo.ctId),
+                tag: true,
+                ctEmail: this.datas[3].content
             });
             let responses = new Promise();
             responses(resolve => {
@@ -201,18 +245,13 @@ export default {
             if (!bol) return;
             this.$refs.subForm.resetFields();
             this.pwdModel = false;
-        },
-        datasChange(e, title) {
-            let data = this.datas.find(item => {
-                return item.title === title;
-            })
-            if (data) data.content = e;
         }
     },
     async beforeMount() {
         this.datas = [{
             title: '用户名',
             content: this.adminInfo.ctName,
+            loading: false
             // cellClassName: {
                 // title: 'title-cell',
                 // content: 'info-cell',
@@ -220,12 +259,17 @@ export default {
         },{
             title: '会员权限',
             content: this.adminInfo.ctType,
+            loading: false
         },{
             title: '邮箱地址',
             content: this.adminInfo.ctEmail,
+            code: '',
+            loading: false
         },{
             title: '电话号码',
             content: this.adminInfo.ctPhone,
+            code: '',
+            loading: false
         },
         // {
         //     title: '公司名称',
@@ -291,6 +335,22 @@ export default {
                 margin-right: 10px;
                 &:last-child {
                     margin-right: 0;
+                }
+            }
+        }
+        & .content-box {
+            display: flex;
+            align-items: center;
+            & .flex-box {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                margin: 5px 0;
+                & section {
+                    display: flex;
+                    &:first-child {
+                        margin-bottom: 5px;
+                    }
                 }
             }
         }

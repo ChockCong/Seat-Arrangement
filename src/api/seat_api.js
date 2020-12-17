@@ -9,6 +9,11 @@ export const uploadCustomers = (params) => {
     return reqJsonData({ url: '/seat/customer/upload', isformData: true, params, method: 'post', types: 'seat' })
 }
 
+
+/**
+     * @module Using.vue,List.vue
+     * @desc 会场增删改查
+**/
 export const getSeats = (params) => {
     return reqJsonData({ url: '/seat/main/page', params, method: 'post', types: 'seat' })
 }

@@ -50,7 +50,7 @@ const menuItems = [
     },
     {
         text: '账号中心',
-        type: 'logo-android',
+        type: 'ios-contact',
         size: 18, // icon大小
         category: 'admin',
         children: [
@@ -63,7 +63,7 @@ const menuItems = [
                         type: 'md-person',
                         size: 18, // icon大小
                         name: 'info',
-                        text: '主账号管理',
+                        text: '个人信息',
                     },
                     {
                         type: 'md-people',

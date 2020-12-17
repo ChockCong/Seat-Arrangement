@@ -835,13 +835,14 @@ export default {
                 }
             });
             let params = {
-                ctName: this.totalOthers.totalName + '@@@@@' + this.oss_url,
+                ctName: this.totalOthers.totalName,
                 ctRow: Number(this.rowNum),
                 ctCol: Number(this.rowNum),
                 ctContent: tableContent,
                 ctTableNumber: tableNumber,
                 ctType: this.totalOthers.totalType,
-                ctNumber: Number(this.totalOthers.totalNumber)
+                ctNumber: Number(this.totalOthers.totalNumber),
+                ctImgUrl: this.oss_url
             };
             if (this.type === 'template') {
                 //编辑模板

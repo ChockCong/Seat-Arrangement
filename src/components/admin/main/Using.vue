@@ -160,7 +160,8 @@
             </Modal>
             <Modal v-model="nModel" :title="'模板预览'">
                 <div class="modal-form">
-                    <img :src="'@/assets/logo.png'" />
+                    <!-- <img :src="mImage" /> -->
+                    <img :src="'http://testcodethunder.oss-cn-shenzhen.aliyuncs.com/images/seat20201216233408.jpg'" />
                 </div>
             </Modal>
         </div>
@@ -170,7 +171,7 @@
 <script>
 import { confirmModal, downloadFile, formatDateTime } from '@/utils/index'
 import Setting from './Setting';
-import { getTemplates, dTemplate, uploadCustomers, exportCustomers, cSeat, uSeat } from '@/api/seat_api'
+import { getTemplates, rTemplate, dTemplate, uploadCustomers, exportCustomers, cSeat, uSeat } from '@/api/seat_api'
 export default {
     name: 'Using',
     components: {Setting},
@@ -311,6 +312,7 @@ export default {
             searchClientSelect: 'clientName',
             searchClientInput: '',
             mModel: false,
+            mImage: '',
             Form: {
                 client_name: '',
                 seat_no: 0
@@ -583,9 +585,14 @@ export default {
             this.selectedClients = selection;
         },
         preViewImage(row) {
+            this.mImage = row.ct_img_url
             this.nModel = true;
         },
-        editModel(row) {
+        async editModel(row) {
+            this.loading = true;
+            const res = await rTemplate({ctId: row.ct_id});
+            console.log(res);
+            this.loading = false;
             this.seatListObj = row;
             this.formatSeats(this.seatListObj);
             // this.seatList = [[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":1},{"value":3,"No":2},{"value":3,"No":3},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":4},{"value":3,"No":5},{"value":3,"No":6},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":7},{"value":3,"No":8},{"value":3,"No":9},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}]];
@@ -597,8 +604,6 @@ export default {
             this.tableLoading = false;
             if (res && res.data && res.data.content) {
                 let datas = res.data.content.map(item => {
-                    let name = item.ct_name.split('@@@@@');
-                    item.ct_name = name[0];
                     item.moduleName = item.ct_name;
                     item.keyName = '';
                     item.category = item.ct_type;

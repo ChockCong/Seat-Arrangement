@@ -17,6 +17,7 @@ export const adminLogout = (params) => {
     return reqJsonData({url: '/api/org/main/logout', params, method: 'post'})
 }
 
+
 /**
      * @module Info.vue
      * @desc 查看个人信息
@@ -31,6 +32,14 @@ export const updateUserInfo = (params) => {
 
 export const updatePhone = (params) => {
     return reqJsonData({url: '/api/org/main/updatePhone', params, method: 'post'})
+}
+
+export const sendEmail = (params) => {
+    return reqJsonData({url: '/api/org/main/sendCodeToEmail', params, method: 'post'})
+}
+
+export const validateEmailCode = (params) => {
+    return reqJsonData({url: '/api/org/main/validateCodeByEmail', params, method: 'post'})
 }
 
 export const updateEmail = (params) => {
