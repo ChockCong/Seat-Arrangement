@@ -170,9 +170,13 @@ export default {
                 data.content = e.content;
                 data.code = e.code
             }
+            if (title === '用户名') {
+                this.$store.commit('SET_ADMIN_NAME', {name: e.content});
+            }
         },
         async datasApi(row) {
             if (row.title === '用户名') {
+                if (!row.content || !row.content.trim()) return this.$Message.warning('用户名不能为空')
                 this.datas[0].loading = true;
                 const res = await updateUserInfo({
                     ctId: String(this.adminInfo.ctId),
@@ -185,6 +189,10 @@ export default {
                         return this.$Message.success('修改成功');
                     }, 1000);
                 }
+            } else if (row.title === '邮箱地址') {
+                if (!row.content || !row.content.trim()) return this.$Message.warning('邮箱地址不能为空')
+            } else {
+                if (!row.content || !row.content.trim()) return this.$Message.warning('电话号码不能为空')
             }
         },
         async allRequest() {

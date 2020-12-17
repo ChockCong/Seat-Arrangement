@@ -216,6 +216,9 @@ export default {
         this.bg['backgroundImage'] = `url(${require('../../assets/bg01.jpg')})`;
         this.bg['background-position'] = 'center';
         // this.checkNameFun = await _.debounce(this.nameExist, 500);
+        if (!_.isEmpty(this.$route.query) && this.$route.query.type) {
+            if (this.$route.query.type === 'register') this.tab = false;
+        }
     },
     watch: {
         $route: {
@@ -274,8 +277,11 @@ export default {
                     });
                     this.isShowLoading = false;
                     // console.log(res, !_.isEmpty(res))
-                    if (res && !_.isEmpty(res) && res.data) {
-                        let data = res.data;
+                    if (res && !_.isEmpty(res) && res.data && res.data.content) {
+                        //因为vuex结构锁定，登陆时最好构造结构
+                        let data = res.data.content;
+                        data.admin_token = res.data.token;
+                        data.token_overtime = res.data.tokenOverTime;
                         this.$store.commit('SET_ADMIN_INFO', data);
                         setCookie(data);
                         if (this.$store.getters.getAdminToken) {

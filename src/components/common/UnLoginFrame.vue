@@ -9,23 +9,24 @@
                     </div>
                     <div class="login-c" v-if="iscomponent === 'Index'">
                         <span @click="goToLogin">登陆</span>
-                        <span>注册</span>
+                        <span @click="goToLogin('register')">注册</span>
                     </div>
                 </div>
             </Header>
             <Content class="content">
-                <component :is="iscomponent"></component>
+                <component :is="iscomponent" :type="'unlogin'"></component>
             </Content>
             <!-- <Footer>Footer</Footer> -->
         </Layout>
     </div>
 </template>
 <script>
-import ForgetPawssword from '../common/ForgetPassword'
-import Index from '../common/Index'
+import ForgetPawssword from '../common/ForgetPassword';
+import Index from '../common/Index';
+import Error from '../admin/404';
 export default {
     name: 'UnLogin',
-    components: {Index, ForgetPawssword},
+    components: {Index, ForgetPawssword, Error},
     data() {
         return {
             iscomponent: '',
@@ -33,9 +34,9 @@ export default {
         }
     },
     methods: {
-        goToLogin() {
-            this.$router.push('/admin/login')
-        }
+        goToLogin(type) {
+            this.$router.push('/admin/login?' + '?type=' + type)
+       }
     },
     beforeMount() {
         console.log(this.$route.params.page)
@@ -46,6 +47,8 @@ export default {
             } else if (this.$route.params.page === 'unlogin') {
                 this.iscomponent = 'ForgetPawssword';
                 this.totalTitle = '忘记密码';
+            } else {
+                this.iscomponent = 'Error';
             }
         }
     }

@@ -19,6 +19,7 @@ const router = new VueRouter({
         {
             path: '/',
             component: () => import('../components/HelloWorld.vue'),
+            redirect: 'admin/management/home',
         },
         {
             path: '/user',
@@ -88,6 +89,14 @@ const router = new VueRouter({
                             }
                         },
                         {
+                            path: '404',
+                            name: '404',
+                            meta: {
+                                tag: '404'
+                            },
+                            component: () => import('../components/admin/404.vue')
+                        },
+                        {
                             path: 'info',
                             name: 'info',
                             component: () => import('../components/admin/self/Info.vue'),
@@ -147,10 +156,27 @@ const router = new VueRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    // console.log(to, from)
+    console.log(to, from)
     // const tokenEnable = isTokenEnable();
     //2020-12-04 改为后端去管理token时间，由401控制登录重定向，只要cookie存在，就证明登录状态在延续
     const tokenEnable = getCookie('loginInfo');
+    const redirect = (to, store, tokenEnable) => {
+        if (!tokenEnable) {
+            return to.name === 'login' ? next() : next({ path: '/admin/login' });
+        } else {
+            const userStorage = getCookie('loginInfo');
+            let user = userStorage ? JSON.parse(userStorage) : undefined;
+            // console.log(user);
+            if (user) store.commit('SET_ADMIN_INFO', user);
+            else {
+                return to.name === 'login' ? next() : next({ path: '/admin/login' });
+            }
+        }
+    }
+    if (!to.matched.some(route => route.name === to.name)) {
+        redirect(to, store, tokenEnable)
+        return next({ path: '/admin/management/404' })
+    }
     if (to.matched.some(route => route.meta && route.meta.requiresAuth) && store.state.adminInfo.admin_token) {
         //TODO: token过期后应刷新保持登录，反之退出登录
         // console.log(store.state.adminInfo, isTokenEnable());
@@ -161,17 +187,7 @@ router.beforeEach(async (to, from, next) => {
         if (to.matched.some(route => route.meta && route.meta.tag && route.meta.tag === 'unlogin')) {
             return next();
         }
-        if (!tokenEnable) {
-            return to.name === 'login' ? next() : next({ path: '/admin/login' });
-        } else {
-            const userStorage = getCookie('loginInfo');
-            let user = userStorage ? JSON.parse(userStorage) : undefined;
-            console.log(user);
-            if (user) store.commit('SET_ADMIN_INFO', user);
-            else {
-                return to.name === 'login' ? next() : next({ path: '/admin/login' });
-            }
-        }
+        redirect(to, store, tokenEnable)
     }
     return next();
 });
