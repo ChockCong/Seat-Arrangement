@@ -37,7 +37,7 @@
                     <div class="button-area clear-flex">
                         <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
                         <Button v-if="!seeType" type="primary" icon="ios-cloud-download-outline" @click="download">下载模板</Button>
-                        <Button v-if="!seeType" icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
+                        <Button v-if="!seeType" icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ '上传文件' }}</Button>
                         <Button v-if="!seeType" type="primary" icon="md-add" @click="mModel = true">新增宾客</Button>
                         <Select style="width: 100px;" v-model="searchClientSelect">
                             <Option value="clientName" label="宾客名"></Option>
@@ -63,7 +63,7 @@
                         <Setting :type="'seats'" :editObj="seatListObj" :editList="seatList"></Setting>
                     </template>
                     <template v-if="step === 2">
-                        <Table v-if="hasFile || hasClients" ref="table" border stripe :max-height="tableHeight" :width="650" :loading="false" :columns="excelColumns" :data="excelDatas"  @on-selection-change="onSelectClientChange">
+                        <Table ref="table" border stripe :max-height="tableHeight" :width="650" :loading="false" :columns="excelColumns" :data="excelDatas"  @on-selection-change="onSelectClientChange">
                             <template slot-scope="{ row }" slot="client_name">
                                 <template v-if="!row.edit">{{ row.client_name }}</template>
                                 <Input v-else v-model="row.client_name" />
@@ -135,7 +135,7 @@
                         </div>
                     </template>
                     <div class="button-area-item" :class="!seeType && step === 2 ? 'step2' : ''">
-                        <Button v-if="step === 2 && !seeType" type="error" icon="md-trash" @click="deletes">删除宾客</Button>
+                        <Button v-if="hasClients && step === 2 && !seeType" type="error" icon="md-trash" @click="deletes">删除宾客</Button>
                         <section>
                             <Button type="primary" v-if="[2,3].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
                             <Button type="primary" v-if="step < 3" @click="changeStep('next')">{{ '下一步' }}</Button>
@@ -274,38 +274,7 @@ export default {
                     width: 80
                 }
             ],
-            excelDatas: [
-                {
-                    client_name: '测试宾客1',
-                    seat_no:1,
-                    des: '',
-                    edit: false,
-                },
-                {
-                    client_name: '测试宾客2',
-                    seat_no:1,
-                    des: '',
-                    edit: false
-                },
-                {
-                    client_name: '张三',
-                    seat_no:2,
-                    des: '小学同学',
-                    edit: false
-                },
-                {
-                    client_name: '李四',
-                    seat_no:3,
-                    des: '',
-                    edit: false
-                },
-                {
-                    client_name: '张三',
-                    seat_no:5,
-                    des: '初中同学',
-                    edit: false
-                }
-            ],
+            excelDatas: [],
             copyExcelDatas: [],
             searchClientFun: null,
             selectedClients: [],
@@ -479,13 +448,21 @@ export default {
             this.file = file[0];
             console.log(this.file);
             if (!checkFiles(0, 'excel', this.file)) return;
-            const res = await uploadCustomers({ ctId: String(this.selectedModule.ct_id), file: this.file });
+            const res = await uploadCustomers({ file: this.file });
             if (res) {
                 this.$Message.success('上传成功')
                 this.file = null;
                 this.$refs.fileInput.value = null;
-                this.excelDatas = res.data;
-                this.copyDatas = _.cloneDeep(this.excelDatas);
+                this.excelDatas = res.data.map(item => {
+                    return {
+                        client_name: item.name,
+                        seat_no: item.tableNumber,
+                        des: item.description,
+                        edit: false
+                    }
+                });
+                this.copyExcelDatas = _.cloneDeep(this.excelDatas);
+                this.$forceUpdate();
                 this.debounceClientsSearch();
             }
             this.$refs.fileInput.value = null;
@@ -631,13 +608,15 @@ export default {
                 ctBeginTime: formatDateTime(this.times.start),
                 ctEndTime: formatDateTime(this.times.end),
                 ctQRCodeTime: formatDateTime(this.times.qrcode),
-                ctDetails: '',
-                ctStatus: 0
+                ctDescription: this.details,
+                ctImgUrl: this.selectedModule.ct_img_url
             };
             if (this.editType) params.ctId = this.editData.ct_id;
             const res = !this.editType ? await cSeat(params) : await uSeat(params);
-            this.$Message.success(!this.editType ? '新增会场成功' : '编辑会场成功');
-            this.$router.push('seat-list');
+            if (res) {
+                this.$Message.success(!this.editType ? '新增会场成功' : '编辑会场成功');
+                this.$router.push('seat-list');
+            }
         }
     },
     created() {

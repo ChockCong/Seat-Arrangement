@@ -30,7 +30,7 @@
                     <div class="button-area clear-flex">
                         <Button type="primary" icon="ios-cloud-download-outline" @click="download">下载模板</Button>
                         <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
-                        <Button icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ hasFile ? '重新上传' : '上传文件' }}</Button>
+                        <Button icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ '上传文件' }}</Button>
                         <Button type="primary" icon="md-add" @click="adds">新增宾客</Button>
                         <Select style="width: 100px;" v-model="searchClientSelect">
                             <Option value="clientName" label="宾客名"></Option>
@@ -68,7 +68,7 @@
 <script>
 import { confirmModal, downloadFile } from '@/utils/index'
 import Using from './Using';
-import { getSeats, uploadCustomers, exportCustomers } from '@/api/seat_api';
+import { getSeats, uploadCustomers, exportCustomers, importCustomers } from '@/api/seat_api';
 export default {
     name: 'List',
     data() {
@@ -118,26 +118,7 @@ export default {
                     width: 250
                 }
             ],
-            seatDatas: [
-                {
-                    id: 1337604479561810000,
-                    name: 'xx联姻',
-                    detail: '于xxxx大酒店3楼宴会厅举办婚礼',
-                    people: '欧阳查理',
-                    number: '200',
-                    start: 'xxxx-xx-xx 00:00:00',
-                    end: 'xxxx-xx-xx 00:00:00',
-                },
-                {
-                    id: 1337604479561810000,
-                    name: 'xx宣讲会',
-                    detail: '于xx集团行政楼会议厅举办会议',
-                    people: '阿里嘎吧',
-                    number: '1000',
-                    start: 'xxxx-xx-xx 00:00:00',
-                    end: 'xxxx-xx-xx 00:00:00',
-                }
-            ],
+            seatDatas: [],
             copySeatDatas: [],
             mModel: false,
             fileLoading: false,
@@ -180,38 +161,7 @@ export default {
                     width: 80
                 }
             ],
-            excelDatas: [
-                {
-                    client_name: '测试宾客1',
-                    seat_no:1,
-                    des: '',
-                    edit: false,
-                },
-                {
-                    client_name: '测试宾客2',
-                    seat_no:1,
-                    des: '',
-                    edit: false
-                },
-                {
-                    client_name: '张三',
-                    seat_no:2,
-                    des: '小学同学',
-                    edit: false
-                },
-                {
-                    client_name: '李四',
-                    seat_no:3,
-                    des: '',
-                    edit: false
-                },
-                {
-                    client_name: '张三',
-                    seat_no:5,
-                    des: '初中同学',
-                    edit: false
-                }
-            ],
+            excelDatas: [],
             copyExcelDatas: [],
             searchClientFun: null,
             selectedClients: [],
@@ -348,27 +298,46 @@ export default {
             const file = e.target.files;
             this.file = file[0];
             console.log(this.file);
-            const res = await uploadCustomers({ ctId: String(this.editData.id), file: this.file });
+            const res = await uploadCustomers({ file: this.file });
             if (res) {
                 this.$Message.success('上传成功')
                 this.file = null;
                 this.$refs.fileInput.value = null;
-                this.excelDatas = res.data;
+                this.excelDatas = res.data.map(item => {
+                    return {
+                        client_name: item.name,
+                        seat_no: item.tableNumber,
+                        des: item.description,
+                        edit: false
+                    }
+                });
+                this.copyExcelDatas = _.cloneDeep(this.excelDatas);
+                this.$forceUpdate();
+                this.debounceClientsSearch();
             }
+            this.$refs.fileInput.value = null;
             
         },
-        sureCilents() {
+        async sureCilents() {
             this.fileLoading = true;
             let list = this.excelDatas.filter(item => {
                 return item.client_name && item.seat_no;
             });
             let _this = this;
             if (list.length) {
-                setTimeout(() => {
+                list = list .map(item => {
+                    return {
+                        name: item.client_name,
+                        tableNumber: item.seat_no,
+                        description: item.des,
+                    }
+                })
+                const res = await importCustomers({ ctId: this.editData.id, customer: list })
+                if (res) {
                     _this.fileLoading = false;
                     _this.$Message.success('上传成功');
                     _this.mModel = false;
-                }, 1000)
+                }
             }
         },
         changePeoples(row, index) {
@@ -385,16 +354,16 @@ export default {
             const res = await getSeats();
             if (res && res.data && res.data.content) {
                 let datas = res.data.content.map(item => {
-                    item.id = item.ctId;
-                    item.name = item.ctName;
-                    item.detail = item.ctContent;
-                    item.people = item.ctCreatorName;
-                    item.number = item.ctNumber;
-                    item.start = item.ctBeginTime;
-                    item.end = item.ctEndTime;
+                    item.id = item.ct_id;
+                    item.name = item.ct_name;
+                    item.detail = item.ct_description;
+                    item.people = item.ct_organizer_name;
+                    item.number = item.ct_number;
+                    item.start = item.ct_begin_time;
+                    item.end = item.ct_end_time;
                     return item;
                 })
-                this.seatDatas = this.seatDatas.concat(datas);
+                this.seatDatas = _.cloneDeep(datas);
             }
         }
     },

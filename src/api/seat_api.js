@@ -6,9 +6,12 @@ export const exportCustomers = (params) => {
 }
 
 export const uploadCustomers = (params) => {
-    return reqJsonData({ url: '/seat/customer/upload', isformData: true, params, method: 'post', types: 'seat' })
+    return reqJsonData({ url: '/seat/customer/analysis', isformData: true, params, method: 'post', types: 'seat' })
 }
 
+export const importCustomers = (params) => {
+    return reqJsonData({ url: '/seat/customer/upload', params, method: 'post', types: 'seat' })
+}
 
 /**
      * @module Using.vue,List.vue

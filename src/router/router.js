@@ -156,11 +156,10 @@ const router = new VueRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    console.log(to, from)
     // const tokenEnable = isTokenEnable();
     //2020-12-04 改为后端去管理token时间，由401控制登录重定向，只要cookie存在，就证明登录状态在延续
     const tokenEnable = getCookie('loginInfo');
-    const redirect = (to, store, tokenEnable) => {
+    const redirect = (from, to) => {
         if (!tokenEnable) {
             return to.name === 'login' ? next() : next({ path: '/admin/login' });
         } else {
@@ -173,7 +172,9 @@ router.beforeEach(async (to, from, next) => {
             }
         }
     }
+    redirect(from, to)
     if (to.matched.some(route => route.meta && route.meta.requiresAuth) && store.state.adminInfo.admin_token) {
+        console.log(111,to, from)
         //TODO: token过期后应刷新保持登录，反之退出登录
         // console.log(store.state.adminInfo, isTokenEnable());
         if (!tokenEnable) {
@@ -181,13 +182,13 @@ router.beforeEach(async (to, from, next) => {
         }
     } else {
         if (!to.matched.some(route => route.name === to.name)) {
-            redirect(to, store, tokenEnable)
             return next({ path: store.state.adminInfo.admin_token ? '/admin/management/404' : '/404' })
         }
         if (to.matched.some(route => route.meta && route.meta.tag && route.meta.tag === 'unlogin')) {
             return next();
         }
-        redirect(to, store, tokenEnable)
+        console.log(222,to, from)
+        redirect(from, to)
     }
     return next();
 });
