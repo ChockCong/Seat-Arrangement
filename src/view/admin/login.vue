@@ -264,7 +264,7 @@ export default {
             return res && res.data && !res.data.validate;
         },
         forgetPwd() {
-            this.$router.push('/unlogin')
+            this.$router.push('/forget')
         },
         async login() {
             let tag = false;
@@ -364,9 +364,8 @@ export default {
         }
     },
     beforeDestroy() {
-        console.log(this.st);
-        clearTimeout(this.st)
-        console.log(this.st);
+        if(this.st) clearTimeout(this.st)
+        console.log('setTomeout', this.st);
     }
 }
 </script>

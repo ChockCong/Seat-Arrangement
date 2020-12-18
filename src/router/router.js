@@ -92,7 +92,7 @@ const router = new VueRouter({
                             path: '404',
                             name: '404',
                             meta: {
-                                tag: '404'
+                                requiresAuth: true
                             },
                             component: () => import('../components/admin/404.vue')
                         },
@@ -159,36 +159,31 @@ router.beforeEach(async (to, from, next) => {
     // const tokenEnable = isTokenEnable();
     //2020-12-04 改为后端去管理token时间，由401控制登录重定向，只要cookie存在，就证明登录状态在延续
     const tokenEnable = getCookie('loginInfo');
-    const redirect = (from, to) => {
-        if (!tokenEnable) {
-            return to.name === 'login' ? next() : next({ path: '/admin/login' });
-        } else {
-            const userStorage = getCookie('loginInfo');
-            let user = userStorage ? JSON.parse(userStorage) : undefined;
-            // console.log(user);
-            if (user) store.commit('SET_ADMIN_INFO', user);
-            else {
-                return to.name === 'login' ? next() : next({ path: '/admin/login' });
-            }
-        }
+    const setInfo = () => {
+        let userStorage = getCookie('loginInfo');
+        let user = userStorage ? JSON.parse(userStorage) : undefined;
+        // console.log(user);
+        if (user) store.commit('SET_ADMIN_INFO', user);
     }
-    redirect(from, to)
+    if (tokenEnable) setInfo()
     if (to.matched.some(route => route.meta && route.meta.requiresAuth) && store.state.adminInfo.admin_token) {
-        console.log(111,to, from)
         //TODO: token过期后应刷新保持登录，反之退出登录
         // console.log(store.state.adminInfo, isTokenEnable());
         if (!tokenEnable) {
+            if (to.name !== 'login') Vue.prototype.errorPopHandler('用户信息已过期，请重新登陆');
             return to.name === 'login' ? next() : next({ path: '/admin/login' });
         }
     } else {
-        if (!to.matched.some(route => route.name === to.name)) {
-            return next({ path: store.state.adminInfo.admin_token ? '/admin/management/404' : '/404' })
+        if (!to.matched.some(route => route.name === to.name) && store.state.adminInfo.admin_token) {
+            return next({ path: '/admin/management/404' })
         }
         if (to.matched.some(route => route.meta && route.meta.tag && route.meta.tag === 'unlogin')) {
             return next();
         }
-        console.log(222,to, from)
-        redirect(from, to)
+        if (!tokenEnable) {
+            if (to.name !== 'login') Vue.prototype.errorPopHandler('用户信息已过期，请重新登陆');
+            return to.name === 'login' ? next() : next({ path: '/admin/login' });
+        }
     }
     return next();
 });

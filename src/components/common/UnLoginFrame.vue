@@ -30,7 +30,8 @@ export default {
     data() {
         return {
             iscomponent: '',
-            totalTitle: ''
+            totalTitle: '',
+            st: ''
         }
     },
     methods: {
@@ -44,13 +45,23 @@ export default {
             if (this.$route.params.page === 'index') {
                 this.iscomponent = 'Index';
                 this.totalTitle = '码雷';
-            } else if (this.$route.params.page === 'unlogin') {
+            } else if (this.$route.params.page === 'forget') {
                 this.iscomponent = 'ForgetPawssword';
                 this.totalTitle = '忘记密码';
             } else {
                 this.iscomponent = 'Error';
+                this.$Message.loading({
+                    content: '正在为你跳转登录请稍后...',
+                    duration: 3
+                });
+                this.st = setTimeout(() => {
+                    this.$router.push('/admin/login')
+                }, 3000)
             }
         }
+    },
+    beforeDestroy() {
+        if (this.st) clearTimeout(this.st);
     }
 }
 </script>
