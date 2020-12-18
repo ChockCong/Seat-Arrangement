@@ -31,8 +31,8 @@
                                 <Button type="primary" style="margin-left: 10px" @click="datasApi(row)" :disabled="!row.code.trim()">{{ index === 2 ? '修改邮箱' : '修改手机' }}</Button>
                             </section>
                             <section>
-                                <Input type="text" v-model="row.code" :disabled="index === 3" :placeholder="'输入验证码'" />
-                                <Button type="primary" style="margin-left: 10px" @click="send(index, row.content)">{{ index === 2 ? '发送邮箱验证码' : '发送手机验证码' }}</Button>
+                                <Input type="text" v-model="row.code" :disabled="index === 3" :placeholder="index === 2 ? '输入邮箱验证码' : '输入手机验证码'" />
+                                <Button type="primary" style="margin-left: 10px" @click="send(index, row.content)">{{ '发送验证码' }}</Button>
                             </section>
                         </div>
                     </div>
@@ -156,6 +156,10 @@ export default {
         },
         async send(index, data) {
             if (index === 3) return this.$Message.info('暂时不能修改手机，如需修改请联系管理员');
+             this.$Message.loading({
+                content: '正在发送验证码，请稍后...',
+                duration: 3
+            });
             const res = await sendEmail();
             if (res) {
                 return this.$Message.success('发送验证码成功，请前往邮箱查看');

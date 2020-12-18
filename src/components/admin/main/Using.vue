@@ -169,7 +169,7 @@
     </div>
 </template>
 <script>
-import { confirmModal, downloadFile, formatDateTime } from '@/utils/index'
+import { confirmModal, downloadFile, checkFiles, formatDateTime } from '@/utils/index'
 import Setting from './Setting';
 import { getTemplates, rTemplate, dTemplate, uploadCustomers, exportCustomers, cSeat, uSeat } from '@/api/seat_api'
 export default {
@@ -478,6 +478,7 @@ export default {
             const file = e.target.files;
             this.file = file[0];
             console.log(this.file);
+            if (!checkFiles(0, 'excel', this.file)) return;
             const res = await uploadCustomers({ ctId: String(this.selectedModule.ct_id), file: this.file });
             if (res) {
                 this.$Message.success('上传成功')

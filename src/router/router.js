@@ -173,10 +173,6 @@ router.beforeEach(async (to, from, next) => {
             }
         }
     }
-    if (!to.matched.some(route => route.name === to.name)) {
-        redirect(to, store, tokenEnable)
-        return next({ path: '/admin/management/404' })
-    }
     if (to.matched.some(route => route.meta && route.meta.requiresAuth) && store.state.adminInfo.admin_token) {
         //TODO: token过期后应刷新保持登录，反之退出登录
         // console.log(store.state.adminInfo, isTokenEnable());
@@ -184,6 +180,10 @@ router.beforeEach(async (to, from, next) => {
             return to.name === 'login' ? next() : next({ path: '/admin/login' });
         }
     } else {
+        if (!to.matched.some(route => route.name === to.name)) {
+            redirect(to, store, tokenEnable)
+            return next({ path: store.state.adminInfo.admin_token ? '/admin/management/404' : '/404' })
+        }
         if (to.matched.some(route => route.meta && route.meta.tag && route.meta.tag === 'unlogin')) {
             return next();
         }

@@ -1,6 +1,10 @@
 import Vue from 'vue';
 import router from '../router/router'
 const vm = new Vue();
+const fileType = {
+    excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+}
+
 export function globalFunc() {
     console.log('-----这里是码雷实验室-----')
 }
@@ -124,6 +128,25 @@ export function downloadFile(data, fileName) {
     link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
+}
+
+export function checkFiles(size = 0/* 单位M */, type = ''/* 文件术语详见fileType */, file) {
+    if (typeof size !== 'number') {
+		return false;
+	}
+    if (size) {
+        if (file.size > size / 1024 / 1024) {
+            Vue.prototype.errorPopHandler(`文件不能超过${size}M，请重新上传`);
+            return false;
+        }
+    }
+    if (type) {
+        if (file.type !== fileType[type]) {
+            Vue.prototype.errorPopHandler(`只能上传${type}类型文件，请重新上传`);
+            return false;
+        }
+    }
+    return true;
 }
 
 

@@ -8,12 +8,12 @@
             </Select>
             <Input style="width: 200px; margin-left: 10px" v-model="searchInput" placeholder="输入功能名搜索"  @input="searchFun" />
         </div>
-        <Table ref="table" border stripe :max-height="tableHeight"  :width="1262" :loading="loading" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
+        <Table ref="table" border stripe :max-height="tableHeight"  :width="1200" :loading="loading" :columns="columns" :data="datas"  @on-selection-change="onSelectChange">
             <template slot-scope="{ row, index }" slot="disabled">
                 <SwitchTab v-model="datas[index].disabled" :disabled="!datas[index].active" size="small" @on-change="switchs(index)" />
             </template>
             <template slot-scope="{ row, index  }" slot="name">
-                <span v-if="!row.active">{{ row.name }}</span>
+                <template v-if="!row.active">{{ row.name }}</template>
                 <template v-else>
                     <Input type="text" v-model="datas[index].name" />
                 </template>
@@ -114,13 +114,14 @@ export default {
                     key: 'order',
                     align: 'center',
                     slot: 'order',
-                    width: 100,
+                    width: 70,
                 },
                 {
                     title: '功能名',
                     key: 'name',
                     slot: 'name',
-                    width: 100,
+                    width: 120,
+                    tooltip: true
                 },
                 {
                     title: 'Mapping',
@@ -151,7 +152,7 @@ export default {
                     title: '权限',
                     key: 'level',
                     align: 'center',
-                    width: 150
+                    width: 100
                 },
                 {
                     title: '价格',
@@ -317,7 +318,7 @@ export default {
             if (this.datas[index].active) {
                 let params = {
                     ctId: String(this.datas[index].id),
-                    ct_name: this.datas[index].name,
+                    ctName: this.datas[index].name,
                     ctTypeId: 1,
                     ctOrder: this.datas[index].order,
                     ctDescription: this.datas[index].detail,
@@ -384,14 +385,14 @@ export default {
                     key: 'disabled',
                     slot: 'disabled',
                     align: 'center',
-                    width: 100
+                    width: 90
                 },
                 {
                     title: '操作',
                     key: 'action',
                     slot: 'action',
                     align: 'center',
-                    width: 100
+                    width: 80
                 }
             ])
         }
