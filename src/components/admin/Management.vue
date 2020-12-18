@@ -297,6 +297,8 @@ export default {
         isNoMenu(item) {
             if (!item.text && item.name === 'buy') {
                 return '购买';
+            } else if(!item.text && item.name === '404') {
+                return '错误页面';
             } else {
                 return item.text;
             }
@@ -541,7 +543,14 @@ export default {
         },
         // 激活标签
         activeTag(i) {
-            this.gotoPage(this.tagsArry[i].name)
+            let err = this.tagsArry.findIndex(item => { return item.name === '404' });
+            let update_i = -1;
+            if (err > -1 && this.tagsArry[i].name !== '404') {
+                let currentName = this.tagsArry[i].name;
+                this.tagsArry.splice(err, 1);
+                update_i = this.tagsArry.findIndex(item => { return item.name === currentName });
+            }
+            this.gotoPage(this.tagsArry[update_i > -1 ? update_i : i].name)
         },
         // 消息通知
         info() {

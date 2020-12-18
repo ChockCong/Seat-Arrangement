@@ -2,7 +2,7 @@ import { reqJsonData } from './axios';
 
 
 export const exportCustomers = (params) => {
-    return reqJsonData({ url: '/seat/customer/export', isJson: false, params, method: 'post', types: 'seat' })
+    return reqJsonData({ url: '/seat/customer/export', isJson: false, params, method: 'get', types: 'seat' })
 }
 
 export const uploadCustomers = (params) => {

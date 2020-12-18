@@ -160,8 +160,8 @@
             </Modal>
             <Modal v-model="nModel" :title="'模板预览'">
                 <div class="modal-form">
-                    <!-- <img :src="mImage" /> -->
-                    <img :src="'http://testcodethunder.oss-cn-shenzhen.aliyuncs.com/images/seat20201216233408.jpg'" />
+                    <img :src="mImage" />
+                    <!-- <img :src="'http://testcodethunder.oss-cn-shenzhen.aliyuncs.com/images/seat20201216233408.jpg'" /> -->
                 </div>
             </Modal>
         </div>
@@ -466,6 +466,10 @@ export default {
             }
         },
         async download() {
+            this.$Message.loading({
+                content: '正在下载，请稍后...',
+                duration: 2
+            });
             const res = await exportCustomers();
             // let dFile = new File(res, '1.xlsx');
             downloadFile(res, '宾客名单模板.xlsx');
@@ -600,7 +604,7 @@ export default {
         },
         async getList() {
             this.tableLoading = true;
-            const res = await getTemplates({ pageSize: '100', offset: 2 });
+            const res = await getTemplates({});
             this.tableLoading = false;
             if (res && res.data && res.data.content) {
                 let datas = res.data.content.map(item => {
