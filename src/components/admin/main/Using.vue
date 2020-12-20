@@ -77,7 +77,7 @@
                                 <Input v-else v-model="row.des" />
                             </template>
                             <template slot-scope="{ row, index }" slot="action">
-                                <Button v-if="!seeType" type="primary" size="small" @click="changePeoples(row, index)">{{ row.edit ? '保存' : '编辑' }}</Button>
+                                <Button v-if="!seeType && showEditOne(index)" type="primary" size="small" @click="changePeoples(row, index)">{{ row.edit ? '保存' : '编辑' }}</Button>
                             </template>
                         </Table>
                     </template>
@@ -171,7 +171,7 @@
 <script>
 import { confirmModal, downloadFile, checkFiles, formatDateTime } from '@/utils/index'
 import Setting from './Setting';
-import { getTemplates, rTemplate, dTemplate, uploadCustomers, exportCustomers, cSeat, uSeat } from '@/api/seat_api'
+import { getTemplates, rTemplate, dTemplate, uploadCustomers, exportCustomers, importCustomers, cSeat, uSeat } from '@/api/seat_api'
 export default {
     name: 'Using',
     components: {Setting},
@@ -276,6 +276,7 @@ export default {
             ],
             excelDatas: [],
             copyExcelDatas: [],
+            changeCopyPeopleIndex: -1,
             searchClientFun: null,
             selectedClients: [],
             searchClientSelect: 'clientName',
@@ -368,6 +369,9 @@ export default {
         }
     },
     methods: {
+        addNew() {
+            this.$router.push('seat-setting');
+        },
         async backUsing(reflash) {
             console.log(111, reflash)
             this.type = '';
@@ -401,16 +405,34 @@ export default {
             secondArr = [];
             console.log(secondArr,this.seatList)
         },
-        changePeoples(row, index) {
-          if (!row.edit) return this.excelDatas[index].edit = !row.edit;
-          let { client_name, seat_no, des } = row;
-          this.excelDatas[index].client_name = client_name;
-          this.excelDatas[index].seat_no = seat_no;
-          this.excelDatas[index].des = des;
-          this.excelDatas[index].edit = !row.edit;
+        showEditOne(index) {
+            return !this.excelDatas.some(item => {return item.edit; }) || this.excelDatas[index].edit
         },
-        addNew() {
-            this.$router.push('seat-setting');
+        changePeoples(row, index) {
+            let { client_name, seat_no, des } = row;
+            if (!row.edit) {
+                this.excelDatas[index].edit = !row.edit;
+                this.changeCopyPeopleIndex = this.copyExcelDatas.findIndex(item => {
+                    return item.client_name === client_name && item.seat_no === seat_no && item.des === des;
+                });
+                return;
+            }
+            let copyIndex = this.changeCopyPeopleIndex;
+            this.copyExcelDatas[copyIndex].edit = this.excelDatas[index].edit;
+            this.excelDatas[index].client_name = client_name;
+            this.excelDatas[index].seat_no = seat_no;
+            this.excelDatas[index].des = des;
+            this.copyExcelDatas[copyIndex].client_name = client_name;
+            this.copyExcelDatas[copyIndex].seat_no = seat_no;
+            this.copyExcelDatas[copyIndex].des = des;
+            this.excelDatas[index].edit = !row.edit;
+            this.copyExcelDatas[copyIndex].edit = !row.edit;
+            this.changeCopyPeopleIndex = -1;
+        },
+        sureOK() {
+            this.copyExcelDatas.push(Object.assign({}, this.Form, { edit: false }));
+            this.debounceClientsSearch();
+            this.mModel = false;
         },
         deleteNew(row) {
             // if (_.isEmpty(this.selectedModule)) return this.$Message.warning({content: '请先选择模板', closable: true});
@@ -469,11 +491,6 @@ export default {
         },
         clickFile() {
             this.$refs.fileInput.click();
-        },
-        sureOK() {
-            this.copyExcelDatas.push(Object.assign({}, this.Form, { edit: false }));
-            this.debounceClientsSearch();
-            this.mModel = false;
         },
         deletes() {
             if (!this.selectedClients.length) {
@@ -552,6 +569,11 @@ export default {
         },
         stepfun(type) {
             this.step = type === 'next' ? this.step + 1 : this.step - 1;
+            if(this.editType && this.step === 2) {
+                this.$nextTick(() => {
+                    this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 160;
+                })
+            }
         },
         changeStep(type) {
             if (this.step === 1 && !this.editType) {
@@ -611,9 +633,24 @@ export default {
                 ctDescription: this.details,
                 ctImgUrl: this.selectedModule.ct_img_url
             };
-            if (this.editType) params.ctId = this.editData.ct_id;
-            const res = !this.editType ? await cSeat(params) : await uSeat(params);
-            if (res) {
+            let editRes = null;
+            if (this.editType) {
+                params.ctId = this.editData.ct_id;
+                let list = this.excelDatas.filter(item => {
+                    return item.client_name && item.seat_no;
+                });
+                list = list .map(item => {
+                    return {
+                        name: item.client_name,
+                        tableNumber: item.seat_no,
+                        description: item.des,
+                    }
+                })
+                editRes = [await importCustomers({ ctId: this.editData.ct_id, customer: list }), await uSeat(params)];
+            }
+            const res = !this.editType ? await cSeat(params) : await Promise.all(editRes);
+            console.log(res)
+            if (res || (this.editType && res.length === 2)) {
                 this.$Message.success(!this.editType ? '新增会场成功' : '编辑会场成功');
                 this.$router.push('seat-list');
             }
@@ -624,7 +661,7 @@ export default {
         this.searchClientFun = _.debounce(this.debounceClientsSearch, 1000);
     },
     mounted() {
-        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 110;
+        if(!this.editType) this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 110;
     },
     async beforeMount() {
         // for(let i = 0; i < 100; i++) {

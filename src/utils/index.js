@@ -4,6 +4,24 @@ const vm = new Vue();
 const fileType = {
     excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 }
+Date.prototype.format = function (format) {
+    var o = {
+        "M+": this.getMonth() + 1, //month
+        "d+": this.getDate(),    //day
+        "h+": this.getHours(),   //hour
+        "m+": this.getMinutes(), //minute
+        "s+": this.getSeconds(), //second
+        "q+": Math.floor((this.getMonth() + 3) / 3),  //quarter
+        "S": this.getMilliseconds() //millisecond
+    }
+    if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
+        (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o) if (new RegExp("(" + k + ")").test(format))
+        format = format.replace(RegExp.$1,
+            RegExp.$1.length == 1 ? o[k] :
+                ("00" + o[k]).substr(("" + o[k]).length));
+    return format;
+}
 
 export function globalFunc() {
     console.log('-----这里是码雷实验室-----')
@@ -91,12 +109,13 @@ export function level(level, isGod = false) {
 
 export function formatDateTime(dates) {
     let date = new Date(dates);
+    console.log(new Date(date.getTime()))
     let y = date.getFullYear();
     let m = date.getMonth() + 1;
     m = m < 10 ? ('0' + m) : m;
     let d = date.getDate();
     d = d < 10 ? ('0' + d) : d;
-    let h = date.getHours();
+    let h = date.getUTCHours();
     h = h < 10 ? ('0' + h) : h;
     let i = date.getMinutes();
     i = i < 10 ? ('0' + i) : i;
@@ -132,8 +151,8 @@ export function downloadFile(data, fileName) {
 
 export function checkFiles(size = 0/* 单位M */, type = ''/* 文件术语详见fileType */, file) {
     if (typeof size !== 'number') {
-		return false;
-	}
+        return false;
+    }
     if (size) {
         if (file.size > size / 1024 / 1024) {
             Vue.prototype.errorPopHandler(`文件不能超过${size}M，请重新上传`);

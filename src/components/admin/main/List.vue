@@ -16,14 +16,14 @@
                         <template slot-scope="{ row, index }" slot="action">
                             <Button type="primary" size="small" @click="seeRow(row, index)">{{ '查看' }}</Button>
                             <Button style="margin-left: 10px" type="primary" size="small" @click="editRow(row, index)">{{ '编辑' }}</Button>
-                            <Button style="margin-left: 10px" type="primary" size="small" @click="uploadRow(row, index)">{{ '重新上传名单' }}</Button>
+                            <Button style="margin-left: 10px" type="primary" size="small" @click="uploadRow(row, index)">{{ '上传名单' }}</Button>
                         </template>
                     </Table>
                 </div>
             </div>
             <Modal
                 v-model="mModel"
-                :title="'重新上传名单'"
+                :title="'上传宾客名单'"
                 width="682px"
                 :footer-hide="true">
                 <div class="file-modal">
@@ -66,7 +66,7 @@
     </div>
 </template>
 <script>
-import { confirmModal, downloadFile } from '@/utils/index'
+import { confirmModal, downloadFile, formatDateTime } from '@/utils/index'
 import Using from './Using';
 import { getSeats, uploadCustomers, exportCustomers, importCustomers } from '@/api/seat_api';
 export default {
@@ -300,7 +300,7 @@ export default {
             console.log(this.file);
             const res = await uploadCustomers({ file: this.file });
             if (res) {
-                this.$Message.success('上传成功')
+                this.$Message.success('新增宾客成功')
                 this.file = null;
                 this.$refs.fileInput.value = null;
                 this.excelDatas = res.data.map(item => {
@@ -359,8 +359,8 @@ export default {
                     item.detail = item.ct_description;
                     item.people = item.ct_organizer_name;
                     item.number = item.ct_number;
-                    item.start = item.ct_begin_time;
-                    item.end = item.ct_end_time;
+                    item.start = formatDateTime(item.ct_begin_time);
+                    item.end = formatDateTime(item.ct_end_time);
                     return item;
                 })
                 this.seatDatas = _.cloneDeep(datas);
