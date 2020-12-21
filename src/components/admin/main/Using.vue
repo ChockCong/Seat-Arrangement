@@ -169,7 +169,7 @@
     </div>
 </template>
 <script>
-import { confirmModal, downloadFile, checkFiles, formatDateTime } from '@/utils/index'
+import { confirmModal, downloadFile, checkFiles, formatDateTime, openNewWindow } from '@/utils/index'
 import Setting from './Setting';
 import { getTemplates, rTemplate, dTemplate, uploadCustomers, exportCustomers, importCustomers, cSeat, uSeat } from '@/api/seat_api'
 export default {
@@ -457,13 +457,13 @@ export default {
             }
         },
         async download() {
-            this.$Message.loading({
-                content: '正在下载，请稍后...',
-                duration: 2
-            });
-            const res = await exportCustomers();
-            // let dFile = new File(res, '1.xlsx');
-            downloadFile(res, '宾客名单模板.xlsx');
+            openNewWindow({ url: process.env.VUE_APP_SEAT_API+'customer/export', full: true });
+            // this.$Message.loading({
+            //     content: '正在下载，请稍后...',
+            //     duration: 2
+            // });
+            // const res = await exportCustomers();
+            // downloadFile(res, '宾客名单模板.xlsx');
         },
         async upload(e) {
             const file = e.target.files;
