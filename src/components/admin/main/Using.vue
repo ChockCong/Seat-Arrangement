@@ -10,8 +10,8 @@
             <div class="title-area">
                 <Steps :current="step - 1" size="small" class="step-bar">
                     <Step :title="seeType ? '会场模板' : editType ? '会场重设' : '选择会场模板'" content=""></Step>
-                    <Step :title="seeType ? '宾客名单' : '上传宾客名单'" content=""></Step>
                     <Step :title="'会场预览'" content=""></Step>
+                    <!-- <Step :title="seeType ? '宾客名单' : '上传宾客名单'" content=""></Step> -->
                     <!-- <Step :title="`第4步：确定座位编号`" content=""></Step> -->
                 </Steps>
                 <!-- <section  class="button-area-item" v-if="step === 4">
@@ -21,7 +21,6 @@
                 <template v-if="step === 1 && !editType">
                     <div class="button-area">
                         <Button v-if="!seeType" type="primary" icon="md-add" @click="addNew">新增模板</Button>
-                        <!-- <Button v-if="!seeType" type="primary" icon="md-trash" @click="deleteNew">删除模板</Button> -->
                         <Select style="width: 100px;" v-model="searchSelect">
                             <Option value="seatName" label="会场模板名"></Option>
                         </Select>
@@ -33,7 +32,7 @@
                         </span>
                     </div>
                 </template>
-                <template v-if="step === 2">
+                <template v-if="step === 3">
                     <div class="button-area clear-flex">
                         <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
                         <Button v-if="!seeType" type="primary" icon="ios-cloud-download-outline" @click="download">下载模板</Button>
@@ -62,7 +61,7 @@
                     <template v-if="step === 1 && editType">
                         <Setting :type="'seats'" :editObj="seatListObj" :editList="seatList"></Setting>
                     </template>
-                    <template v-if="step === 2">
+                    <template v-if="step === 3">
                         <Table ref="table" border stripe :max-height="tableHeight" :width="650" :loading="false" :columns="excelColumns" :data="excelDatas"  @on-selection-change="onSelectClientChange">
                             <template slot-scope="{ row }" slot="client_name">
                                 <template v-if="!row.edit">{{ row.client_name }}</template>
@@ -81,7 +80,7 @@
                             </template>
                         </Table>
                     </template>
-                    <template v-if="step === 3">
+                    <template v-if="step === 2">
                         <div class="preview">
                             <div class="preview-img">
                                 <div class="image">会场图</div>
@@ -134,12 +133,13 @@
                             </div>
                         </div>
                     </template>
-                    <div class="button-area-item" :class="!seeType && step === 2 ? 'step2' : ''">
-                        <Button v-if="hasClients && step === 2 && !seeType" type="error" icon="md-trash" @click="deletes">删除宾客</Button>
+                    <div class="button-area-item" :class="!seeType && step === 3 ? 'step2' : ''">
+                        <Button v-if="hasClients && step === 3 && !seeType" type="error" icon="md-trash" @click="deletes">删除宾客</Button>
                         <section>
-                            <Button type="primary" v-if="[2,3].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
-                            <Button type="primary" v-if="step < 3" @click="changeStep('next')">{{ '下一步' }}</Button>
-                            <Button type="primary" v-if="step === 3 && !seeType" @click="finalSave">{{ '确认生成' }}</Button>
+                            <Button type="primary" v-if="[2].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
+                            <Button type="primary" v-if="step < 2" @click="changeStep('next')">{{ '下一步' }}</Button>
+                            <Button type="primary" v-if="step === 2 && !seeType" @click="finalSave">{{ editType ? '完成编辑' : '确认生成' }}</Button>
+                            <!-- <Button type="primary" v-if="step === 3" @click="saveUpload">{{ '确认上传' }}</Button> -->
                         </section>
                     </div>
                 </div>
@@ -465,6 +465,9 @@ export default {
             // const res = await exportCustomers();
             // downloadFile(res, '宾客名单模板.xlsx');
         },
+        clickFile() {
+            this.$refs.fileInput.click();
+        },
         async upload(e) {
             const file = e.target.files;
             this.file = file[0];
@@ -472,7 +475,7 @@ export default {
             if (!checkFiles(0, 'excel', this.file)) return;
             const res = await uploadCustomers({ file: this.file });
             if (res) {
-                this.$Message.success('上传成功')
+                this.$Message.success('新增宾客成功')
                 this.file = null;
                 this.$refs.fileInput.value = null;
                 this.excelDatas = res.data.map(item => {
@@ -489,8 +492,8 @@ export default {
             }
             this.$refs.fileInput.value = null;
         },
-        clickFile() {
-            this.$refs.fileInput.click();
+        saveUpload() {
+
         },
         deletes() {
             if (!this.selectedClients.length) {
@@ -569,7 +572,7 @@ export default {
         },
         stepfun(type) {
             this.step = type === 'next' ? this.step + 1 : this.step - 1;
-            if(this.editType && this.step === 2) {
+            if(this.editType && this.step === 3) {
                 this.$nextTick(() => {
                     this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 160;
                 })
@@ -579,7 +582,7 @@ export default {
             if (this.step === 1 && !this.editType) {
                 if (!this.showSelected) return this.$Message.warning({content: '请先选择一个模板', closable: true});
             }
-            if (this.step === 2 && type === 'next' && !this.seeType) {
+            if (this.step === 3 && type === 'next' && !this.seeType) {
                 return confirmModal('confirm', '提示', `<p>是否确认宾客名单无误？</p>`, this.stepfun, type);
             }
             this.stepfun(type);
@@ -633,26 +636,27 @@ export default {
                 ctDescription: this.details,
                 ctImgUrl: this.selectedModule.ct_img_url
             };
-            let editRes = null;
+            // let editRes = null;
             if (this.editType) {
                 params.ctId = this.editData.ct_id;
-                let list = this.excelDatas.filter(item => {
-                    return item.client_name && item.seat_no;
-                });
-                list = list .map(item => {
-                    return {
-                        name: item.client_name,
-                        tableNumber: item.seat_no,
-                        description: item.des,
-                    }
-                })
-                editRes = [await importCustomers({ ctId: this.editData.ct_id, customer: list }), await uSeat(params)];
+                // let list = this.excelDatas.filter(item => {
+                //     return item.client_name && item.seat_no;
+                // });
+                // list = list .map(item => {
+                //     return {
+                //         name: item.client_name,
+                //         tableNumber: item.seat_no,
+                //         description: item.des,
+                //     }
+                // })
+                // editRes = [await importCustomers({ ctId: this.editData.ct_id, customer: list }), await uSeat(params)];
             }
-            const res = !this.editType ? await cSeat(params) : await Promise.all(editRes);
+            const res = !this.editType ? await cSeat(params) : await uSeat(params);
             console.log(res)
-            if (res || (this.editType && res.length === 2)) {
+            if (res) {
                 this.$Message.success(!this.editType ? '新增会场成功' : '编辑会场成功');
                 this.$router.push('seat-list');
+                // this.changeStep('next');
             }
         }
     },

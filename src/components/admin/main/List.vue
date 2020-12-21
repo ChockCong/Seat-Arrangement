@@ -52,7 +52,7 @@
                             <Input v-else v-model="row.des" />
                         </template>
                         <template slot-scope="{ row, index }" slot="action">
-                            <Button type="primary" size="small" @click="changePeoples(row, index)">{{ row.edit ? '保存' : '编辑' }}</Button>
+                            <Button type="primary" size="small" v-if="showEditOne(index)" @click="changePeoples(row, index)">{{ row.edit ? '保存' : '编辑' }}</Button>
                         </template>
                     </Table>
                     <div class="button-area bottom">
@@ -66,7 +66,7 @@
     </div>
 </template>
 <script>
-import { confirmModal, downloadFile, formatDateTime } from '@/utils/index'
+import { confirmModal, downloadFile, formatDateTime, checkFiles } from '@/utils/index'
 import Using from './Using';
 import { getSeats, uploadCustomers, exportCustomers, importCustomers } from '@/api/seat_api';
 export default {
@@ -161,6 +161,7 @@ export default {
                     width: 80
                 }
             ],
+            changeCopyPeopleIndex: -1,
             excelDatas: [],
             copyExcelDatas: [],
             searchClientFun: null,
@@ -248,6 +249,7 @@ export default {
                 des: '',
                 edit: true
             });
+            this.debounceClientsSearch();
         },
         deletes() {
             if (!this.selectedClients.length) {
@@ -298,6 +300,7 @@ export default {
             const file = e.target.files;
             this.file = file[0];
             console.log(this.file);
+            if (!checkFiles(0, 'excel', this.file)) return;
             const res = await uploadCustomers({ file: this.file });
             if (res) {
                 this.$Message.success('新增宾客成功')
@@ -341,14 +344,28 @@ export default {
             }
         },
         changePeoples(row, index) {
-          if (!row.edit) return this.excelDatas[index].edit = !row.edit;
-          let { client_name, seat_no, des } = row;
-          if (!client_name || !seat_no) return this.$Message.warning('请填写姓名和座位号')
-          this.excelDatas[index].client_name = client_name;
-          this.excelDatas[index].seat_no = seat_no;
-          this.excelDatas[index].des = des;
-          this.excelDatas[index].edit = !row.edit;
-          this.$set(this.copyExcelDatas, index, this.excelDatas[index]);
+            if (!row.edit) {
+                return this.excelDatas[index].edit = !row.edit;
+                // this.changeCopyPeopleIndex = this.copyExcelDatas.findIndex(item => {
+                //     return item.client_name === client_name && item.seat_no === seat_no && item.des === des;
+                // });
+                // return;
+            }
+            let { client_name, seat_no, des } = row;
+            if (!client_name || !seat_no || !des) return this.$Message.warning('请填写姓名和座位号')
+            this.excelDatas[index].client_name = client_name;
+            this.excelDatas[index].seat_no = seat_no;
+            this.excelDatas[index].des = des;
+            this.excelDatas[index].edit = !row.edit;
+            let changeCopyPeopleIndex = this.copyExcelDatas.findIndex(item => {
+                return item.client_name === client_name && item.seat_no === seat_no && item.des === des;
+            });
+            if (changeCopyPeopleIndex === -1) this.copyExcelDatas.push(this.excelDatas[index]);
+            else this.$set(this.copyExcelDatas, changeCopyPeopleIndex, this.excelDatas[index]);
+            this.debounceClientsSearch();
+        },
+        showEditOne(index) {
+            return !this.excelDatas.some(item => {return item.edit; }) || this.excelDatas[index].edit
         },
         async getList() {
             const res = await getSeats();
