@@ -158,7 +158,7 @@
                     </FormItem>
                 </Form>
             </Modal>
-            <Modal v-model="nModel" :title="'模板预览'">
+            <Modal v-model="nModel" :title="'模板预览'" width="700">
                 <div class="modal-form">
                     <img :src="mImage" />
                     <!-- <img :src="'http://testcodethunder.oss-cn-shenzhen.aliyuncs.com/images/seat20201216233408.jpg'" /> -->
@@ -617,7 +617,7 @@ export default {
                     item.img = name[1];
                     item.number = item.ct_number;
                     item.creater = item.ct_creator_name;
-                    item.created = item.ct_create_time;
+                    item.created = formatDateTime(item.ct_create_time);
                     item.chceked = false;
                     item.disabled = false;
                     return item;

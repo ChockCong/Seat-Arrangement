@@ -45,7 +45,7 @@
                         </template>
                         <template slot-scope="{ row }" slot="seat_no">
                             <template v-if="!row.edit">{{ row.seat_no }}</template>
-                            <Input v-else v-model="row.seat_no" />
+                            <Input v-else v-model="row.seat_no" type="number" />
                         </template>
                         <template slot-scope="{ row }" slot="des">
                             <template v-if="!row.edit">{{ row.des }}</template>
@@ -180,11 +180,22 @@ export default {
         hasFile() {
             return this.file;
         },
+        clientsEdited() {
+            return this.excelDatas.some(item=> { return item.edit });
+        }
     },
     watch:{
         searchClientSelect() {
             this.searchClientInput = '';
             this.debounceClientsSearch();
+        },
+        mModel(v) {
+            if (!v) {
+                this.excelDatas = [];
+                this.copyExcelDatas = [];
+                this.searchClientSelect = 'clientName';
+                this.searchClientInput = '';
+            }
         }
     },
     methods: {
@@ -243,13 +254,45 @@ export default {
             this.$refs.fileInput.click();
         },
         adds() {
-            this.excelDatas.push({
+            let sortClients = [];
+            if (this.copyExcelDatas.length) sortClients = _.orderBy(this.copyExcelDatas, 'id', 'desc');
+            let newData = {
+                id: !sortClients.length ? 1 : sortClients[0].id+1,
                 client_name: '',
                 seat_no: 0,
                 des: '',
                 edit: true
-            });
+            };
+            this.excelDatas.push(newData);
+            this.copyExcelDatas.push(newData);
+        },
+        changePeoples(row, index) {
+            if (!row.edit) {
+                return this.excelDatas[index].edit = !row.edit;
+                // this.changeCopyPeopleIndex = this.copyExcelDatas.findIndex(item => {
+                //     return item.client_name === client_name && item.seat_no === seat_no && item.des === des;
+                // });
+                // return;
+            }
+            let copyIndex = this.copyExcelDatas.findIndex(item => {
+                return item.id === row.id;
+            })
+            let { client_name, seat_no, des } = row;
+            if (!client_name || !seat_no || !des) return this.$Message.warning('请填写姓名和座位号')
+            this.excelDatas[index].client_name = client_name;
+            this.excelDatas[index].seat_no = seat_no;
+            this.excelDatas[index].des = des;
+            this.excelDatas[index].edit = !row.edit;
+            console.log(copyIndex, this.excelDatas[index]);
+            if (copyIndex > -1) {
+                this.copyExcelDatas[copyIndex].client_name = client_name;
+                this.copyExcelDatas[copyIndex].seat_no = seat_no;
+                this.copyExcelDatas[copyIndex].des = des;
+            }
             this.debounceClientsSearch();
+        },
+        showEditOne(index) {
+            return !this.excelDatas.some(item => {return item.edit; }) || this.excelDatas[index].edit
         },
         deletes() {
             if (!this.selectedClients.length) {
@@ -264,13 +307,13 @@ export default {
         async sureDelete() {
             const fun = () => {
                 let selected = this.selectedClients.map(val => {
-                    return val.client_name;
+                    return val.id;
                 });
                 console.log(selected);
                 let copyDatas = _.cloneDeep(this.copyExcelDatas);
                 copyDatas.forEach(item => {
-                    if (selected.includes(item.client_name)) {
-                        this.copyExcelDatas.splice(this.copyExcelDatas.findIndex(v => { return item.client_name === v.client_name; }), 1);
+                    if (selected.includes(item.id)) {
+                        this.copyExcelDatas.splice(this.copyExcelDatas.findIndex(v => { return item.id === v.id; }), 1);
                     }
                 });
                 this.selectedClients = [];
@@ -306,8 +349,9 @@ export default {
                 this.$Message.success('新增宾客成功')
                 this.file = null;
                 this.$refs.fileInput.value = null;
-                this.excelDatas = res.data.map(item => {
+                this.excelDatas = res.data.map((item,index) => {
                     return {
+                        id: index+1,
                         client_name: item.name,
                         seat_no: item.tableNumber,
                         des: item.description,
@@ -331,7 +375,7 @@ export default {
                 list = list .map(item => {
                     return {
                         name: item.client_name,
-                        tableNumber: item.seat_no,
+                        tableNumber: Number(item.seat_no),
                         description: item.des,
                     }
                 })
@@ -342,30 +386,6 @@ export default {
                     _this.mModel = false;
                 }
             }
-        },
-        changePeoples(row, index) {
-            if (!row.edit) {
-                return this.excelDatas[index].edit = !row.edit;
-                // this.changeCopyPeopleIndex = this.copyExcelDatas.findIndex(item => {
-                //     return item.client_name === client_name && item.seat_no === seat_no && item.des === des;
-                // });
-                // return;
-            }
-            let { client_name, seat_no, des } = row;
-            if (!client_name || !seat_no || !des) return this.$Message.warning('请填写姓名和座位号')
-            this.excelDatas[index].client_name = client_name;
-            this.excelDatas[index].seat_no = seat_no;
-            this.excelDatas[index].des = des;
-            this.excelDatas[index].edit = !row.edit;
-            let changeCopyPeopleIndex = this.copyExcelDatas.findIndex(item => {
-                return item.client_name === client_name && item.seat_no === seat_no && item.des === des;
-            });
-            if (changeCopyPeopleIndex === -1) this.copyExcelDatas.push(this.excelDatas[index]);
-            else this.$set(this.copyExcelDatas, changeCopyPeopleIndex, this.excelDatas[index]);
-            this.debounceClientsSearch();
-        },
-        showEditOne(index) {
-            return !this.excelDatas.some(item => {return item.edit; }) || this.excelDatas[index].edit
         },
         async getList() {
             const res = await getSeats();

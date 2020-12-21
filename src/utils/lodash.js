@@ -1,6 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import debounce from 'lodash/debounce';
-// import orderBy from 'lodash/orderBy';
+import orderBy from 'lodash/orderBy';
 // import pick from 'lodash/pick';
 // import isArray from 'lodash/isArray';
 // import omit from 'lodash/omit';
@@ -22,7 +22,7 @@ import has from 'lodash/has';
 // import differenceBy from 'lodash/differenceBy';
 // import concat from 'lodash/concat';
 // import values from 'lodash/values';
-// import sortBy from 'lodash/sortBy';
+import sortBy from 'lodash/sortBy';
 // import uniqBy from 'lodash/uniqBy';
 // import chunk from 'lodash/chunk';
 // import compact from 'lodash/compact';
@@ -30,7 +30,7 @@ import has from 'lodash/has';
 export default {
 	isEmpty,
 	debounce,
-	// orderBy,
+	orderBy,
 	// pick,
 	// isArray,
 	// omit,
@@ -52,7 +52,7 @@ export default {
 	// differenceBy,
 	// concat,
 	// values,
-	// sortBy,
+	sortBy
 	// uniqBy,
 	// chunk,
 	// compact,
