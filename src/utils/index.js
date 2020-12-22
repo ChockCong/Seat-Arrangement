@@ -1,8 +1,9 @@
 import Vue from 'vue';
-import router from '../router/router'
+import router from '../router/router';
 const vm = new Vue();
+
 const fileType = {
-    excel: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'xlsx'],
+    excel: ['xlsx', 'xls'],
 }
 Date.prototype.format = function (format) {
     var o = {
@@ -160,8 +161,10 @@ export function checkFiles(size = 0/* 单位M */, type = ''/* 文件术语详见
         }
     }
     if (type) {
-        if (!fileType[type].includes(file.type)) {
-            Vue.prototype.errorPopHandler(`只能上传${type}类型文件，请重新上传`);
+        let fileExt = file.name.replace(/.+\./, "");
+        const fileSetType = fileType[type];
+        if (fileSetType.indexOf(fileExt.toLowerCase()) === -1) {
+            Vue.prototype.errorPopHandler(`只能上传${type.toUpperCase()}类型文件，请重新上传`);
             return false;
         }
     }

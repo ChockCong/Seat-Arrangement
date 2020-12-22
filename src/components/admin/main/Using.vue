@@ -654,8 +654,15 @@ export default {
             const res = !this.editType ? await cSeat(params) : await uSeat(params);
             console.log(res)
             if (res) {
-                this.$Message.success(!this.editType ? '新增会场成功' : '编辑会场成功');
-                this.$router.push('seat-list');
+                if (this.editType) return this.$Message.success('编辑会场成功');
+                this.$Message.loading({
+                    content: '新增会场成功，即将跳转至会场记录，上传宾客名单...',
+                    duration: 1
+                });
+                setTimeout(() => {
+                    this.$router.push('seat-list');
+                }, 1000);
+                // this.$router.push('seat-list');
                 // this.changeStep('next');
             }
         }
