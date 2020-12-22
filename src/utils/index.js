@@ -2,7 +2,7 @@ import Vue from 'vue';
 import router from '../router/router'
 const vm = new Vue();
 const fileType = {
-    excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    excel: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'xlsx'],
 }
 Date.prototype.format = function (format) {
     var o = {
@@ -160,7 +160,7 @@ export function checkFiles(size = 0/* 单位M */, type = ''/* 文件术语详见
         }
     }
     if (type) {
-        if (file.type !== fileType[type]) {
+        if (!fileType[type].includes(file.type)) {
             Vue.prototype.errorPopHandler(`只能上传${type}类型文件，请重新上传`);
             return false;
         }

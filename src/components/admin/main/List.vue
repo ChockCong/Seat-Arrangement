@@ -29,7 +29,7 @@
                 <div class="file-modal">
                     <div class="button-area clear-flex">
                         <Button type="primary" icon="ios-cloud-download-outline" @click="download">下载模板</Button>
-                        <input type="file" ref="fileInput" hidden accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="upload"/>
+                        <input type="file" ref="fileInput" hidden accept="xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" @change="upload"/>
                         <Button icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ '上传文件' }}</Button>
                         <Button type="primary" icon="md-add" @click="adds">新增宾客</Button>
                         <Select style="width: 100px;" v-model="searchClientSelect">
