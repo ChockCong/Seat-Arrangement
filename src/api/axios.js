@@ -88,7 +88,7 @@ export const reqJsonData = async ({
 			const Axios = !isformData ? axios(config) : axios.post(config.url, transformRequest, config);
 			Axios
 				.then(res => {
-					// console.log(res.data.errorCode);
+					console.log(loginStatus.includes(res.data.status), res.data.status);
 					if (loginStatus.includes(res.data.status)) {
 						Vue.prototype.errorPopHandler(res.data.status === '401' ? '用户信息已过期，请重新登陆' : '登陆失败，请重试');
 						removeCookie();

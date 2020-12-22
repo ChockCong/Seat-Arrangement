@@ -53,7 +53,7 @@
                             </Row>
                             <Row class="row">
                                 <ICol span="24">
-                                    <FormItem label="用户名" prop="stName">
+                                    <FormItem label="昵称" prop="stName">
                                         <Input prefix="md-happy" v-model="registForm.stName" placeholder="用户名" clearable>
                                             <Icon v-if="hasNameTag" type="ios-loading" size=18 class="demo-spin-icon-load" slot="suffix"></Icon>
                                         </Input>
@@ -305,7 +305,10 @@ export default {
             });
         },
         afterLogin(res) {
-            let data = res.data;
+            // let data = res.data;
+            let data = res.data.content;
+            data.admin_token = res.data.token;
+            data.token_overtime = res.data.tokenOverTime;
             this.$store.commit('SET_ADMIN_INFO', data);
             setCookie(data);
             if (this.$store.getters.getAdminToken) {
@@ -332,7 +335,7 @@ export default {
                     const res = await adminRegister(params);
                     this.isShowLoading = false;
                     if (res && !_.isEmpty(res) && res.data) {
-                        this.st = setTimeout(() => {
+                        setTimeout(() => {
                             this.afterLogin(res)
                         }, 2100);
                         this.$Message.loading({
@@ -363,10 +366,7 @@ export default {
             });
         }
     },
-    beforeDestroy() {
-        if(this.st) clearTimeout(this.st)
-        console.log('setTomeout', this.st);
-    }
+    beforeDestroy() {}
 }
 </script>
 

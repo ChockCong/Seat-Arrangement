@@ -162,6 +162,7 @@ export function checkFiles(size = 0/* 单位M */, type = ''/* 文件术语详见
     }
     if (type) {
         let fileExt = file.name.replace(/.+\./, "");
+        console.log(fileExt);
         const fileSetType = fileType[type];
         if (fileSetType.indexOf(fileExt.toLowerCase()) === -1) {
             Vue.prototype.errorPopHandler(`只能上传${type.toUpperCase()}类型文件，请重新上传`);

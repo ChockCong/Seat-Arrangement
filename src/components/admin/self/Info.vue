@@ -23,7 +23,7 @@
                     <div class="content-box">
                         <Tag v-if="index === 1" color="orange" size="large">{{level(row.content)}}</Tag>
                         <Button v-if="index === 1" type="primary" @click="changeRule">修改</Button>
-                        <Input v-if="index === 0" type="text" v-model="row.content" :placeholder="'输入用户名'" />
+                        <Input v-if="index === 0" type="text" v-model="row.content" :placeholder="'输入昵称'" />
                         <Button v-if="index === 0" type="primary" :loading="row.loading" style="margin-left: 10px" @click="datasApi(row)">{{ '修改' }}</Button>
                         <div class="flex-box" v-if="[2,3].includes(index)">
                             <section>
@@ -174,13 +174,13 @@ export default {
                 data.content = e.content;
                 data.code = e.code
             }
-            if (title === '用户名') {
+            if (title === '昵称') {
                 this.$store.commit('SET_ADMIN_NAME', {name: e.content});
             }
         },
         async datasApi(row) {
-            if (row.title === '用户名') {
-                if (!row.content || !row.content.trim()) return this.$Message.warning('用户名不能为空')
+            if (row.title === '昵称') {
+                if (!row.content || !row.content.trim()) return this.$Message.warning('昵称不能为空')
                 this.datas[0].loading = true;
                 const res = await updateUserInfo({
                     ctId: String(this.adminInfo.ctId),
@@ -261,7 +261,7 @@ export default {
     },
     async beforeMount() {
         this.datas = [{
-            title: '用户名',
+            title: '昵称',
             content: this.adminInfo.ctName,
             loading: false
             // cellClassName: {
