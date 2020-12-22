@@ -66,7 +66,7 @@
     </div>
 </template>
 <script>
-import { confirmModal, downloadFile, formatDateTime, checkFiles } from '@/utils/index'
+import { confirmModal, downloadFile, formatDateTime, checkFiles, openNewWindow } from '@/utils/index'
 import Using from './Using';
 import { getSeats, uploadCustomers, exportCustomers, importCustomers } from '@/api/seat_api';
 export default {
@@ -200,9 +200,9 @@ export default {
     },
     methods: {
         async download() {
-            const res = await exportCustomers();
-            // let dFile = new File(res, '1.xlsx');
-            downloadFile(res, '宾客名单模板.xlsx');
+            openNewWindow({ url: process.env.VUE_APP_SEAT_API+'customer/export', full: true });
+            // const res = await exportCustomers();
+            // downloadFile(res, '宾客名单模板.xlsx');
         },
         debounceSearch() {
             if (this.searchInput) {
