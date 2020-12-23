@@ -300,7 +300,7 @@ export default {
                     tag = true;
                     gotoSuccess(tag);
                 } else {
-                    this.$Message.error('请输入正确登录名和密码');
+                    this.$Message.warning('请输入正确登录名和密码');
                 }
             });
         },
@@ -346,7 +346,7 @@ export default {
                         this.$Message.success('登录失败，请重试');
                     }
                 } else {
-                    this.$Message.error('请输入正确注册信息');
+                    this.$Message.warning('请输入正确注册信息');
                 }
             }
             this.$refs.registF.validate(async (valid) => {
@@ -361,7 +361,7 @@ export default {
                         gotoSuccess(tag);
                     }
                 } else {
-                    this.$Message.error('请输入正确注册信息');
+                    this.$Message.warning('请输入正确注册信息');
                 }
             });
         }

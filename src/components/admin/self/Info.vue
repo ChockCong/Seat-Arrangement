@@ -191,7 +191,7 @@ export default {
                         this.datas[0].loading = false;
                         this.datasChange(row, row.title);
                         return this.$Message.success('修改成功');
-                    }, 1000);
+                    }, 500);
                 }
             } else if (row.title === '邮箱地址') {
                 if (!row.content || !row.content.trim()) return this.$Message.warning('邮箱地址不能为空')

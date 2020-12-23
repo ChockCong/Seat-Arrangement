@@ -409,7 +409,7 @@ export default {
                     }
                 } else {
                     this.cancelLoading(500);
-                    this.$Message.error('请输入正确的子账号信息');
+                    this.$Message.warning('请输入正确的子账号信息');
                 }
             });
         },

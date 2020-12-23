@@ -1,7 +1,7 @@
 <template>
 <div style="height: 100%" :style="type === 'seats' ? 'border-bottom: 2px solid #e8eaec;' : ''">
     <div v-if="editList.length && type === 'template'" class="index-vue-settingedit-title">
-        <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back', this.reflash) }">返回会场模板</Button>
+        <Button type="primary" class="back" icon="md-arrow-round-back" @click="() => { this.$emit('back', this.reflash) }">返回会场模板</Button>
         <span style="margin-left: 10px">当前会场模板：</span>
         <Tag style="margin-top: -2px;" size="large" color="success">{{ editObj.moduleName }}</Tag>
     </div>
@@ -75,7 +75,7 @@
                     <Button size="small" shape="circle" @click="selectLeave(step)">{{ '全选位置' }}</Button>
                     <Button size="small" shape="circle" @click="selectLeave(0)">{{ '取消全选' }}</Button>
                 </section>
-                <section  class="button-area-item" v-if="step === 4 && !previewTag">
+                <section  class="button-area-item" v-if="step === 4">
                     <!-- <Button :class="mutipliTag ? 'mutiply' : 'gary'" :type="'default'" @click="mutipliControl">
                         {{ '多选排号' }}
                     </Button>
@@ -106,17 +106,19 @@
                                 <i v-else-if="itemj.value === 3"  class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
                                 <div class="number-cycle" :class="itemj.active ? 'active' : ''" v-if="step === 4 && itemj.value === 3" @click="setNumber(indexI, indexJ)">{{itemj.No > 0 ? itemj.No : ''}}</div>
                             </div>
-                            <div v-else :key="indexJ" class="seat-area-row-item" :class="previewTag ? 'full' : ''" @click="selectItem(indexI, indexJ)">
-                                <template v-if="!previewTag">
+                            <!-- :class="previewTag ? 'full' : ''" -->
+                            <div v-else :key="indexJ" class="seat-area-row-item" @click="selectItem(indexI, indexJ)">
+                                <!-- v-if="!previewTag" -->
+                                <template>
                                     <i v-if="step === 2 && itemj.value !== 1 && (indexJ === 0 || indexI === 0 || indexI === seatList.length - 1 || indexJ === seatList[indexI].length - 1)" class="iconfont icon-men" :class="differentColor(itemj.value)"></i>
                                     <i v-else-if="step === 3 && itemj.value !== 1 && ((indexI > 0 && indexI < seatList.length - 1) && (indexJ > 0 &&indexJ < seatList[indexI].length - 1))" class="iconfont icon-efbdddbe" :class="differentColor(itemj.value)"></i>
                                     <i v-else-if="step === 1" class="iconfont icon-diban big" :class="differentColor(itemj.value)"></i>
                                     <div v-else class="full-icon"></div>
                                     <!-- <Icon :class="differentColor(itemj.value)" type="md-cube" /> -->
                                 </template>
-                                <template v-else>
+                                <!-- <template v-else>
                                     <i v-if="itemj.value" class="iconfont icon-diban" :class="differentColor(itemj.value)"></i>
-                                </template>
+                                </template> -->
                             </div>
                         </template>
                     </div>
@@ -124,16 +126,19 @@
             </div>
             <div class="button-area">
                 <section>
-                    <Button class="reset" v-if="!editTag && !previewTag" size="default" type="primary" @click="clearSeat">{{'重置会场'}}</Button>
-                    <Button v-if="previewTag" size="default" type="primary" @click="buildImage">{{'确定生成'}}</Button>
-                    <Button v-if="step === 4 && !mutipliTag" size="default" type="primary" @click="preview">
+                    <!-- && !previewTag -->
+                    <Button class="reset" v-if="!editTag" size="default" type="primary" @click="clearSeat">{{'重置会场'}}</Button>
+                    <!-- v-if="previewTag" -->
+                    <Button size="default" v-if="step === 4 && !mutipliTag" type="primary" @click="buildImage">{{'确定生成'}}</Button>
+                    <!-- <Button v-if="step === 4 && !mutipliTag" size="default" type="primary" @click="preview">
                         {{previewTag ? '取消预览' : '确定预览'}}
-                    </Button>
+                    </Button> -->
                     <Button v-if="step === 4 && mutipliTag" size="default" type="primary" @click="toNotMutiply">
                         {{'下一步'}}
                     </Button>
                     <Button v-if="[1,2,3].includes(step)" size="default" type="primary" @click="nextStep">{{!editType ? '下一步' : '会场下一步'}}</Button>
-                    <Button v-if="[2,3,4].includes(step) && !previewTag" size="default" type="primary" @click="previewStep">{{!editType ? '上一步' : '会场上一步'}}</Button>
+                     <!-- && !previewTag -->
+                    <Button v-if="[2,3,4].includes(step)" size="default" type="primary" @click="previewStep">{{!editType ? '上一步' : '会场上一步'}}</Button>
                 </section>
             </div>
         </div>
@@ -346,9 +351,10 @@ export default {
         },
         settingStart() {
             let reg = new RegExp(/\d/);
-            if (this.previewTag) {
-                return this.$Message.warning({content: '请取消预览再进行操作', closable: true});
-            } else if (!this.editTag) {
+            // if (this.previewTag) {
+            //     return this.$Message.warning({content: '请取消预览再进行操作', closable: true});
+            // } else 
+            if (!this.editTag) {
                 return this.$Message.warning({content: '请重置布局再进行操作', closable: true});
             }
             if (!reg.test(Number(this.rowNum)) || !reg.test(Number(this.colNum))) {
@@ -389,7 +395,7 @@ export default {
             this.imgUrl = null;
             this.copySeatList = [];
             this.editTag = true;
-            this.previewTag = false;
+            // this.previewTag = false;
             this.oss_url = '';
             this.totalOthers = {
                 totalName: '',
@@ -487,7 +493,8 @@ export default {
             if (!this.posMutipliTag) this.posMutipliSelect = [];
         },
         selectItem(i, j) {
-            if (this.previewTag || this.step === 4) return;
+            // this.previewTag || 
+            if (this.step === 4) return;
             if (this.step === 2) {
                 const rowBol = i === 0 || j === 0;
                 const colBol = i === this.seatList.length - 1 || j === this.seatList[0].length - 1;
@@ -543,7 +550,8 @@ export default {
             }
         },
         selectLeave(type) {
-            if (this.previewTag || this.step === 4) return;
+            // this.previewTag || 
+            if (this.step === 4) return;
             this.seatList.forEach((item, i) => {
                 item.forEach((val, j) => {
                     if (![1,2].includes(val.value) && ![0, this.seatList.length - 1].includes(i) && ![0, item.length - 1].includes(j) && this.step === 3) val.value = type;
@@ -748,15 +756,15 @@ export default {
         //         });
         //     }
         // },
-        preview() {
-            this.previewTag = !this.previewTag;
-            this.clearActive();
+        // preview() {
+        //     this.previewTag = !this.previewTag;
+        //     this.clearActive();
             // this.seatList.forEach(item => {
             //     item.forEach(val => {
             //         if (val.active) delete val.active;
             //     });
             // });
-        },
+        // },
         clearActive(isLoad = true) {
             this.seatList.forEach(item => {
                 item.forEach(val => {
@@ -780,20 +788,23 @@ export default {
             return `images/seat${str}${rand}.jpg`;
         },
         async buildImage() {
-            this.$Loading.start();
-            this.loading = true;
-            this.html2canvas(this.$refs.imageDom, this.opts).then(async canvas => {
-                // console.log(canvas)
-                // 转成图片，生成图片地址
-                this.imgUrl = canvas.toDataURL("image/png");
-                if (this.imgUrl) {
-                    this.$Loading.finish();
-                    this.loading = false;
-                    this.modal = true;
-                } else {
-                    this.$Loading.error();
-                    this.loading = false;
-                }
+            this.clearActive();
+            this.$nextTick(() => {
+                this.$Loading.start();
+                this.loading = true;
+                this.html2canvas(this.$refs.imageDom, this.opts).then(async canvas => {
+                    // console.log(canvas)
+                    // 转成图片，生成图片地址
+                    this.imgUrl = canvas.toDataURL("image/png");
+                    if (this.imgUrl) {
+                        this.$Loading.finish();
+                        this.loading = false;
+                        this.modal = true;
+                    } else {
+                        this.$Loading.error();
+                        this.loading = false;
+                    }
+                });
             });
         },
         async saveImage() {
@@ -811,7 +822,8 @@ export default {
                     this.reflash = true;
                     this.modal = false;
                     this.clearSeat();
-                    this.$emit('back', this.reflash);
+                    if (this.editType) this.$emit('back', this.reflash);
+                    else this.$router.push('seat-using');
                 }
             } else {
                 this.$Message.error('保存会场失败，请取消后重试或刷新');
@@ -878,6 +890,14 @@ export default {
     color: #666;
     padding: 10px 5px;
     border-bottom: 2px dashed #e8eaec;
+    & .back {
+        background: black;
+        border-color: black;
+        &:hover {
+            background: grey;
+            border-color: grey;
+        }
+    }
 }
 .index-vue-seatsetting {
     min-width: 1000px;
@@ -1031,6 +1051,7 @@ export default {
             overflow-y: auto;
             padding: 10px;
             .seat-area {
+                padding: 15px;
                 width: fit-content;
                 margin: auto;
                 // padding: 0 10px;

@@ -1,9 +1,9 @@
 <template>
     <div class="index-vue-seatusing" :class="editType ? 'edit-style' : ''">
-        <Setting v-if="showEditModel" style="width: 100%;" :type="'template'" :editObj="seatListObj" :editList="seatList" @back="backUsing"></Setting>
+        <Setting v-if="showEditModel" style="width: 100%;height: 92%;" :type="'template'" :editObj="seatListObj" :editList="seatList" @back="backUsing"></Setting>
         <div v-else class="right-side">
             <div class="edit-area" v-if="seeType || editType">
-                <Button type="primary" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场记录</Button>
+                <Button type="primary" class="back" icon="md-arrow-round-back" @click="() => { this.$emit('back') }">返回会场记录</Button>
                 <span style="margin-left: 10px">{{'当前会场：'}}</span>
                 <Tag style="margin-top: -2px;" size="large" color="success">{{ editData.name }}</Tag>
             </div>
@@ -20,7 +20,7 @@
             <div class="show-area" ref="show">
                 <template v-if="step === 1 && !editType">
                     <div class="button-area">
-                        <Button v-if="!seeType" type="primary" icon="md-add" @click="addNew">新增模板</Button>
+                        <!-- <Button v-if="!seeType" type="primary" icon="md-add" @click="addNew">新增模板</Button> -->
                         <Select style="width: 100px;" v-model="searchSelect">
                             <Option value="seatName" label="会场模板名"></Option>
                         </Select>
@@ -83,13 +83,23 @@
                     <template v-if="step === 2">
                         <div class="preview">
                             <div class="preview-img">
-                                <div class="image">会场图</div>
+                                <div class="image">
+                                    <img v-if="selectedModule" :src="selectedModule.ct_img_url" @click="preViewImage({ ct_img_url: selectedModule.ct_img_url })" />
+                                </div>
                             </div>
-                            <div class="info">
-                                <div class="info-item">
-                                    <p>会场名</p>
-                                    <div>
-                                        <Input :disabled="seeType" v-model="names" placeholder="输入会场名" />
+                            <div class="info" :class="seeType ? 'see_info' : ''">
+                                <div class="info-item flex">
+                                    <div class="item-flex">
+                                        <p>会场名</p>
+                                        <div>
+                                            <Input :disabled="seeType" v-model="seatInfo.names" placeholder="输入会场名" />
+                                        </div>
+                                    </div>
+                                    <div class="item-flex">
+                                        <p>主办人</p>
+                                        <div>
+                                            <Input :disabled="seeType" v-model="seatInfo.holders" placeholder="输入主办人名" />
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- <div class="info-item">
@@ -98,36 +108,30 @@
                                         <Input :disabled="seeType" v-model="details" placeholder="输入会场详情" />
                                     </div>
                                 </div> -->
-                                <div class="info-item flex">
-                                    <div class="item-flex">
-                                        <!-- <p>会场人数</p>
-                                        <div>
-                                            <Input :disabled="seeType" v-model="numbers" type="number" placeholder="输入参与会场人数" />
-                                        </div> -->
-                                        <p>会场详情</p>
-                                        <div>
-                                            <Input :disabled="seeType" v-model="details" placeholder="输入会场详情" />
-                                        </div>
-                                    </div>
-                                    <div class="item-flex">
-                                        <p>主办人</p>
-                                        <div>
-                                            <Input :disabled="seeType" v-model="holders" placeholder="输入主办人名" />
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="info-item">
                                     <p>举办时间</p>
                                     <div>
-                                        <DatePicker :disabled="seeType" type="datetime" v-model="times.start" :format="'yyyy-MM-dd HH:mm:ss'" placeholder="输入开始时间"></DatePicker>
+                                        <DatePicker :disabled="seeType" type="datetime" v-model="seatInfo.times.start" :format="'yyyy-MM-dd HH:mm:ss'" placeholder="输入开始时间"></DatePicker>
                                         <span style="margin: 0 10px; font-size: 14px">至</span>
-                                        <DatePicker :disabled="seeType" type="datetime" v-model="times.end" :format="'yyyy-MM-dd HH:mm:ss'" placeholder="输入结束时间"></DatePicker>
+                                        <DatePicker :disabled="seeType" type="datetime" v-model="seatInfo.times.end" :format="'yyyy-MM-dd HH:mm:ss'" placeholder="输入结束时间"></DatePicker>
                                     </div>
                                 </div>
                                 <div class="info-item">
-                                    <p>可扫码入场时间</p>
-                                    <div style="text-align: left;">
-                                        <DatePicker type="datetime" :disabled="seeType" v-model="times.qrcode" :format="'yyyy-MM-dd HH:mm:ss'" placeholder="输入扫码开始时间"></DatePicker>
+                                    <p>开始扫码时间</p>
+                                    <div>
+                                        <DatePicker type="datetime" :disabled="seeType" v-model="seatInfo.times.qrcode" :format="'yyyy-MM-dd HH:mm:ss'" placeholder="请输入开始扫码时间"></DatePicker>
+                                        <span style="margin: 0 10px; font-size: 14px">至</span>
+                                        <DatePicker :disabled="true" type="datetime" v-model="seatInfo.times.end" :format="'yyyy-MM-dd HH:mm:ss'" placeholder="同举办结束时间一致"></DatePicker>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <!-- <p>会场人数</p>
+                                    <div>
+                                        <Input :disabled="seeType" v-model="numbers" type="number" placeholder="输入参与会场人数" />
+                                    </div> -->
+                                    <p>会场详情</p>
+                                    <div>
+                                        <Input type="textarea" v-model="seatInfo.details" size="large" :class="seeType ? 'see_textarea' : ''" :disabled="seeType"  :autosize="{ minRows: 4, maxRows: 4 }" placeholder="输入会场详情"  />
                                     </div>
                                 </div>
                             </div>
@@ -136,7 +140,7 @@
                     <div class="button-area-item" :class="!seeType && step === 3 ? 'step2' : ''">
                         <Button v-if="hasClients && step === 3 && !seeType" type="error" icon="md-trash" @click="deletes">删除宾客</Button>
                         <section>
-                            <Button type="primary" v-if="[2].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
+                            <Button type="primary" v-if="!seeType && [2].includes(step)" @click="changeStep('pre')">{{ '上一步' }}</Button>
                             <Button type="primary" v-if="step < 2" @click="changeStep('next')">{{ '下一步' }}</Button>
                             <Button type="primary" v-if="step === 2 && !seeType" @click="finalSave">{{ editType ? '完成编辑' : '确认生成' }}</Button>
                             <!-- <Button type="primary" v-if="step === 3" @click="saveUpload">{{ '确认上传' }}</Button> -->
@@ -158,7 +162,7 @@
                     </FormItem>
                 </Form>
             </Modal>
-            <Modal v-model="nModel" :title="'模板预览'" width="700">
+            <Modal v-model="nModel" :title="'模板预览'" width="700" :footer-hide="true">
                 <div class="modal-form">
                     <img :src="mImage" />
                     <!-- <img :src="'http://testcodethunder.oss-cn-shenzhen.aliyuncs.com/images/seat20201216233408.jpg'" /> -->
@@ -296,14 +300,16 @@ export default {
                 ]
             },
             seeType: false,
-            holders: '',
-            names: '',
-            details: '',
-            numbers: 0,
-            times: {
-                start: '',
-                end:'',
-                qrcode: ''
+            seatInfo: {
+                holders: '',
+                names: '',
+                details: '',
+                // numbers: 0,
+                times: {
+                    start: '',
+                    end:'',
+                    qrcode: ''
+                },
             },
             editType: false,
             tableLoading: false
@@ -344,26 +350,30 @@ export default {
                         });
                     });
                 } else {
-                    if (v.opType === 'see') this.seeType = true;
+                    if (v.opType === 'see') {
+                        this.seeType = true;
+                        this.step = 2;
+                    }
                     else if (v.opType === 'edit') this.editType = true;
                     if (this.editType) {
                         let val = _.cloneDeep(v);
-                        val.ct_table_number = "-1,-1,-1,-1,-1,-1,1,2,3,-1,-1,4,-1,5,-1,-1,6,7,8,-1,-1,-1,-1,-1,-1";
-                        val.ct_content = "0,0,0,0,0,0,3,3,3,0,0,3,1,3,0,0,3,3,3,0,0,0,0,0,2";
-                        val.ct_row = 3;
-                        val.ct_col = 3;
-                        this.seatListObj = val
+                        // val.ct_table_number = "-1,-1,-1,-1,-1,-1,1,2,3,-1,-1,4,-1,5,-1,-1,6,7,8,-1,-1,-1,-1,-1,-1";
+                        // val.ct_content = "0,0,0,0,0,0,3,3,3,0,0,3,1,3,0,0,3,3,3,0,0,0,0,0,2";
+                        // val.ct_row = 3;
+                        // val.ct_col = 3;
+                        this.seatListObj = val;
                         this.formatSeats(this.seatListObj);
                     }
-                    this.holders = v.people;
-                    this.names = v.name;
-                    this.details = v.detail;
-                    this.numbers = Number(v.Number);
-                    this.times = {
+                    this.seatInfo.holders = v.people;
+                    this.seatInfo.names = v.name;
+                    this.seatInfo.details = v.detail;
+                    // this.seatInfo.numbers = Number(v.Number);
+                    this.seatInfo.times = {
                         start: v.start,
                         end:v.end,
-                        qrcode: v.ctQRCodeTime
+                        qrcode: v.ct_qr_code_time
                     };
+                    this.$set(this.selectedModule, 'ct_img_url', v.ct_img_url);
                 }
             }
         }
@@ -596,10 +606,10 @@ export default {
             this.nModel = true;
         },
         async editModel(row) {
-            this.loading = true;
-            const res = await rTemplate({ctId: row.ct_id});
-            console.log(res);
-            this.loading = false;
+            // this.loading = true;
+            // const res = await rTemplate({ctId: row.ct_id});
+            // console.log(res);
+            // this.loading = false;
             this.seatListObj = row;
             this.formatSeats(this.seatListObj);
             // this.seatList = [[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":1},{"value":3,"No":2},{"value":3,"No":3},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":4},{"value":3,"No":5},{"value":3,"No":6},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":3,"No":7},{"value":3,"No":8},{"value":3,"No":9},{"value":0,"No":-1}],[{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1},{"value":0,"No":-1}]];
@@ -625,15 +635,43 @@ export default {
                 this.seatDatas = _.cloneDeep(datas);
             }
         },
+        checkSeatInfo() {
+            const getTimeStamp = (date) => {
+                return new Date(date).getTime();
+            }
+            let holdTimeBol = getTimeStamp(this.seatInfo.times.start) >= getTimeStamp(this.seatInfo.times.end);
+            let codeTimeBol = getTimeStamp(this.seatInfo.times.qrcode) < getTimeStamp(this.seatInfo.times.start) && getTimeStamp(this.seatInfo.times.qrcode) > getTimeStamp(this.seatInfo.times.end);
+            if (!this.seatInfo.names.trim()) {
+                this.$Message.warning('请输入会场名');
+                return false;
+            } else if (!this.seatInfo.holders.trim()) {
+                this.$Message.warning('请输入举办人名');
+                return false;
+            } else if (!this.seatInfo.times.start || !this.seatInfo.times.end) {
+                this.$Message.warning('请输入完整的举办时间');
+                return false;
+            } else if (holdTimeBol) {
+                this.$Message.warning('举办开始时间只能早于举办结束时间');
+                return false;
+            } else if (!this.seatInfo.times.qrcode) {
+                this.$Message.warning('请输入开始扫码时间');
+                return false;
+            } else if (codeTimeBol) {
+                this.$Message.warning('开始扫码时间只能在举办时间段内');
+                return false;
+            } 
+            return true
+        },
         async finalSave() {
+            if (!this.checkSeatInfo()) return;
             let params = {
                 ctTemplateId: this.selectedModule.ct_id,
-                ctOrganizerName: this.holders,
-                ctName: this.names,
-                ctBeginTime: formatDateTime(this.times.start),
-                ctEndTime: formatDateTime(this.times.end),
-                ctQRCodeTime: formatDateTime(this.times.qrcode),
-                ctDescription: this.details,
+                ctOrganizerName: this.seatInfo.holders,
+                ctName: this.seatInfo.names,
+                ctBeginTime: formatDateTime(this.seatInfo.times.start),
+                ctEndTime: formatDateTime(this.seatInfo.times.end),
+                ctQRCodeTime: formatDateTime(this.seatInfo.times.qrcode),
+                ctDescription: this.seatInfo.details,
                 ctImgUrl: this.selectedModule.ct_img_url
             };
             // let editRes = null;
@@ -654,7 +692,11 @@ export default {
             const res = !this.editType ? await cSeat(params) : await uSeat(params);
             console.log(res)
             if (res) {
-                if (this.editType) return this.$Message.success('编辑会场成功');
+                if (this.editType) {
+                    this.$Message.success('编辑会场成功');
+                    this.$emit('back', true)
+                    return;
+                }
                 this.$Message.loading({
                     content: '新增会场成功，即将跳转至会场记录，上传宾客名单...',
                     duration: 1
@@ -672,7 +714,7 @@ export default {
         this.searchClientFun = _.debounce(this.debounceClientsSearch, 1000);
     },
     mounted() {
-        if(!this.editType) this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 110;
+        if(!this.editType && !this.seeType) this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 110;
     },
     async beforeMount() {
         // for(let i = 0; i < 100; i++) {
@@ -691,15 +733,15 @@ export default {
         if (this.seeType) {
             this.$nextTick(() => {
                 //TODO: 编辑
-                console.log(this.seatDatas.find(item => { return item.ct_id === this.editData.id; }));
-                this.selectedModule = _.cloneDeep(this.seatDatas.find(item => { return item.ct_id === this.editData.id; }));
-                this.seatDatas.forEach(item => {
-                    item.disabled = true;
-                    if (item.ct_id === this.selectedModule.ct_id) {
-                        // item.disabled = true;
-                        item.chceked = true;
-                    } 
-                });
+                // console.log(this.seatDatas.find(item => { return item.ct_id === this.editData.id; }));
+                // this.selectedModule = _.cloneDeep(this.seatDatas.find(item => { return item.ct_id === this.editData.id; }));
+                // this.seatDatas.forEach(item => {
+                //     item.disabled = true;
+                //     if (item.ct_id === this.selectedModule.ct_id) {
+                //         // item.disabled = true;
+                //         item.chceked = true;
+                //     } 
+                // });
                 this.$forceUpdate();
             });
         }
@@ -741,6 +783,14 @@ export default {
             text-align: left;
             padding: 0 0 10px 0;
             border-bottom: 2px dashed #e8eaec;
+            & .back {
+                background: black;
+                border-color: black;
+                &:hover {
+                    background: grey;
+                    border-color: grey;
+                }
+            }
         }
         & .title-area {
             display: flex;
@@ -826,18 +876,38 @@ export default {
             height: 350px;
             &-img {
                 box-sizing: border-box;
-                width: 500px;
-                padding: 10px;
+                width: 400px;
+                padding: 10px 20px 10px 0;
                 & .image {
-                    border: 1px solid black;
+                    // border-right: 1px solid black;
+                    padding: 10px;
+                    background: gray;
                     width: 100%;
                     height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    & img {
+                        cursor: pointer;
+                        max-height: 100%;
+                        max-width: 100%;
+                    }
                 }
             }
         }
         & .info {
+            &.see_info {
+                ::v-deep input {
+                    color: lightslategray;
+                }
+            }
+            & .see_textarea {
+                ::v-deep textarea {
+                    color: lightslategray;
+                }
+            }
             &-item {
-                padding: 10px 0;
+                padding: 8px 0;
                 text-align: left;
                 & p {
                     font-size: 14px;

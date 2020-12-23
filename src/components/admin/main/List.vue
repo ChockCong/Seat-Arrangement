@@ -3,7 +3,7 @@
         <div v-show="!editType" class="right-side">
             <div class="show-area">
                 <div class="button-area">
-                    <Button type="primary" icon="md-add" @click="() => { this.$router.push('seat-using'); }">新增会场</Button>
+                    <!-- <Button type="primary" icon="md-add" @click="() => { this.$router.push('seat-using'); }">新增会场</Button> -->
                     <!-- <Button type="primary" icon="md-trash">删除会场</Button> -->
                     <Select style="width: 100px;" v-model="searchSelect" @on-change="searchFun">
                         <Option value="name" label="会场名"></Option>
@@ -12,7 +12,7 @@
                     <Input style="width: 200px; margin: 0 10px" v-model="searchInput" placeholder="输入用户名搜索"  @input="searchFun" />
                 </div>
                 <div style="width: fit-content">
-                    <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="false" :columns="seatColumns" :data="seatDatas">
+                    <Table ref="table" border stripe :max-height="tableHeight" :width="1100" :loading="loading" :columns="seatColumns" :data="seatDatas">
                         <template slot-scope="{ row, index }" slot="action">
                             <Button type="primary" size="small" @click="seeRow(row, index)">{{ '查看' }}</Button>
                             <Button style="margin-left: 10px" type="primary" size="small" @click="editRow(row, index)">{{ '编辑' }}</Button>
@@ -31,7 +31,6 @@
                         <Button type="primary" icon="ios-cloud-download-outline" @click="download">下载模板</Button>
                         <input type="file" ref="fileInput" hidden accept="xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" @change="upload"/>
                         <Button icon="ios-cloud-upload-outline" type="primary" @click="clickFile">{{ '上传文件' }}</Button>
-                        <Button type="primary" icon="md-add" @click="adds">新增宾客</Button>
                         <Select style="width: 100px;" v-model="searchClientSelect">
                             <Option value="clientName" label="宾客名"></Option>
                             <Option value="seatNo" label="座位号"></Option>
@@ -56,8 +55,11 @@
                         </template>
                     </Table>
                     <div class="button-area bottom">
-                        <Button type="error" icon="md-trash" @click="deletes">删除宾客</Button>
-                        <Button type="primary" :loading="fileLoading" @click="sureCilents">{{ '确认上传' }}</Button>
+                        <section>
+                            <Button type="primary" icon="md-add" @click="adds">新增宾客</Button>
+                            <Button style="margin-left: 10px" type="error" icon="md-trash" @click="deletes">删除宾客</Button>
+                        </section>
+                        <Button type="primary" :loading="fileLoading" :disabled="!hasClients || clientsEdited" @click="sureCilents">{{ '确认上传' }}</Button>
                     </div>
                 </div>
             </Modal>
@@ -73,6 +75,7 @@ export default {
     name: 'List',
     data() {
         return {
+            loading: false,
             tableHeight: 0,
             searchSelect: 'name',
             searchInput: '',
@@ -215,11 +218,12 @@ export default {
                 this.seatDatas = _.cloneDeep(this.copySeatDatas);
             }
         },
-        backRow() {
+        backRow(refresh) {
             if (this.editType) {
                 this.editType = false;
                 this.editData = undefined;
             }
+            if (refresh) this.getList();
         },
         seeRow(row, index) {
             if (this.editType) {
@@ -323,7 +327,7 @@ export default {
                 setTimeout(() => {
                     fun();
                     resolve(true);
-                }, 2000);
+                }, 200);
             });
         },
         debounceClientsSearch() {
@@ -366,6 +370,7 @@ export default {
             
         },
         async sureCilents() {
+            if (!this.hasClients || this.clientsEdited) return this.$Message.warning('请检查宾客名单信息是否完善');
             this.fileLoading = true;
             let list = this.excelDatas.filter(item => {
                 return item.client_name && item.seat_no;
@@ -388,7 +393,9 @@ export default {
             }
         },
         async getList() {
+            this.loading = true;
             const res = await getSeats();
+            this.loading = false;
             if (res && res.data && res.data.content) {
                 let datas = res.data.content.map(item => {
                     item.id = item.ct_id;

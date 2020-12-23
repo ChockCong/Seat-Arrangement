@@ -116,7 +116,7 @@ export function formatDateTime(dates) {
     m = m < 10 ? ('0' + m) : m;
     let d = date.getDate();
     d = d < 10 ? ('0' + d) : d;
-    let h = date.getUTCHours();
+    let h = date.getHours();
     h = h < 10 ? ('0' + h) : h;
     let i = date.getMinutes();
     i = i < 10 ? ('0' + i) : i;

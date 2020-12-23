@@ -82,7 +82,7 @@ export default {
             this.$refs['forgetF'].validate((valid) => {
                 if (valid && this.forgetForm.account && this.forgetForm.value) this.$Message.success('发送成功');
                 else {
-                    this.$Message.error('请填写登录名和选择找回方式');
+                    this.$Message.warning('请填写登录名和选择找回方式');
                 }
             });
         },
