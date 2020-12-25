@@ -335,7 +335,7 @@ export default {
                     const res = await adminRegister(params);
                     this.isShowLoading = false;
                     if (res && !_.isEmpty(res) && res.data) {
-                        setTimeout(() => {
+                        this.st = setTimeout(() => {
                             this.afterLogin(res)
                         }, 2100);
                         this.$Message.loading({
@@ -366,7 +366,9 @@ export default {
             });
         }
     },
-    beforeDestroy() {}
+    beforeDestroy() {
+        if (this.st) clearTimeout(this.st)
+    }
 }
 </script>
 
