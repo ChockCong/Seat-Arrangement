@@ -105,6 +105,7 @@ export default {
         ::v-deep .ivu-alert-desc {
             p {
                 line-height: 2;
+                font-size: 13px;
             }
         }
     }
