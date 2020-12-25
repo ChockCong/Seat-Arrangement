@@ -14,7 +14,8 @@
                 <template slot-scope="{ row, index }" slot="content">
                     <div class="content-box">
                         <Tag v-if="[0,1].includes(index)" :color="index === 1 ? 'orange' : 'blue'">{{index === 1 ? level(row.content) : row.content}}</Tag>
-                        <b v-else>隐藏信息</b>
+                        <b v-else-if="index === 2">原邮箱地址</b>
+                        <b v-else>原电话号码</b>
                     </div>
                 </template>
             </Table>
@@ -27,12 +28,8 @@
                         <Button v-if="index === 0" type="primary" :loading="row.loading" style="margin-left: 10px" @click="datasApi(row)">{{ '修改' }}</Button>
                         <div class="flex-box" v-if="[2,3].includes(index)">
                             <section>
-                                <Input type="text" v-model="row.content" :disabled="index === 3 || !row.code.trim()" :placeholder="index === 2 ? '输入邮箱' : '输入手机号'" />
-                                <Button type="primary" style="margin-left: 10px" @click="datasApi(row)" :disabled="!row.code.trim()">{{ index === 2 ? '修改邮箱' : '修改手机' }}</Button>
-                            </section>
-                            <section>
-                                <Input type="text" v-model="row.code" :disabled="index === 3" :placeholder="index === 2 ? '输入邮箱验证码' : '输入手机验证码'" />
-                                <Button type="primary" style="margin-left: 10px" @click="send(index, row.content)">{{ '发送验证码' }}</Button>
+                                <Input type="text" v-model="row.content" :value="index === 2 ? '原邮箱地址' : '原电话号码'" :disabled="true" />
+                                <Button type="primary" style="margin-left: 10px" @click="changeMailPhone(index)">{{ '修改' }}</Button>
                             </section>
                         </div>
                     </div>
@@ -70,6 +67,31 @@
                     </Input>
                 </FormItem>
             </Form>
+        </Modal>
+        <Modal
+            v-model="nModel"
+            :title="modelContent === 2 ? '修改邮箱' : '修改电话'"
+            :loading="true"
+            :footer-hide="true"
+            @on-cancel="okMailPhone">
+            <div class="notSubForm">
+                <template v-if="!isReset">
+                    <section>
+                        <label style="width: 115px;">{{ modelContent === 2 ? '原邮箱地址' : '原电话号码' }}</label>
+                        <Button class="button" :type="!isSend ? 'primary' : 'default'" :disabled="isSend" @click="send">{{ isSend ? '已发送' : '发送验证码' }}</Button>
+                    </section>
+                    <section>
+                        <Input style="width: 115px;" v-model.trim="vaildateCode" :placeholder="modelContent === 2 ? '输入邮箱验证码' : '输入电话验证码'" />
+                        <Button class="button" :type="isSend ? 'primary' : 'default'" :disabled="!vaildateCode.trim() || !isSend" @click="vaildateCodes">{{ '校验验证码' }}</Button>
+                    </section>
+                </template>
+                <template v-else>
+                    <section>
+                        <Input style="width: 300px;" v-model.trim="newMailPhone" :placeholder="modelContent === 2 ? '输入新的邮箱地址' : '输入新的电话号码'" />
+                        <Button class="button" :type="isSend ? 'primary' : 'default'" :disabled="!newMailPhone.trim()" @click="okMailPhone(true)">{{ '确认修改' }}</Button>
+                    </section>
+                </template>
+            </div>
         </Modal>
     </div>
 </template>
@@ -121,6 +143,12 @@ export default {
             datas: [],
             originDatas: [],
             pwdModel: false,
+            nModel: false,
+            modelContent: '',
+            vaildateCode: '',
+            isSend: false,
+            isReset: false,
+            newMailPhone: '',
             seePwd: false,
             seeSubPwd: false,
             subForm: {
@@ -154,16 +182,41 @@ export default {
         changeRule() {
             return this.$Message.info('暂时不能修改权限，如需修改请联系管理员');
         },
-        async send(index, data) {
-            if (index === 3) return this.$Message.info('暂时不能修改手机，如需修改请联系管理员');
+        changeMailPhone(type) {
+            this.modelContent = type;
+            this.nModel = true;
+        },
+        async send() {
+            if (!this.modelContent) return;
+            if (this.modelContent === 3) return this.$Message.info('暂时不能修改手机，如需修改请联系管理员');
              this.$Message.loading({
                 content: '正在发送验证码，请稍后...',
-                duration: 3
+                duration: 2
             });
+            this.isSend = true;
             const res = await sendEmail();
             if (res) {
                 return this.$Message.success('发送验证码成功，请前往邮箱查看');
             }
+            
+        },
+        async vaildateCodes() {
+            this.isReset = true;
+        },
+        okMailPhone(request) {
+            let res = null;
+            if (request) {
+                res = true;
+                if (res) {
+                    this.$Message.success('修改成功');
+                    this.datas[this.modelContent].content = this.newMailPhone;
+                }
+            }
+            this.vaildateCode = '';
+            this.isSend = false;
+            this.isReset = false;
+            this.nModel = false;
+            this.modelContent = '';
         },
         datasChange(e, title) {
             console.log(e, title)
@@ -379,6 +432,20 @@ export default {
             & .ivu-table-cell {
                 width: 100%;
             }
+        }
+    }
+}
+.notSubForm {
+    padding: 10px 0;
+    & section {
+        &:first-child {
+            margin: 20px;
+        }
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        & button {
+            margin-left: 20px;
         }
     }
 }
